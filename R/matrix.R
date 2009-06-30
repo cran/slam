@@ -108,6 +108,8 @@ function(e1, e2)
 
     if(op %in% c("==", "!=", "<", "<=", ">", ">=")) {
         if(length(v <- e2) == 1L) {
+            if(is.na(v))
+                stop("NA/NaN handling not implemented.")
             ind <- if(do.call(.Generic, list(0, v))) {
                 ## This inverts the sparse storage advantage, and hence
                 ## will typically be inefficient.  Need to find the row
@@ -148,6 +150,8 @@ function(e1, e2)
 
     if(op == "*") {
         if(!is.object(e1)) {
+            if(any(is.na(e1)))
+                stop("NA/NaN handling not implemented.")
             if(length(e1) == 1L) {
                 e2$v <- e2$v * e1
                 return(e2)
@@ -159,6 +163,8 @@ function(e1, e2)
             stop("Not implemented.")
         }
         if(!is.object(e2)) {
+            if(any(is.na(e2)))
+                stop("NA/NaN handling not implemented.")
             if(length(e2) == 1L) {
                 e1$v <- e1$v * e2
                 return(e1)
@@ -172,6 +178,8 @@ function(e1, e2)
         ## This leaves multiplying two simple triplet matrices.
         e1 <- as.simple_triplet_matrix(e1)
         e2 <- as.simple_triplet_matrix(e2)
+        if(any(is.na(e1$v)) || any(is.na(e2$v)))
+            stop("NA/NaN handling not implemented.")
         ## Check dimensions: currently, no recycling.
         if(((nr <- e1$nrow) != e2$nrow) || ((nc <- e1$ncol) != e2$ncol))
             stop("Incompatible dimensions.")
@@ -194,6 +202,8 @@ function(e1, e2)
 
     if(op == "/") {
         if(!is.object(e2)) {
+            if(any(is.na(e2)))
+                stop("NA/NaN handling not implemented.")
             if(length(e2) == 1L) {
                 e1$v <- e1$v / e2
                 return(e1)
@@ -212,6 +222,8 @@ function(e1, e2)
         as.simple_triplet_matrix(e2)
     else
         as.simple_triplet_matrix(-e2)
+    if(any(is.na(e1$v)) || any(is.na(e2$v)))
+        stop("NA/NaN handling not implemented.")
     ## Check dimensions: currently, no recycling.
     if((e1$nrow != e2$nrow) || (e1$ncol != e2$ncol))
         stop("Incompatible dimensions.")
