@@ -44,7 +44,7 @@ columns, respectively. Defaults are the maximum row and column indices, respecti
   Currently implemented operations include the addition, subtraction,
   multiplication and division of compatible simple triplet matrices,
   as well as the multiplication and division of a simple triplet matrix
-  and a vector. Comparisions of the elements of a simple triplet
+  and a vector.  Comparisons of the elements of a simple triplet
   matrices with a number are also provided. In addition, 
   methods for indexing, combining by rows
   (\code{rbind}) and columns (\code{cbind}), transposing (\code{t}),

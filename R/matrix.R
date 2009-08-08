@@ -32,15 +32,11 @@ function(x)
                           dimnames = dimnames(x))
 }
 
-as.matrix.simple_triplet_matrix <-
-function(x, ...)
+as.simple_triplet_matrix.dgTMatrix <-
+function(x)
 {
-    nr <- x$nrow
-    nc <- x$ncol
-    y <- matrix(vector(typeof(x$v), nr * nc), nr, nc)
-    y[cbind(x$i, x$j)] <- x$v
-    dimnames(y) <- x$dimnames
-    y
+    simple_triplet_matrix(x@i + 1L, x@j + 1L, x@x,
+                          x@Dim[1L], x@Dim[2L], x@Dimnames)
 }
 
 ## We could also simply write a method to coerce to a dgTMatrix, based
@@ -52,6 +48,17 @@ function(x, ...)
 ##       Dim = c(nrow, ncol))
 ## (Note that these have C-style indices starting at zero.)
 
+as.matrix.simple_triplet_matrix <-
+function(x, ...)
+{
+    nr <- x$nrow
+    nc <- x$ncol
+    y <- matrix(vector(typeof(x$v), nr * nc), nr, nc)
+    y[cbind(x$i, x$j)] <- x$v
+    dimnames(y) <- x$dimnames
+    y
+}
+
 is.simple_triplet_matrix <-
 function(x)
     inherits(x, "simple_triplet_matrix")
@@ -59,6 +66,7 @@ function(x)
 is.numeric.simple_triplet_matrix <-
 function(x)
     is.numeric(x$v)
+
 
 Ops.simple_triplet_matrix <-
 function(e1, e2)
@@ -146,40 +154,59 @@ function(e1, e2)
             list(rnms, cnms)
     }
 
+    .reduce <- function(x) {
+	ind <- which(x$v == vector(typeof(x$v), 1L))
+	if(length(ind)) {
+	    simple_triplet_matrix(x$i[-ind], x$j[-ind], x$v[-ind],
+		x$nrow, x$ncol, x$dimnames)	
+	} else
+	    x
+    }
+
     ## Obviously, the following could be generalized ...
 
     if(op == "*") {
         if(!is.object(e1)) {
-            if(any(is.na(e1)))
-                stop("NA/NaN handling not implemented.")
+	    if(!all(is.finite(e1)))
+		return(as.simple_triplet_matrix(e1 * as.matrix(e2)))
             if(length(e1) == 1L) {
                 e2$v <- e2$v * e1
-                return(e2)
+                return(.reduce(e2))
             }
             if(length(e1) == e2$nrow) {
                 e2$v <- e2$v * e1[e2$i]
-                return(e2)
+                return(.reduce(e2))
             }
-            stop("Not implemented.")
+	    if (is.matrix(e1)) {
+		if (!all(dim(e1) == c(e2$nrow, e2$ncol)))
+		    stop("Incompatible dimensions.")
+		e2$v <- e2$v * e1[cbind(e2$i, e2$j)]
+		return(.reduce(e2))
+	    }
+	    stop("Not implemented.")
         }
         if(!is.object(e2)) {
-            if(any(is.na(e2)))
-                stop("NA/NaN handling not implemented.")
+            if(!all(is.finite(e2)))
+                return(as.simple_triplet_matrix(as.matrix(e1) * e2))
             if(length(e2) == 1L) {
                 e1$v <- e1$v * e2
-                return(e1)
+                return(.reduce(e1))
             }
             if(length(e2) == e1$nrow) {
                 e1$v <- e1$v * e2[e1$i]
-                return(e1)
+                return(.reduce(e1))
             }
-            stop("Not implemented.")
+	    if (is.matrix(e2)) {
+		if (!all(dim(e2) == c(e1$nrow, e1$ncol)))
+		    stop("Incompatible dimensions.")
+		e1$v <- e1$v * e2[cbind(e1$i, e1$j)]
+		return(.reduce(e1))
+	    }
+	    stop("Not implemented.")
         }
         ## This leaves multiplying two simple triplet matrices.
         e1 <- as.simple_triplet_matrix(e1)
         e2 <- as.simple_triplet_matrix(e2)
-        if(any(is.na(e1$v)) || any(is.na(e2$v)))
-            stop("NA/NaN handling not implemented.")
         ## Check dimensions: currently, no recycling.
         if(((nr <- e1$nrow) != e2$nrow) || ((nc <- e1$ncol) != e2$ncol))
             stop("Incompatible dimensions.")
@@ -195,25 +222,29 @@ function(e1, e2)
                      paste(e1$i, e1$j, sep = "\r"),
                      nomatch = 0L)
         ind <- which(pos > 0L)
-        return(simple_triplet_matrix(e2$i[ind], e2$j[ind],
-                                     e2$v[ind] * e1$v[pos],
-                                     nr, nc, .make_dimnames(e1, e2)))
+        if(!all(is.finite(e1$v)) || !all(is.finite(e2$v))) {
+	    ## Augment and reduce
+	    e2$i <- c(e2$i[ind], e2$i[-ind], e1$i[-pos])
+	    e2$j <- c(e2$j[ind], e2$j[-ind], e1$j[-pos])
+	    e2$v <- c(e2$v[ind] * e1$v[pos],
+		vector(typeof(e2$v), 1L) * c(e2$v[-ind], e1$v[-pos]))
+	    e2$dimnames <- .make_dimnames(e1, e2)
+	    return(.reduce(e2))
+	} else
+	    return(simple_triplet_matrix(e2$i[ind], e2$j[ind],
+                                         e2$v[ind] * e1$v[pos],
+                                         nr, nc, .make_dimnames(e1, e2)))
     }
 
+    ## This is slightly inefficent but special value handling is already
+    ## in place.  Note v / 0 = v * 0^(-1) = v * Inf.
     if(op == "/") {
-        if(!is.object(e2)) {
-            if(any(is.na(e2)))
-                stop("NA/NaN handling not implemented.")
-            if(length(e2) == 1L) {
-                e1$v <- e1$v / e2
-                return(e1)
-            }
-            if(length(e2) == e1$nrow) {
-                e1$v <- e1$v / e2[e1$i]
-                return(e1)
-            }
-        }
-        stop("Not implemented.")
+        if(!is.object(e2))
+	    return(e1 * e2^(-1))
+	e2 <- as.matrix(e2)
+	if (!is.object(e1))
+	    return(as.simple_triplet_matrix(e1 * e2^(-1)))
+	return(e1 * e2^(-1))
     }
 
     ## This leaves adding and subtracting two simple triplet matrices.
@@ -222,8 +253,6 @@ function(e1, e2)
         as.simple_triplet_matrix(e2)
     else
         as.simple_triplet_matrix(-e2)
-    if(any(is.na(e1$v)) || any(is.na(e2$v)))
-        stop("NA/NaN handling not implemented.")
     ## Check dimensions: currently, no recycling.
     if((e1$nrow != e2$nrow) || (e1$ncol != e2$ncol))
         stop("Incompatible dimensions.")
@@ -239,6 +268,7 @@ function(e1, e2)
                  paste(e1$i, e1$j, sep = "\r"),
                  nomatch = 0L)
     ind <- which(pos == 0L)
+    ## Notice 0 + special value = special value.
     e1$v[pos] <- e1$v[pos] + e2$v[pos > 0L]
     e1$i <- c(e1$i, e2$i[ind])
     e1$j <- c(e1$j, e2$j[ind])
@@ -307,8 +337,8 @@ function(x, i, j, ...)
             if(all(i >= 0)) {
                 i <- i[i > 0]
                 out <- vector(mode = typeof(x$v), length = length(i))
-                pos <- match(i, (x$j - 1L) * nr + x$i, 0)
-                out[pos > 0] <- x$v[pos]
+                pos <- match(i, (x$j - 1L) * nr + x$i, 0L)
+                out[pos > 0L] <- x$v[pos]
             } else if(all(i <= 0)) {
                 out <- vector(mode = typeof(x$v), nr * nc)
                 out[(x$j - 1L) * nr + x$i] <- x$v
@@ -330,7 +360,7 @@ function(x, i, j, ...)
             pos <- match(paste(i[,1L], i[,2L], sep = "\r"),
                          paste(x$i, x$j, sep = "\r"),
                          nomatch = 0L)
-            out[pos > 0] <- x$v[pos]
+            out[pos > 0L] <- x$v[pos]
         }
     }
     else {
@@ -355,7 +385,7 @@ function(x, i, j, ...)
             else
                 stop("Cannot mix positive and negative subscripts.")
             nr <- length(i)
-            pos <- match(x$i, i, 0) > 0
+            pos <- match(x$i, i, 0L) > 0L
             pi[i] <- seq_len(nr)
         }
         if(missing(j)) {
@@ -374,7 +404,7 @@ function(x, i, j, ...)
             else
                 stop("Cannot mix positive and negative subscripts.")
             nc <- length(j)
-            pos <- pos & (match(x$j, j, 0) > 0)
+            pos <- pos & (match(x$j, j, 0L) > 0L)
             pj[j] <- seq_len(nc)
         }
         if(!is.null(dnx <- x$dimnames))
@@ -492,13 +522,13 @@ function(..., recursive = FALSE)
                    y[x$i + (x$j - 1L) * x$nrow] <- x$v
                    y
                })
-    do.call(c, args)
+    do.call("c", args)
 }
 
 print.simple_triplet_matrix <-
 function(x, ...)
 {
-    writeLines(sprintf("\nA %s simple triplet matrix.\n",
+    writeLines(sprintf("A %s simple triplet matrix.",
                        paste(dim(x), collapse = "x")))
     invisible(x)
 }

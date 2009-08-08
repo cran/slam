@@ -35,7 +35,7 @@ function(x)
     if(!prod(dim(x)))
         simple_sparse_array(array(integer(), dim(x)), c(x),
                             dim(x), dimnames(x))
-    ind <- which(x != vector(typeof(x), 1L), arr.ind = TRUE)
+    ind <- which(is.na(x) | (x != vector(typeof(x), 1L)), arr.ind = TRUE)
     dimnames(ind) <- NULL
     simple_sparse_array(ind, x[ind], dim(x), dimnames(x))
 }
@@ -97,8 +97,8 @@ function(x, ...)
             if(all(i >= 0)) {
                 i <- i[i > 0]
                 out <- vector(mode = typeof(x$v), length = length(i))
-                pos <- match(i, spos(x$i), 0)
-                out[pos > 0] <- x$v[pos]
+                pos <- match(i, spos(x$i), 0L)
+                out[pos > 0L] <- x$v[pos]
             } else if(all(i <= 0)) {
                 out <- vector(mode = typeof(x$v), prod(x$dim))
                 out[spos(x$i)] <- x$v
@@ -115,8 +115,8 @@ function(x, ...)
             out <- vector(mode = typeof(x$v), length = nrow(i))
             ## This is not really the fastest way to match rows, but is
             ## there an obvious better one?
-            pos <- match(split(i, row(i)), split(x$i, row(x$i)))
-            out[pos > 0] <- x$v[pos]
+            pos <- match(split(i, row(i)), split(x$i, row(x$i)), 0L)
+            out[pos > 0L] <- x$v[pos]
         }
     }
     else {
@@ -175,7 +175,7 @@ function(x, ...)
 print.simple_sparse_array <-
 function(x, ...)
 {
-    writeLines(sprintf("\nA %s simple sparse array.\n",
+    writeLines(sprintf("A %s simple sparse array.",
                        paste(dim(x), collapse = "x")))
     invisible(x)
 }
