@@ -7,7 +7,8 @@
 simple_triplet_matrix <-
 function(i, j, v, nrow = max(i), ncol = max(j), dimnames = NULL)
 {
-    structure(list(i = i, j = j, v = v, nrow = nrow, ncol = ncol,
+    structure(list(i = as.integer(i), j = as.integer(j), v = v,
+                   nrow = as.integer(nrow), ncol = as.integer(ncol),
                    dimnames = dimnames),
               class = "simple_triplet_matrix")
 }
@@ -105,7 +106,7 @@ function(e1, e2)
                       .Generic, .Class))
     }
 
-    if(!(op %in% c("+", "-", "*", "/",
+    if(!(op %in% c("+", "-", "*", "/", "^",
                    "==", "!=", "<", "<=", ">", ">=")))
         stop(gettextf("Generic '%s' not defined for \"%s\" objects.",
                       .Generic, .Class))
@@ -143,6 +144,15 @@ function(e1, e2)
         stop("Not implemented.")
     }
 
+    if(op == "^") {
+        ## Allow for taking (single) positive exponents.
+        if(is.object(e2) || (length(e2) != 1L) ||
+           !is.finite(e2) || (e2 <= 0))
+            stop("Not implemented.")
+        e1$v <- e1$v ^ e2
+        return(e1)
+    }
+
     .make_dimnames <- function(e1, e2) {
         if(is.null(rnms <- rownames(e1)))
             rnms <- rownames(e2)
@@ -157,8 +167,10 @@ function(e1, e2)
     .reduce <- function(x) {
 	ind <- which(x$v == vector(typeof(x$v), 1L))
 	if(length(ind)) {
-	    simple_triplet_matrix(x$i[-ind], x$j[-ind], x$v[-ind],
-		x$nrow, x$ncol, x$dimnames)	
+	    structure(simple_triplet_matrix(x$i[-ind], x$j[-ind],
+                                            x$v[-ind], x$nrow, x$ncol,
+                                            x$dimnames),
+                      class = class(x))
 	} else
 	    x
     }
@@ -312,26 +324,31 @@ function(x, value)
 }
 
 `[.simple_triplet_matrix` <-
-function(x, i, j, ...)
+function(x, i, j, drop = FALSE)
 {
     ## (Well, we certainly don't drop ...)
 
-    ## Note that calling x[] with a simple triplet matrix x will call
-    ## the subscript method with args x and missing ...
-    na <- nargs()
-    if((na == 1L) || (na == 2L) && missing(i))
-        return(x)
+    ## (See e.g. `[.data.frame` for the trickeries of subscript methods:
+    ## e.g., 
+    ##   x[i = sample.int(nr, k), , drop = FALSE]
+    ## counts 4 arguments (x, i, j and drop) where j is missing ...
 
+    na <- nargs() - !missing(drop)
+    if ((na == 1L) || (na == 2L) && missing(i)) 
+        return(x)
+    
     nr <- x$nrow
     nc <- x$ncol
 
     if(na == 2L) {
         ## Single index subscripting.
-        if(is.logical(i))
-            stop("Logical subscripting currently not implemented.")
-        else if(is.character(i))
+        ## Mimic subscripting matrices: no named argument handling in
+        ## this case.
+        if(is.character(i))
             stop("Character subscripting currently not implemented.")
-        else if(!is.matrix(i)) {
+        if(!is.matrix(i)) {
+            if(is.logical(i))
+                i <- which(rep(i, length.out = nr))
             ## Let's hope we have a vector.
             ## What if we have both negatives and positives?
             if(all(i >= 0)) {
@@ -351,6 +368,9 @@ function(x, i, j, ...)
             ## subscript.
             if((ncol(i) != 2L) || (any(i < 0)))
                 stop("Invalid subscript.")
+            ## Rows containing zero indices can be dropped.
+            ## Rows with NA indices should give NA (at least for
+            ## non-recursive x).
             i <- i[!apply(i == 0, 1L, any), , drop = FALSE]
             out <- vector(mode = typeof(x$v), length = nrow(i))
             ##  pi <- match(i[, 1L], x$i)
@@ -372,9 +392,11 @@ function(x, i, j, ...)
             pos <- rep.int(TRUE, length(x$v))
             pi <- seq_len(nr)
         }
-        else if(!is.numeric(i))
-            stop("Only numeric two-index subscripting is implemented.")
         else {
+            if(is.logical(i))
+                i <- which(rep(i, length.out = nr))
+            if(!is.numeric(i))
+                stop("Two-index subscripting needs numeric or logical subscripts.")                
             pi <- seq_len(nr)
             if(all(i >= 0)) {
                 i <- i[i > 0]
@@ -391,9 +413,11 @@ function(x, i, j, ...)
         if(missing(j)) {
             pj <- seq_len(nc)
         }
-        else if(!is.numeric(j))
-            stop("Only numeric two-index subscripting is implemented.")
         else {
+            if(is.logical(j))
+                j <- which(rep(j, length.out = nc))
+            if(!is.numeric(j))
+                stop("Two-index subscripting needs numeric or logical subscripts.")                
             pj <- seq_len(nc)
             if(all(j >= 0)) {
                 j <- j[j > 0]

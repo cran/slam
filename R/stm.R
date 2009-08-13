@@ -80,7 +80,7 @@ function(x, na.rm = FALSE, dims = 1, ...)
 ##      it calls the bailout function below.
 tcrossprod.simple_triplet_matrix <-
 function(x, y = NULL) {
-    if (!is(x, "simple_triplet_matrix"))
+    if(!inherits(x, "simple_triplet_matrix"))
 	stop("'x' not of class simple_triplet_matrix")
     x <- structure(x$v, i = x$i, j = x$j, Dim = c(x$nrow, x$ncol),
 	Dimnames = x$dimnames, class = "stm")
