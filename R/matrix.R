@@ -167,12 +167,11 @@ function(e1, e2)
     .reduce <- function(x) {
 	ind <- which(x$v == vector(typeof(x$v), 1L))
 	if(length(ind)) {
-	    structure(simple_triplet_matrix(x$i[-ind], x$j[-ind],
-                                            x$v[-ind], x$nrow, x$ncol,
-                                            x$dimnames),
-                      class = class(x))
-	} else
-	    x
+	    x$i <- x$i[-ind]
+            x$j <- x$j[-ind]
+            x$v <- x$v[-ind]
+        }
+        x
     }
 
     ## Obviously, the following could be generalized ...
