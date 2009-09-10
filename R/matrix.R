@@ -344,10 +344,12 @@ function(x, i, j, drop = FALSE)
         ## Mimic subscripting matrices: no named argument handling in
         ## this case.
         if(is.character(i))
-            stop("Character subscripting currently not implemented.")
-        if(!is.matrix(i)) {
+            out <- vector(typeof(x$v))[rep.int(NA, length(i))]
+        else if(!is.matrix(i)) {
             if(is.logical(i))
                 i <- which(rep(i, length.out = nr))
+            else if(!is.numeric(i))
+                stop(gettextf("Invalid subscript type: %s.", typeof(i)))
             ## Let's hope we have a vector.
             ## What if we have both negatives and positives?
             if(all(i >= 0)) {
@@ -394,8 +396,12 @@ function(x, i, j, drop = FALSE)
         else {
             if(is.logical(i))
                 i <- which(rep(i, length.out = nr))
-            if(!is.numeric(i))
-                stop("Two-index subscripting needs numeric or logical subscripts.")                
+            else if(is.character(i)) {
+                i <- match(i, rownames(x))
+                if(any(is.na(i))) stop("Subscript out of bounds.")
+            } 
+            else if(!is.numeric(i))
+                stop(gettextf("Invalid subscript type: %s.", typeof(i)))
             pi <- seq_len(nr)
             if(all(i >= 0)) {
                 i <- i[i > 0]
@@ -415,8 +421,12 @@ function(x, i, j, drop = FALSE)
         else {
             if(is.logical(j))
                 j <- which(rep(j, length.out = nc))
-            if(!is.numeric(j))
-                stop("Two-index subscripting needs numeric or logical subscripts.")                
+            else if(is.character(j)) {
+                j <- match(j, colnames(x))
+                if(any(is.na(j))) stop("Subscript out of bounds.")
+            }
+            else if(!is.numeric(j))
+                stop(gettextf("Invalid subscript type: %s.", typeof(j)))
             pj <- seq_len(nc)
             if(all(j >= 0)) {
                 j <- j[j > 0]
