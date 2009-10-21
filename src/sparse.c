@@ -1,9 +1,26 @@
 #include <R.h>
 #include <Rdefines.h>
 
-// ceeboo 2009/5
+// ceeboo 2009/5,10
 //
 
+// make fake S4 object
+SEXP _as_stm(SEXP v, SEXP i, SEXP j, SEXP d, SEXP dn) {
+
+    SEXP r = PROTECT(allocVector(VECSXP, 0));
+
+    setAttrib(r, install("v"),         v);
+    setAttrib(r, install("i"),         i);
+    setAttrib(r, install("j"),         j);
+    setAttrib(r, install("Dim"),       d);
+    setAttrib(r, install("Dimnames"), dn);
+
+    setAttrib(r, R_ClassSymbol, mkString("stm"));
+
+    UNPROTECT(1);
+
+    return r;
+}
 
 // row or column sums of some triplet matrix
 //
@@ -35,35 +52,42 @@ SEXP _sums_stm(SEXP x, SEXP R_dim, SEXP R_na_rm) {
 
     memset(REAL(r), 0, sizeof(double) * n);
 
-    switch (TYPEOF(x)) {
+    SEXP _x_;
+
+    if (TYPEOF(x) == VECSXP)
+	_x_ = getAttrib(x, install("v"));
+    else
+	_x_ = x;
+
+    switch (TYPEOF(_x_)) {
 	case LGLSXP:
 	case INTSXP:
 	    if (*LOGICAL(R_na_rm)) {
 		int v;
-		for (int k = 0; k < LENGTH(x); k++)
-		    if ((v = INTEGER(x)[k]) == NA_INTEGER)
+		for (int k = 0; k < LENGTH(_x_); k++)
+		    if ((v = INTEGER(_x_)[k]) == NA_INTEGER)
 			continue;
 		    else 
 			REAL(r)[i[k]-1] += (double) v;
 	    } else {
 		int v;
-		for (int k = 0; k < LENGTH(x); k++)
+		for (int k = 0; k < LENGTH(_x_); k++)
 		    REAL(r)[i[k]-1] +=
 		    // map NA
-			 ((v = INTEGER(x)[k]) == NA_INTEGER) ? NA_REAL : v;
+			 ((v = INTEGER(_x_)[k]) == NA_INTEGER) ? NA_REAL : v;
 	    }
 	    break;
 	case REALSXP:
 	    if (*LOGICAL(R_na_rm)) {
 		double v;
-		for (int k = 0; k < LENGTH(x); k++)
-		    if (ISNAN((v = REAL(x)[k])))
+		for (int k = 0; k < LENGTH(_x_); k++)
+		    if (ISNAN((v = REAL(_x_)[k])))
 			continue;
 		    else
 			REAL(r)[i[k]-1] += v;
 	    } else
-		for (int k = 0; k < LENGTH(x); k++)
-		    REAL(r)[i[k]-1] += REAL(x)[k];
+		for (int k = 0; k < LENGTH(_x_); k++)
+		    REAL(r)[i[k]-1] += REAL(_x_)[k];
 	    break;
 	default:
 	    error("type of 'x' not supported");
@@ -130,25 +154,32 @@ bailout:
 			LCONS(y, R_NilValue))), pkgEnv);
 	}
 
-    switch (TYPEOF(x)) {
+    SEXP _x_; 
+
+    if (TYPEOF(x) == VECSXP)
+	_x_ = getAttrib(x, install("v"));
+    else
+	_x_ = x;
+
+    switch (TYPEOF(_x_)) {
 	case LGLSXP:
 	case INTSXP:
-	    for (k = 0; k < LENGTH(x); k++) {
+	    for (k = 0; k < LENGTH(_x_); k++) {
 		i = xi[k] - 1;
 		j = xj[k] - 1;
 
-		double z = (double) INTEGER(x)[k];
+		double z = (double) INTEGER(_x_)[k];
 
 		for (l = 0; l < m; l++)
 		    REAL(r)[i + l * n] += z * REAL(y)[l + j * m];
 	    }
 	    break;
 	case REALSXP:
-	    for (k = 0; k < LENGTH(x); k++) {
+	    for (k = 0; k < LENGTH(_x_); k++) {
 		i = xi[k] - 1;
 		j = xj[k] - 1;
 
-		double z = REAL(x)[k];
+		double z = REAL(_x_)[k];
 
 		for (l = 0; l < m; l++)
 		    REAL(r)[i + l * n] += z * REAL(y)[l + j * m];

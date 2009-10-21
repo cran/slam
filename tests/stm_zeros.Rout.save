@@ -1,0 +1,174 @@
+
+R version 2.9.2 Patched (2009-09-24 r50081)
+Copyright (C) 2009 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> library("slam")
+
+Attaching package: 'slam'
+
+
+	The following object(s) are masked from package:base :
+
+	 colMeans,
+	 colSums,
+	 rowMeans,
+	 rowSums 
+
+> set.seed(20091012)
+> 
+> 
+> ###
+> as.simple_triplet_matrix_zeros <-
++ function(x) {
++     x <- list(
++         v        = c(x), 
++         i        = rep(seq_len(nrow(x)), ncol(x)),
++         j        = rep(seq_len(ncol(x)), each = nrow(x)),
++         nrow     = nrow(x),
++         ncol     = ncol(x),
++         dimnames = dimnames(x)
++     )
++     class(x) <-  "simple_triplet_matrix"
++     x
++ }
+> 
+> x <- sample(0:5, 100, T, prob=c(.8,rep(.04,5)))
+> x <- matrix(as.logical(x), nrow = 20,
++      dimnames = list(rows = 1:20, cols = LETTERS[1:5]))
+> x
+    cols
+rows     A     B     C     D     E
+  1  FALSE FALSE FALSE FALSE FALSE
+  2  FALSE FALSE FALSE FALSE FALSE
+  3  FALSE FALSE FALSE FALSE  TRUE
+  4  FALSE FALSE FALSE  TRUE FALSE
+  5  FALSE FALSE FALSE FALSE FALSE
+  6   TRUE FALSE FALSE FALSE FALSE
+  7  FALSE FALSE FALSE FALSE FALSE
+  8   TRUE  TRUE FALSE FALSE FALSE
+  9  FALSE FALSE  TRUE FALSE FALSE
+  10  TRUE FALSE FALSE FALSE FALSE
+  11 FALSE FALSE FALSE  TRUE FALSE
+  12 FALSE FALSE FALSE FALSE FALSE
+  13 FALSE FALSE FALSE FALSE  TRUE
+  14 FALSE FALSE FALSE FALSE FALSE
+  15 FALSE  TRUE FALSE  TRUE  TRUE
+  16 FALSE FALSE  TRUE  TRUE  TRUE
+  17 FALSE  TRUE FALSE FALSE FALSE
+  18 FALSE FALSE FALSE  TRUE FALSE
+  19 FALSE  TRUE FALSE FALSE FALSE
+  20 FALSE FALSE FALSE FALSE FALSE
+> 
+> xst <- as.simple_triplet_matrix_zeros(x)
+> xst
+A 20x5 simple triplet matrix.
+> 
+> identical(rowSums(x), rowSums(xst))
+[1] TRUE
+> identical(colSums(x), colSums(xst))
+[1] TRUE
+> identical(rowMeans(x), rowMeans(xst))
+[1] TRUE
+> identical(colMeans(x), colMeans(xst))
+[1] TRUE
+> 
+> ## NAs
+> 
+> xna <- x
+> n <- prod(dim(x))
+> is.na(xna) <- sample(seq_len(n), ceiling(n * .1))
+> xna
+    cols
+rows     A     B     C     D     E
+  1  FALSE FALSE FALSE    NA FALSE
+  2  FALSE FALSE FALSE FALSE FALSE
+  3  FALSE FALSE FALSE FALSE  TRUE
+  4  FALSE FALSE FALSE  TRUE FALSE
+  5  FALSE FALSE FALSE FALSE FALSE
+  6     NA FALSE FALSE FALSE FALSE
+  7  FALSE    NA FALSE FALSE FALSE
+  8   TRUE  TRUE FALSE FALSE FALSE
+  9     NA FALSE  TRUE FALSE FALSE
+  10  TRUE    NA    NA FALSE FALSE
+  11 FALSE FALSE FALSE  TRUE FALSE
+  12 FALSE FALSE FALSE FALSE FALSE
+  13 FALSE FALSE FALSE FALSE    NA
+  14 FALSE FALSE FALSE FALSE FALSE
+  15 FALSE  TRUE FALSE  TRUE  TRUE
+  16 FALSE FALSE    NA  TRUE  TRUE
+  17 FALSE  TRUE FALSE    NA FALSE
+  18 FALSE FALSE FALSE  TRUE FALSE
+  19 FALSE  TRUE FALSE FALSE    NA
+  20 FALSE FALSE FALSE FALSE FALSE
+> 
+> xnast <- as.simple_triplet_matrix_zeros(xna)
+> xnast
+A 20x5 simple triplet matrix.
+> 
+> identical(rowSums(xna), rowSums(xnast))
+[1] TRUE
+> identical(colSums(xna), colSums(xnast))
+[1] TRUE
+> identical(rowMeans(xna), rowMeans(xnast))
+[1] TRUE
+> identical(colMeans(xna), colMeans(xnast))
+[1] TRUE
+> 
+> identical(rowSums(xna, na.rm = TRUE), rowSums(xnast, na.rm = TRUE))
+[1] TRUE
+> identical(colSums(xna, na.rm = TRUE), colSums(xnast, na.rm = TRUE))
+[1] TRUE
+> identical(rowMeans(xna, na.rm = TRUE), rowMeans(xnast, na.rm = TRUE))
+[1] TRUE
+> identical(colMeans(xna, na.rm = TRUE), colMeans(xnast, na.rm = TRUE))
+[1] TRUE
+> 
+> ## cross-product
+> 
+> identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(xst))
+[1] TRUE
+> identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(xst, x))
+[1] TRUE
+> 
+> x <- matrix(c(1, 0, 0, 2, 1, NA), nrow = 3)
+> x
+     [,1] [,2]
+[1,]    1    2
+[2,]    0    1
+[3,]    0   NA
+> s <- as.simple_triplet_matrix_zeros(x)
+> 
+> identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(s))
+[1] TRUE
+> identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(s, x))
+[1] TRUE
+> 
+> ##
+> identical(as.matrix(s * x), x * x)
+[1] TRUE
+> identical(as.matrix(x * s), x * x)
+[1] TRUE
+> identical(as.matrix(s * s), x * x)
+[1] TRUE
+> 
+> identical(as.matrix(s + s), x + x)
+[1] TRUE
+> 
+> ###
+> 
+> 
+> 

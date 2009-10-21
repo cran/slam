@@ -19,8 +19,9 @@ function(i, v, dim = NULL, dimnames = NULL)
     ## which are either NULL or character vectors as long as the
     ## corresponding dim.
     ## </FIXME>
-    structure(list(i = i, v = v, dim = dim, dimnames = dimnames),
-              class = "simple_sparse_array")
+    ssa <- list(i = i, v = v, dim = dim, dimnames = dimnames)
+    class(ssa) <- "simple_sparse_array"
+    ssa
 }
 
 as.simple_sparse_array <-
