@@ -11,6 +11,7 @@ identical(as.matrix(s) * c(Inf, NA, 0), as.matrix(s * c(Inf, NA, 0)))
 x1 <- matrix(c(1, Inf, 0, 1), nrow = 2)
 x2 <- matrix(c(1, 0,  NA, 1), nrow = 2)
 
+identical(x1 * x2, as.matrix(as.simple_triplet_matrix(x1) * x2))
 identical(x1 * x2, as.matrix(as.simple_triplet_matrix(x1) *
                              as.simple_triplet_matrix(x2)))
 

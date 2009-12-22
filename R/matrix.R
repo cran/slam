@@ -45,7 +45,7 @@ as.simple_triplet_matrix.dgCMatrix <-
 function(x)
 {
     nc <- x@Dim[2L]
-    simple_triplet_matrix(x@i + 1L, rep(seq_len(nc), diff(x@p)), x@x,
+    simple_triplet_matrix(x@i + 1L, rep.int(seq_len(nc), diff(x@p)), x@x,
                           x@Dim[1L], nc, x@Dimnames)
 }
 
@@ -97,6 +97,18 @@ function(e1, e2)
     ## More could be added (but note that the elements could have
     ## arbitrary modes).
 
+    ## Drop zero-valued elements
+    .reduce <- function(x) {
+	ind <- which(!x$v)
+	if(length(ind)) {
+	    ind <- -ind
+	    x$i <- x$i[ind]
+	    x$j <- x$j[ind]
+	    x$v <- x$v[ind]
+	}
+	x
+    }
+
     op <- as.character(.Generic)
 
     if(nargs() == 1L) {
@@ -126,17 +138,13 @@ function(e1, e2)
                 ## This inverts the sparse storage advantage, and hence
                 ## will typically be inefficient.  Need to find the row
                 ## and column positions of the zero entries.
-                m <- matrix(1, e1$nrow, e1$ncol)
-                m[cbind(e1$i, e1$j)] <- 0
-                which(m != 0, arr.ind = TRUE)
-            } else integer()
+                m <- matrix(TRUE, e1$nrow, e1$ncol)
+                m[cbind(e1$i, e1$j)] <- FALSE
+                which(m, arr.ind = TRUE)
+            } else 
+		integer()
             e1$v <- do.call(.Generic, list(e1$v, v))
-            pos <- which(!e1$v)
-            if(length(pos)) {
-                e1$i <- e1$i[-pos]
-                e1$j <- e1$j[-pos]
-                e1$v <- e1$v[-pos]
-            }
+	    e1 <- .reduce(e1)
             if(n <- NROW(ind)) {
                 e1$i <- c(e1$i, ind[, 1L])
                 e1$j <- c(e1$j, ind[, 2L])
@@ -167,53 +175,55 @@ function(e1, e2)
             list(rnms, cnms)
     }
 
-    .reduce <- function(x) {
-	ind <- which(!x$v)
-	if(length(ind)) {
-	    x$i <- x$i[-ind]
-	    x$j <- x$j[-ind]
-	    x$v <- x$v[-ind]
-	}
-	x
-    }
-
     ## Obviously, the following could be generalized ...
 
     if(op == "*") {
-        if(!is.object(e1)) {
-	    if(!all(is.finite(e1)))
-		return(as.simple_triplet_matrix(e1 * as.matrix(e2)))
-            if(length(e1) == 1L) {
-                e2$v <- e2$v * e1
-                return(e2)
-            }
-            if(length(e1) == e2$nrow) {
-                e2$v <- e2$v * e1[e2$i]
-                return(e2)
-            }
-	    if (is.matrix(e1)) {
-		if (!all(dim(e1) == c(e2$nrow, e2$ncol)))
-		    stop("Incompatible dimensions.")
-		e2$v <- e2$v * e1[cbind(e2$i, e2$j)]
-		return(e2)
-	    }
-	    stop("Not implemented.")
-        }
+	if(!is.object(e1)) {
+	    e3 <- e2
+	    e2 <- e1
+	    e1 <- e3 
+	}
         if(!is.object(e2)) {
-            if(!all(is.finite(e2)))
-                return(as.simple_triplet_matrix(as.matrix(e1) * e2))
             if(length(e2) == 1L) {
-                e1$v <- e1$v * e2
+		if(!is.finite(e2))
+		    return(as.simple_triplet_matrix(as.matrix(e1) * e2))
+		e1$v <- e1$v * e2
+		if(!e2)
+		    e1 <- .reduce(e1)
                 return(e1)
             }
             if(length(e2) == e1$nrow) {
+		pos <- which(!is.finite(e2))
+		if(length(pos)) {
+		    ## replace with dense rows
+		    ind <- match(e1$i, pos, nomatch = 0L) == 0L
+		    e1$v <- c(e1$v[ind], as.matrix(e1[pos,]))
+		    e1$i <- c(e1$i[ind], rep.int(pos, e1$ncol))
+		    e1$j <- c(e1$j[ind], rep(seq_len(e1$ncol), 
+					     each = length(pos)))
+		}
                 e1$v <- e1$v * e2[e1$i]
+		if (any(!e2))
+		    e1 <- .reduce(e1)
                 return(e1)
             }
-	    if (is.matrix(e2)) {
-		if (!all(dim(e2) == c(e1$nrow, e1$ncol)))
+	    if(is.matrix(e2)) {
+		if(!all(dim(e2) == c(e1$nrow, e1$ncol)))
 		    stop("Incompatible dimensions.")
+		pos <- which(!is.finite(e2))
+		if(length(pos)) {
+		    ## add zeros
+		    pos <- pos[match(pos, e1$i + (e1$j - 1L) * e1$nrow,
+				     nomatch = 0L) == 0L] - 1L
+		    if(length(pos)) {
+			e1$v <- c(e1$v, vector(typeof(e1$v), length(pos)))
+			e1$i <- c(e1$i, pos %%  e1$nrow + 1L)
+			e1$j <- c(e1$j, pos %/% e1$nrow + 1L)
+		    }
+		}
 		e1$v <- e1$v * e2[cbind(e1$i, e1$j)]
+		if (any(!e2))
+		    e1 <- .reduce(e1)
 		return(e1)
 	    }
 	    stop("Not implemented.")
