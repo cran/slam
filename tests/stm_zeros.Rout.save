@@ -1,6 +1,6 @@
 
-R version 2.9.2 Patched (2009-09-24 r50081)
-Copyright (C) 2009 The R Foundation for Statistical Computing
+R version 2.10.1 Patched (2010-01-01 r50884)
+Copyright (C) 2010 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -17,17 +17,6 @@ Type 'q()' to quit R.
 
 > 
 > library("slam")
-
-Attaching package: 'slam'
-
-
-	The following object(s) are masked from package:base :
-
-	 colMeans,
-	 colSums,
-	 rowMeans,
-	 rowSums 
-
 > set.seed(20091012)
 > 
 > 
@@ -35,9 +24,9 @@ Attaching package: 'slam'
 > as.simple_triplet_matrix_zeros <-
 + function(x) {
 +     x <- list(
-+         v        = c(x), 
 +         i        = rep(seq_len(nrow(x)), ncol(x)),
 +         j        = rep(seq_len(ncol(x)), each = nrow(x)),
++         v        = c(x),
 +         nrow     = nrow(x),
 +         ncol     = ncol(x),
 +         dimnames = dimnames(x)
@@ -77,13 +66,13 @@ rows     A     B     C     D     E
 > xst
 A 20x5 simple triplet matrix.
 > 
-> identical(rowSums(x), rowSums(xst))
+> identical(rowSums(x), row_sums(xst))
 [1] TRUE
-> identical(colSums(x), colSums(xst))
+> identical(colSums(x), col_sums(xst))
 [1] TRUE
-> identical(rowMeans(x), rowMeans(xst))
+> identical(rowMeans(x), row_means(xst))
 [1] TRUE
-> identical(colMeans(x), colMeans(xst))
+> identical(colMeans(x), col_means(xst))
 [1] TRUE
 > 
 > ## NAs
@@ -119,29 +108,29 @@ rows     A     B     C     D     E
 > xnast
 A 20x5 simple triplet matrix.
 > 
-> identical(rowSums(xna), rowSums(xnast))
+> identical(rowSums(xna), row_sums(xnast))
 [1] TRUE
-> identical(colSums(xna), colSums(xnast))
+> identical(colSums(xna), col_sums(xnast))
 [1] TRUE
-> identical(rowMeans(xna), rowMeans(xnast))
+> identical(rowMeans(xna), row_means(xnast))
 [1] TRUE
-> identical(colMeans(xna), colMeans(xnast))
+> identical(colMeans(xna), col_means(xnast))
 [1] TRUE
 > 
-> identical(rowSums(xna, na.rm = TRUE), rowSums(xnast, na.rm = TRUE))
+> identical(rowSums(xna, na.rm = TRUE), row_sums(xnast, na.rm = TRUE))
 [1] TRUE
-> identical(colSums(xna, na.rm = TRUE), colSums(xnast, na.rm = TRUE))
+> identical(colSums(xna, na.rm = TRUE), col_sums(xnast, na.rm = TRUE))
 [1] TRUE
-> identical(rowMeans(xna, na.rm = TRUE), rowMeans(xnast, na.rm = TRUE))
+> identical(rowMeans(xna, na.rm = TRUE), row_means(xnast, na.rm = TRUE))
 [1] TRUE
-> identical(colMeans(xna, na.rm = TRUE), colMeans(xnast, na.rm = TRUE))
+> identical(colMeans(xna, na.rm = TRUE), col_means(xnast, na.rm = TRUE))
 [1] TRUE
 > 
 > ## cross-product
 > 
-> identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(xst))
+> identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(xst))
 [1] TRUE
-> identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(xst, x))
+> identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(xst, x))
 [1] TRUE
 > 
 > x <- matrix(c(1, 0, 0, 2, 1, NA), nrow = 3)
@@ -152,9 +141,9 @@ A 20x5 simple triplet matrix.
 [3,]    0   NA
 > s <- as.simple_triplet_matrix_zeros(x)
 > 
-> identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(s))
+> identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(s))
 [1] TRUE
-> identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(s, x))
+> identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(s, x))
 [1] TRUE
 > 
 > ##

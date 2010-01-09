@@ -28,26 +28,26 @@ S3method("unique", "simple_triplet_matrix")
 ## enhanced stuff
 useDynLib(slam)
 
-export("rowSums",
-       "colSums",
-       "rowMeans",
-       "colMeans"
+export("row_sums",
+       "col_sums",
+       "row_means",
+       "col_means"
       )
 
-S3method("rowSums", "default")
-S3method("rowSums", "simple_triplet_matrix")
+S3method("row_sums", "default")
+S3method("row_sums", "simple_triplet_matrix")
 
-S3method("colSums", "default")
-S3method("colSums", "simple_triplet_matrix")
+S3method("col_sums", "default")
+S3method("col_sums", "simple_triplet_matrix")
 
-S3method("rowMeans", "default")
-S3method("rowMeans", "simple_triplet_matrix")
+S3method("row_means", "default")
+S3method("row_means", "simple_triplet_matrix")
 
-S3method("colMeans", "default")
-S3method("colMeans", "simple_triplet_matrix")
+S3method("col_means", "default")
+S3method("col_means", "simple_triplet_matrix")
 
 
-export("tcrossprod.simple_triplet_matrix")
+export("tcrossprod_simple_triplet_matrix")
 
 ## array stuff
 export("as.simple_sparse_array",

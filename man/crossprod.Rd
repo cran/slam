@@ -1,5 +1,5 @@
 \name{crossprod}
-\alias{tcrossprod.simple_triplet_matrix}
+\alias{tcrossprod_simple_triplet_matrix}
 \title{
 Matrix Crossproduct
 }
@@ -7,7 +7,7 @@ Matrix Crossproduct
 Compute the matrix cross-product of a sparse and dense matrix.
 }
 \usage{
-tcrossprod.simple_triplet_matrix(x, y = NULL)
+tcrossprod_simple_triplet_matrix(x, y = NULL)
 }
 \arguments{
   \item{x}{a matrix in \code{simple_triplet_matrix}-form.
@@ -38,9 +38,9 @@ the computation is delegated to \code{tcrossprod}.
 x <- matrix(c(1, 0, 0, 2, 1, 0), nrow = 3)
 x
 s <- as.simple_triplet_matrix(x)
-tcrossprod.simple_triplet_matrix(s, x)
+tcrossprod_simple_triplet_matrix(s, x)
 ## see note
-tcrossprod.simple_triplet_matrix(s)
+tcrossprod_simple_triplet_matrix(s)
 }
 \keyword{algebra}
 \keyword{array}

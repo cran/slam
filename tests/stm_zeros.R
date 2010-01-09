@@ -7,9 +7,9 @@ set.seed(20091012)
 as.simple_triplet_matrix_zeros <-
 function(x) {
     x <- list(
-        v        = c(x), 
         i        = rep(seq_len(nrow(x)), ncol(x)),
         j        = rep(seq_len(ncol(x)), each = nrow(x)),
+        v        = c(x),
         nrow     = nrow(x),
         ncol     = ncol(x),
         dimnames = dimnames(x)
@@ -26,10 +26,10 @@ x
 xst <- as.simple_triplet_matrix_zeros(x)
 xst
 
-identical(rowSums(x), rowSums(xst))
-identical(colSums(x), colSums(xst))
-identical(rowMeans(x), rowMeans(xst))
-identical(colMeans(x), colMeans(xst))
+identical(rowSums(x), row_sums(xst))
+identical(colSums(x), col_sums(xst))
+identical(rowMeans(x), row_means(xst))
+identical(colMeans(x), col_means(xst))
 
 ## NAs
 
@@ -41,27 +41,27 @@ xna
 xnast <- as.simple_triplet_matrix_zeros(xna)
 xnast
 
-identical(rowSums(xna), rowSums(xnast))
-identical(colSums(xna), colSums(xnast))
-identical(rowMeans(xna), rowMeans(xnast))
-identical(colMeans(xna), colMeans(xnast))
+identical(rowSums(xna), row_sums(xnast))
+identical(colSums(xna), col_sums(xnast))
+identical(rowMeans(xna), row_means(xnast))
+identical(colMeans(xna), col_means(xnast))
 
-identical(rowSums(xna, na.rm = TRUE), rowSums(xnast, na.rm = TRUE))
-identical(colSums(xna, na.rm = TRUE), colSums(xnast, na.rm = TRUE))
-identical(rowMeans(xna, na.rm = TRUE), rowMeans(xnast, na.rm = TRUE))
-identical(colMeans(xna, na.rm = TRUE), colMeans(xnast, na.rm = TRUE))
+identical(rowSums(xna, na.rm = TRUE), row_sums(xnast, na.rm = TRUE))
+identical(colSums(xna, na.rm = TRUE), col_sums(xnast, na.rm = TRUE))
+identical(rowMeans(xna, na.rm = TRUE), row_means(xnast, na.rm = TRUE))
+identical(colMeans(xna, na.rm = TRUE), col_means(xnast, na.rm = TRUE))
 
 ## cross-product
 
-identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(xst))
-identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(xst, x))
+identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(xst))
+identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(xst, x))
 
 x <- matrix(c(1, 0, 0, 2, 1, NA), nrow = 3)
 x
 s <- as.simple_triplet_matrix_zeros(x)
 
-identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(s))
-identical(tcrossprod(x), tcrossprod.simple_triplet_matrix(s, x))
+identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(s))
+identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(s, x))
 
 ##
 identical(as.matrix(s * x), x * x)

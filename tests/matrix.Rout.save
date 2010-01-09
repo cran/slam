@@ -1,5 +1,5 @@
 
-R version 2.10.1 Patched (2009-12-16 r50758)
+R version 2.10.1 Patched (2009-12-21 r50815)
 Copyright (C) 2009 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -17,17 +17,6 @@ Type 'q()' to quit R.
 
 > 
 > library("slam")
-
-Attaching package: 'slam'
-
-
-	The following object(s) are masked from package:base :
-
-	 colMeans,
-	 colSums,
-	 rowMeans,
-	 rowSums 
-
 > 
 > s <- simple_triplet_diag_matrix(1, nrow = 3)
 > 

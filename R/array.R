@@ -82,7 +82,7 @@ function(x, ...)
         ## Scalar positions of array index matrices i in the usual row
         ## major ordering of arrays.
         cpd <- cumprod(x$dim)
-        1L + rowSums((i - 1L) * rep(c(1L, cpd[-nd]), each = cpd[nd]))
+        1L + row_sums((i - 1L) * rep(c(1L, cpd[-nd]), each = cpd[nd]))
     }
 
     if(na == 2L) {

@@ -1,13 +1,13 @@
 \name{sums}
 % NOTE need generics
-\alias{rowSums}
-\alias{rowSums.simple_triplet_matrix}
-\alias{colSums}
-\alias{colSums.simple_triplet_matrix}
-\alias{rowMeans}
-\alias{rowMeans.simple_triplet_matrix}
-\alias{colMeans}
-\alias{colMeans.simple_triplet_matrix}
+\alias{row_sums}
+\alias{row_sums.simple_triplet_matrix}
+\alias{col_sums}
+\alias{col_sums.simple_triplet_matrix}
+\alias{row_means}
+\alias{row_means.simple_triplet_matrix}
+\alias{col_means}
+\alias{col_means.simple_triplet_matrix}
 \title{
 Form Row and Column Sums and Means
 }
@@ -16,15 +16,15 @@ Form row and column sums and means for sparse arrays (currently
 \code{simple_triplet_matrix} only).
 }
 \usage{
-rowSums(x, na.rm = FALSE, dims = 1, \dots)
-colSums(x, na.rm = FALSE, dims = 1, \dots)
-rowMeans(x, na.rm = FALSE, dims = 1, \dots)
-colMeans(x, na.rm = FALSE, dims = 1, \dots)
+row_sums(x, na.rm = FALSE, dims = 1, \dots)
+col_sums(x, na.rm = FALSE, dims = 1, \dots)
+row_means(x, na.rm = FALSE, dims = 1, \dots)
+col_means(x, na.rm = FALSE, dims = 1, \dots)
 
-\method{rowSums}{simple_triplet_matrix}(x, na.rm = FALSE, dims = 1, \dots)
-\method{colSums}{simple_triplet_matrix}(x, na.rm = FALSE, dims = 1, \dots)
-\method{rowMeans}{simple_triplet_matrix}(x, na.rm = FALSE, dims = 1, \dots)
-\method{colMeans}{simple_triplet_matrix}(x, na.rm = FALSE, dims = 1, \dots)
+\method{row_sums}{simple_triplet_matrix}(x, na.rm = FALSE, dims = 1, \dots)
+\method{col_sums}{simple_triplet_matrix}(x, na.rm = FALSE, dims = 1, \dots)
+\method{row_means}{simple_triplet_matrix}(x, na.rm = FALSE, dims = 1, \dots)
+\method{col_means}{simple_triplet_matrix}(x, na.rm = FALSE, dims = 1, \dots)
 }
 \arguments{
   \item{x}{a sparse array containing numeric, integer, or logical values.
@@ -62,10 +62,10 @@ numeric arrays.
 x <- matrix(c(1, 0, 0, 2, 1, NA), nrow = 3)
 x
 s <- as.simple_triplet_matrix(x)
-rowSums(s)
-rowSums(s, na.rm = TRUE)
-colSums(s)
-colSums(s, na.rm = TRUE)
+row_sums(s)
+row_sums(s, na.rm = TRUE)
+col_sums(s)
+col_sums(s, na.rm = TRUE)
 }
 \keyword{array}
 \keyword{algebra}
