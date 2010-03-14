@@ -171,8 +171,13 @@ function(e1, e2)
             cnms <- colnames(e2)
         if(is.null(rnms) && is.null(cnms))
             NULL
-        else
-            list(rnms, cnms)
+        else {
+            out <- list(rnms, cnms)
+            if(is.null(nms <- names(dimnames(e1))))
+                nms <- names(dimnames(e2))
+            names(out) <- nms
+            out
+        }
     }
 
     ## Obviously, the following could be generalized ...
@@ -326,6 +331,7 @@ function(x, value)
         else {
             dnx <- vector("list", 2L)
             dnx[!ind] <- lapply(value[!ind], as.character)
+            names(dnx) <- names(value)
         }
     }
     if(is.null(value))
@@ -475,7 +481,7 @@ function(x, i, j, drop = FALSE)
         }
 
         if(!is.null(dnx <- x$dimnames))
-            dnx <- list(dnx[[1L]][i], dnx[[2L]][j])
+            dnx[] <- list(dnx[[1L]][i], dnx[[2L]][j])
 
         i <- if(missing(i)) x$i[pos] else pi[x$i[pos]]
         j <- if(missing(j)) x$j[pos] else pj[x$j[pos]]

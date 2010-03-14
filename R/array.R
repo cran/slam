@@ -159,7 +159,7 @@ function(x, ...)
             }
         }
         if(!is.null(dnx <- x$dimnames))
-            dnx <- Map("[", dnx, ind)
+            dnx[] <- Map("[", dnx, ind)
         out <- simple_sparse_array(x$i[pos, , drop = FALSE], x$v[pos],
                                    dx, dnx)
     }
