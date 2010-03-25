@@ -1,6 +1,6 @@
 Package: slam
-Version: 0.1-10
-Date: 2010-03-14
+Version: 0.1-11
+Date: 2010-03-25
 Title: Sparse Lightweight Arrays and Matrices
 Description: Data structures and algorithms for sparse arrays and
         matrices, based on index arrays and simple triplet
@@ -9,6 +9,6 @@ Author: Kurt Hornik, David Meyer, Christian Buchta
 Maintainer: David Meyer <David.Meyer@R-project.org>
 Depends: R (>= 2.8.0)
 License: GPL-2
-Packaged: 2010-03-14 17:34:21 UTC; hornik
+Packaged: 2010-03-25 15:54:19 UTC; hornik
 Repository: CRAN
-Date/Publication: 2010-03-15 18:40:34
+Date/Publication: 2010-03-25 15:56:51

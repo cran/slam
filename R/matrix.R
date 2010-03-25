@@ -34,6 +34,10 @@ function(x)
                           dimnames = dimnames(x))
 }
 
+as.simple_triplet_matrix.default <-
+function(x)
+    as.simple_triplet_matrix(as.matrix(x))
+
 as.simple_triplet_matrix.dgTMatrix <-
 function(x)
 {
@@ -304,6 +308,20 @@ function(e1, e2)
     e1$v <- c(e1$v, e2$v[ind])
     e1$dimnames <- .make_dimnames(e1, e2)
     .reduce(e1)
+}
+
+Summary.simple_triplet_matrix <-
+function(..., na.rm = FALSE)
+{
+    v <- unlist(lapply(list(...),
+                       function(e) {
+                           v <- as.simple_triplet_matrix(e)$v
+                           if(length(v) < prod(dim(e)))
+                               v <- c(v, vector(typeof(v), 1L))
+                           v
+                       }),
+                recursive = FALSE)
+    do.call(.Generic, list(v, na.rm = na.rm))
 }
 
 dim.simple_triplet_matrix <-
@@ -605,6 +623,12 @@ function(x, ...)
     writeLines(sprintf("A %s simple triplet matrix.",
                        paste(dim(x), collapse = "x")))
     invisible(x)
+}
+
+mean.simple_triplet_matrix <-
+function(x, ...)
+{
+    sum(x$v) / prod(dim(x))
 }
 
 ## Utilities for creating special simple triplet matrices:

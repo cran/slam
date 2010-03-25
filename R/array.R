@@ -41,6 +41,10 @@ function(x)
     simple_sparse_array(ind, x[ind], dim(x), dimnames(x))
 }
 
+as.simple_sparse_array.default <-
+function(x)
+    as.simple_sparse_array(as.array(x))
+
 as.array.simple_sparse_array <-
 function(x, ...)
 {
@@ -55,6 +59,20 @@ function(x, ...)
 is.simple_sparse_array <-
 function(x)
     inherits(x, "simple_sparse_array")
+
+Summary.simple_sparse_array <-
+function(..., na.rm = FALSE)
+{
+    v <- unlist(lapply(list(...),
+                       function(e) {
+                           v <- as.simple_sparse_array(e)$v
+                           if(length(v) < prod(dim(e)))
+                               v <- c(v, vector(typeof(v), 1L))
+                           v
+                       }),
+                recursive = FALSE)
+    do.call(.Generic, list(v, na.rm = na.rm))
+}
 
 dim.simple_sparse_array <-
 function(x)
@@ -179,4 +197,10 @@ function(x, ...)
     writeLines(sprintf("A %s simple sparse array.",
                        paste(dim(x), collapse = "x")))
     invisible(x)
+}
+
+mean.simple_sparse_array <-
+function(x, ...)
+{
+    sum(x$v) / prod(dim(x))
 }
