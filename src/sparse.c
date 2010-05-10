@@ -3,20 +3,51 @@
 #include <R_ext/BLAS.h>
 #include <time.h>
 
-// ceeboo 2009/5,10,12 2010/1 
+// ceeboo 2009/5,10,12 2010/1,5 
 //
 
 // test order of list components
 int _valid_stm(SEXP x) {
-    x = getAttrib(x, R_NamesSymbol);
-    return 
-	strcmp(CHAR(STRING_ELT(x, 0)), "i") ||
-	strcmp(CHAR(STRING_ELT(x, 1)), "j") ||
-	strcmp(CHAR(STRING_ELT(x, 2)), "v") ||
-	strcmp(CHAR(STRING_ELT(x, 3)), "nrow") ||
-	strcmp(CHAR(STRING_ELT(x, 4)), "ncol") ||
-    (LENGTH(x) > 5) ?
-	strcmp(CHAR(STRING_ELT(x, 5)), "dimnames") : 0;
+    SEXP s = getAttrib(x, R_NamesSymbol);
+    int ok = 
+	strcmp(CHAR(STRING_ELT(s, 0)), "i") ||
+	strcmp(CHAR(STRING_ELT(s, 1)), "j") ||
+	strcmp(CHAR(STRING_ELT(s, 2)), "v") ||
+	strcmp(CHAR(STRING_ELT(s, 3)), "nrow") ||
+	strcmp(CHAR(STRING_ELT(s, 4)), "ncol") ||
+    (LENGTH(s) > 5) ?
+	strcmp(CHAR(STRING_ELT(s, 5)), "dimnames") : 0;
+    if (ok) {
+	s = VECTOR_ELT(x, 0);
+	if (LENGTH(s) != LENGTH(VECTOR_ELT(x, 1)) ||
+	    LENGTH(s) != LENGTH(VECTOR_ELT(x, 2)))
+	    error("'i, j, v' different lengths");
+	if (LENGTH(VECTOR_ELT(x, 3)) != 1 ||
+	    LENGTH(VECTOR_ELT(x, 4)) != 1)
+	    error("'nrow, ncol' invalid length");
+	int *xi, *xj, nr, nc;
+	xi = INTEGER(s);
+	xj = INTEGER(VECTOR_ELT(x, 1));
+	nr = INTEGER(VECTOR_ELT(x, 3))[0];
+	nc = INTEGER(VECTOR_ELT(x, 4))[0];
+	for (int k = 0; k < LENGTH(s); k++)
+	    if (xi[k] < 1 || xi[k] > nr ||
+		xj[k] < 1 || xj[k] > nc)
+		error("'i, j' invalid");
+	if (LENGTH(x) > 5) {
+	    s = VECTOR_ELT(x, 5);
+	    if (!isNull(s)) {
+		if (LENGTH(s) != 2)
+		    error("'dimnames' invalid length");
+		if ((!isNull(VECTOR_ELT(s, 0)) &&
+		      LENGTH(VECTOR_ELT(s, 0)) != nr) ||	
+		    (!isNull(VECTOR_ELT(s, 1)) &&
+		      LENGTH(VECTOR_ELT(s, 1)) != nc))
+		    error("rownames, colnames invalid length'");
+	    }
+	}
+    }
+    return ok;
 }
 
 // row or column sums of some triplet matrix
@@ -105,9 +136,10 @@ SEXP _sums_stm(SEXP x, SEXP R_dim, SEXP R_na_rm) {
 //       2) triplet on triplet does not fit in here.
 //       3) if y = NULL or contains special values we call some
 //          bailout function.
-SEXP tcrossprod_stm_matrix(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
+SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose) {
     if (!inherits(x, "simple_triplet_matrix") || _valid_stm(x))
 	error("'x' not of class simple_triplet_matrix");
+    SEXP y = R_y;
     if (isNull(y))
 	goto bailout;
     if (!isMatrix(y))
@@ -143,17 +175,21 @@ SEXP tcrossprod_stm_matrix(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
     // not be runtime efficient. if memory footprint is of concern
     // then the program flow should be further switch(ed).
     if (TYPEOF(y) != REALSXP)
-	y = coerceVector(y, REALSXP);
+	y = PROTECT(coerceVector(y, REALSXP));
 
     // check for special values
     double *_y = REAL(y);
     for (double *k = _y + LENGTH(y); _y < k; _y++)
 	if (!R_FINITE(*_y)) {
-	    UNPROTECT(1);
+	    UNPROTECT_PTR(r);
 bailout:
-	    return eval(LCONS(install(".tcrossprod.bailout"),
-			LCONS(x,
-			LCONS(y, R_NilValue))), pkgEnv);
+	    r = eval(PROTECT(LCONS(install(".tcrossprod.bailout"),
+			     LCONS(x,
+			     LCONS(y, R_NilValue)))), pkgEnv);
+	    UNPROTECT(1);
+	    if (y != R_y)
+		UNPROTECT(1);
+	    return r;
 	}
     _y = REAL(y) - m;
 
@@ -285,6 +321,8 @@ bailout:
 	}
     }
     UNPROTECT(1);
+    if (y != R_y)
+	UNPROTECT(1);
 
     return r;
 }

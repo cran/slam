@@ -79,4 +79,15 @@ function(x, y = NULL)
 function(x, y)
     tcrossprod(as.matrix(x), y)
 
+##
+.nnz <- 
+function(x, scale = FALSE) {
+    v <- as.logical(x$v)
+    v <- table(factor(v, levels = c(TRUE, FALSE)), useNA = "always")
+    if (scale)
+	v <- v / prod(c(x$nrow, x$ncol))
+    names(v) <- c("nzero", "zero", "NA")
+    v
+}
+
 ###
