@@ -1,16 +1,19 @@
 
-## CB 2009/5,6,10
+## CB 2009/5,6,10 2010/6
 
 
 .means_simple_triplet_matrix <-
 function(x, DIM, na.rm)
 {
     s <- .Call("_sums_stm", x, DIM, na.rm)
+    n <- c(x$nrow, x$ncol)[-DIM]
     if (na.rm) {
 	x$v <- is.na(x$v)
-	s /(c(x$nrow, x$ncol)[-DIM] - .Call("_sums_stm", x, DIM, na.rm))
-    } else
-	s / c(x$nrow, x$ncol)[-DIM]
+	nna <- .Call("_sums_stm", x, DIM, FALSE)
+	s / (n - nna)
+    }
+    else
+	s /  n
 }
 
 
@@ -69,10 +72,19 @@ function(x, na.rm = FALSE, dims = 1, ...)
 ##      therefore has control over how to proceed. For now
 ##      it calls the bailout function below. For verbose
 ##      information set the last argument to TRUE.
+##
+##      The symmetric case is now also handled in C. Runtime
+##      could be further improved if data need not to be 
+##      ordered (see the C code).
 tcrossprod_simple_triplet_matrix <-
-function(x, y = NULL)
-    .Call("tcrossprod_stm_matrix", x, y,
-          environment(tcrossprod_simple_triplet_matrix), FALSE)
+function(x, y = NULL) {
+    if (is.null(y))
+	.Call("tcrossprod_stm_stm", x, y, 
+	      environment(tcrossprod_simple_triplet_matrix), FALSE)
+    else
+	.Call("tcrossprod_stm_matrix", x, y,
+	      environment(tcrossprod_simple_triplet_matrix), FALSE)
+}
 
 ## FIXME warning?
 .tcrossprod.bailout <-

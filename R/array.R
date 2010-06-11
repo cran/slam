@@ -50,7 +50,7 @@ function(x, ...)
 {
     v <- x$v
     dim <- x$dim
-    y <- array(vector(typeof(x), prod(dim)), dim = dim,
+    y <- array(vector(typeof(v), prod(dim)), dim = dim,
                dimnames = x$dimnames)
     y[x$i] <- v
     y

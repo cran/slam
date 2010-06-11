@@ -3,10 +3,10 @@
 #include <R_ext/BLAS.h>
 #include <time.h>
 
-// ceeboo 2009/5,10,12 2010/1,5 
+// ceeboo 2009/5,10,12 2010/1,5,6 
 //
 
-// test order of list components
+// test validity of list components.
 int _valid_stm(SEXP x) {
     SEXP s = getAttrib(x, R_NamesSymbol);
     int ok = 
@@ -135,7 +135,9 @@ SEXP _sums_stm(SEXP x, SEXP R_dim, SEXP R_na_rm) {
 // NOTES 1) tcrossprod does not implement na.rm, so neither do we.
 //       2) triplet on triplet does not fit in here.
 //       3) if y = NULL or contains special values we call some
-//          bailout function.
+//          bailout function with y possibly coerced to REALSXP.
+//       4) pkgEnv = NULL deactivates the bailout.
+//
 SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose) {
     if (!inherits(x, "simple_triplet_matrix") || _valid_stm(x))
 	error("'x' not of class simple_triplet_matrix");
@@ -159,16 +161,6 @@ SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose) {
     // code section times
     clock_t t3, t2, t1, t0 = clock();
 #endif
-    SEXP r = PROTECT(allocVector(REALSXP, n * m));
-
-    memset(REAL(r), 0, sizeof(double) * n * m);
-    double *_r = REAL(r) - m;
-
-    int *_i, *_j;
-
-    _i = INTEGER(VECTOR_ELT(x, 0));
-    _j = INTEGER(VECTOR_ELT(x, 1));
-
     // coercing is in general not storage efficient, and therefore
     // assumes that y is not too large. on the other hand, as the
     // entries of y could be accessed multiple times, casting would
@@ -178,10 +170,12 @@ SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose) {
 	y = PROTECT(coerceVector(y, REALSXP));
 
     // check for special values
+    SEXP r;
     double *_y = REAL(y);
     for (double *k = _y + LENGTH(y); _y < k; _y++)
 	if (!R_FINITE(*_y)) {
-	    UNPROTECT_PTR(r);
+	    if (isNull(pkgEnv))
+		error("NA/NaN handling deactivated");
 bailout:
 	    r = eval(PROTECT(LCONS(install(".tcrossprod.bailout"),
 			     LCONS(x,
@@ -192,6 +186,15 @@ bailout:
 	    return r;
 	}
     _y = REAL(y) - m;
+
+    r = PROTECT(allocVector(REALSXP, n * m));
+    memset(REAL(r), 0, sizeof(double) * n * m);
+    double *_r = REAL(r) - m;
+
+    int *_i, *_j;
+
+    _i = INTEGER(VECTOR_ELT(x, 0));
+    _j = INTEGER(VECTOR_ELT(x, 1));
 
     // Notes 1) timings with Blas are better than without.
     //       2) For reasons not yet fully understood using
@@ -250,15 +253,6 @@ bailout:
     for (int i = 0; i < n * m; i++)
 	_r[i] = _y[i / n + (i % n) * m];
     UNPROTECT_PTR(v);
-#ifdef _TIME_H
-    t3 = clock();
-    if (R_verbose && *LOGICAL(R_verbose))
-	Rprintf("tcrossprod_stm_matrix: %.3fs [%.3fs/%.3fs/%.3fs]\n", 
-		((double) t3 - t0) / CLOCKS_PER_SEC,
-		((double) t1 - t0) / CLOCKS_PER_SEC,
-		((double) t2 - t1) / CLOCKS_PER_SEC,
-		((double) t3 - t2) / CLOCKS_PER_SEC);
-#endif
     // set dimnames and names of dimnames.
     SEXP dn = (LENGTH(x) > 5) ? VECTOR_ELT(x, 5) : R_NilValue;
 
@@ -320,12 +314,170 @@ bailout:
 	    }
 	}
     }
+#ifdef _TIME_H
+    t3 = clock();
+    if (R_verbose && *LOGICAL(R_verbose))
+	Rprintf("tcrossprod_stm_matrix: %.3fs [%.3fs/%.3fs/%.3fs]\n", 
+		((double) t3 - t0) / CLOCKS_PER_SEC,
+		((double) t1 - t0) / CLOCKS_PER_SEC,
+		((double) t2 - t1) / CLOCKS_PER_SEC,
+		((double) t3 - t2) / CLOCKS_PER_SEC);
+#endif
     UNPROTECT(1);
     if (y != R_y)
 	UNPROTECT(1);
 
     return r;
 }
+
+// tcrossprod for some triplet matrices. 
+//
+// NOTES 1) y is not implemented.
+//       2) pkgEnv = NULL deactivates the bailout to dense 
+//          computation.
+//
+SEXP tcrossprod_stm_stm(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
+    if (!inherits(x, "simple_triplet_matrix") || _valid_stm(x))
+	error("'x' not of class simple_triplet_matrix");
+    if (!isNull(y))
+	error("'y' not implemented");
+    int *_i, *_j, *_n, k, f, n, m;
+    double *_v, *_r;
+    SEXP r, s;
+#ifdef _TIME_H
+    clock_t t2, t1, t0 = clock();
+#endif
+    s = VECTOR_ELT(x, 2);
+    if (TYPEOF(s) != REALSXP)
+	s = PROTECT(coerceVector(s, REALSXP));
+    _v = REAL(s);
+    for (k = 0; k < LENGTH(s); k++)
+	if (!R_FINITE(_v[k])) {
+	    if (isNull(pkgEnv))
+		error("NA/NaN handling deactivated");
+	    r = eval(PROTECT(LCONS(install(".tcrossprod.bailout"),
+			     LCONS(x,
+			     LCONS(y, R_NilValue)))), pkgEnv);
+	    UNPROTECT(1);
+	    if (s != VECTOR_ELT(x, 2))
+		UNPROTECT(1);
+	    return r;
+	}
+
+    n = INTEGER(VECTOR_ELT(x, 3))[0];
+    if (!n) {
+	if (s != VECTOR_ELT(x, 2))
+	    UNPROTECT(1);
+	return allocMatrix(REALSXP, 0, 0);
+    }
+    m = INTEGER(VECTOR_ELT(x, 4))[0];
+    r = PROTECT(allocMatrix(REALSXP, n, n));
+    memset(REAL(r), 0, sizeof(double) * n * n);
+    if (LENGTH(x) > 5) {
+	SEXP s = VECTOR_ELT(x, 5);
+	if (!isNull(s)) {
+	    SEXP t = VECTOR_ELT(s, 0);
+	    if (!isNull(t)) {
+		SEXP d;
+		setAttrib(r, R_DimNamesSymbol, (d = allocVector(VECSXP, 2)));
+		SET_VECTOR_ELT(d, 0, t);
+		SET_VECTOR_ELT(d, 1, t);
+		s = getAttrib(s, R_NamesSymbol);
+		if (!isNull(s)) {
+		    t = STRING_ELT(s, 0);
+		    setAttrib(d, R_NamesSymbol, (s = allocVector(STRSXP, 2)));
+		    SET_STRING_ELT(s, 0, t);
+		    SET_STRING_ELT(s, 1, t);
+		}
+	    }
+	}
+    }
+    if (!m || !LENGTH(s)) {
+	UNPROTECT(1);
+	if (s != VECTOR_ELT(x, 2))
+	    UNPROTECT(1);
+	return r;
+    }
+    // Arrange the data in blocks of equal column
+    // indexes. Note that the order of and within
+    // the blocks is not relevant (see below).
+
+    _j = INTEGER(VECTOR_ELT(x, 1));	    // column indexes
+    _n = INTEGER(PROTECT(allocVector(INTSXP, m + 1)));
+    memset(_n, 0, sizeof(int) * (m + 1));
+    for (k = 0; k < LENGTH(s); k++)
+	_n[_j[k]]++;
+    for (k = 1; k < m + 1; k++)
+	_n[k] += _n[k-1];
+    {
+	int *__i;
+	double *__v;
+
+	__i = INTEGER(VECTOR_ELT(x, 0));    // row indexs
+	__v = _v;
+
+	_i = INTEGER(PROTECT(allocVector(INTSXP, LENGTH(s))));
+	_v = REAL(PROTECT(allocVector(REALSXP, LENGTH(s))));
+
+	_n -= 1;
+	for (k = 0; k < LENGTH(s); k++) {
+	    int *__n = _n + _j[k];
+	    _i[*__n] = __i[k];
+	    _v[*__n] = __v[k];
+	    (*__n)++;
+	}
+	// reset
+	_n += 1;
+	for (k = m; k > 0; k--)
+	    _n[k] = _n[k-1];
+	_n[0] = 0;
+    }
+#ifdef _TIME_H
+    t1 = clock();
+#endif
+    // Aggregate the outer products of the columns.
+    _r = REAL(r) - n - 1;
+     f = _n[0];
+    for (k = 1; k < m + 1; k++) {
+	int l = _n[k];
+	for (int j = f; j < l; j++) {
+	    double  z =      _v[j],
+		  *_z = _r + _i[j] * n;
+	    for (int i = f; i < j + 1; i++)
+		_z[_i[i]] += _v[i] * z;
+	}
+	f = l;
+    }
+    // Aggregate the lower and upper half.
+    _r = REAL(r);
+    for (k = 1; k < n; k++) {
+	f = k * n;
+	// NOTE the off-diagonal array indexes are i * n + k, 
+	//	and k * n + i for i = 0, 1, ..., k-1. For the
+	//      former (k - 1) * n + k < k * n  <=>  k < n,
+	//      and adding k to the right-hand sides does
+	//      change that.
+	for (int i = k; i < f; i += n, f++) {
+	    _r[f] += _r[i];
+	    _r[i]  = _r[f];
+	}
+    }
+#ifdef _TIME_H
+    t2 = clock();
+    if (R_verbose && *LOGICAL(R_verbose))
+	Rprintf("_crossprod_stm: %.3fs [%.3fs/%.3fs]\n",
+		((double) t2 - t0) / CLOCKS_PER_SEC,
+		((double) t1 - t0) / CLOCKS_PER_SEC,
+		((double) t2 - t1) / CLOCKS_PER_SEC);
+#endif
+    UNPROTECT(4);
+    if (s != VECTOR_ELT(x, 2))
+	UNPROTECT(1);
+
+    return r;
+}
+
+
 
 //
 
