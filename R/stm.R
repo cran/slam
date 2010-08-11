@@ -67,6 +67,38 @@ col_means.simple_triplet_matrix <-
 function(x, na.rm = FALSE, dims = 1, ...)
     .means_simple_triplet_matrix(x, DIM = 2L, na.rm)
 
+## FIXME default
+row_tsums <-
+function(x, INDEX, na.rm = FALSE, dims = 1, ...)
+    UseMethod("row_tsums")
+
+row_tsums.matrix <-
+function(x, INDEX, na.rm = FALSE, dims = 1, ...) {
+    if (dims != 1)
+	stop("invalid 'dims'") 
+    t(apply(x, 1L, tapply, INDEX, sum, na.rm = na.rm))
+}
+
+row_tsums.simple_triplet_matrix <-
+function(x, INDEX, na.rm = FALSE, dims = 1, ...) 
+    .Call("_row_tsums", x, factor(INDEX), na.rm, FALSE)
+
+col_tsums <-
+function(x, INDEX, na.rm = FALSE, dims = 1, ...)
+    UseMethod("col_tsums") 
+
+col_tsums.matrix <-
+function(x, INDEX, na.rm = FALSE, dims = 1, ...) {
+    if (dims != 1)
+	stop("invalid 'dims'") 
+    apply(x, 2L, tapply, INDEX, sum, na.rm = na.rm)
+}
+
+col_tsums.simple_triplet_matrix <-
+function(x, INDEX, na.rm = FALSE, dims = 1, ...)
+    t(row_tsums.simple_triplet_matrix(t(x), INDEX, na.rm, 1, ...))
+
+
 
 ## NOTE the C code must always check for special values and
 ##      therefore has control over how to proceed. For now

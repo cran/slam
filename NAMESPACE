@@ -34,7 +34,9 @@ useDynLib(slam)
 export("row_sums",
        "col_sums",
        "row_means",
-       "col_means"
+       "col_means",
+       "row_tsums",
+       "col_tsums"
       )
 
 S3method("row_sums", "default")
@@ -48,6 +50,12 @@ S3method("row_means", "simple_triplet_matrix")
 
 S3method("col_means", "default")
 S3method("col_means", "simple_triplet_matrix")
+
+S3method("row_tsums", "matrix")
+S3method("row_tsums", "simple_triplet_matrix")
+
+S3method("col_tsums", "matrix")
+S3method("col_tsums", "simple_triplet_matrix")
 
 export("tcrossprod_simple_triplet_matrix")
 
