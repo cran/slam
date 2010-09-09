@@ -41,6 +41,12 @@ function(x)
     simple_sparse_array(ind, x[ind], dim(x), dimnames(x))
 }
 
+as.simple_sparse_array.matrix <- as.simple_sparse_array.array
+
+as.simple_sparse_array.simple_triplet_matrix <-
+function(x) 
+    simple_sparse_array(cbind(x$i, x$j), x$v, c(x$nrow, x$ncol), dimnames(x))
+
 as.simple_sparse_array.default <-
 function(x)
     as.simple_sparse_array(as.array(x))
@@ -81,6 +87,7 @@ function(x)
 dimnames.simple_sparse_array <-
 function(x)
     x$dimnames
+
 
 ## <TODO>
 ## Add dim and dimnames setters.
@@ -194,7 +201,7 @@ function(x, ...)
 print.simple_sparse_array <-
 function(x, ...)
 {
-    writeLines(sprintf("A %s simple sparse array.",
+    writeLines(sprintf("A simple sparse array of dimension %s.",
                        paste(dim(x), collapse = "x")))
     invisible(x)
 }

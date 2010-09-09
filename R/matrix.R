@@ -67,6 +67,39 @@ function(x, ...)
     y
 }
 
+as.array.simple_triplet_matrix <-
+function(x, ...)
+    as.array(as.matrix.simple_triplet_matrix(x, ...))
+
+as.simple_triplet_matrix.simple_sparse_array <-
+function(x) {
+    dx <- x$dim
+    if(length(dx) == 1L) {
+        simple_triplet_matrix(
+	    i = x$i[, 1L],
+            j = rep.int(1L, dx),
+            v = x$v,
+            nrow = dx,
+            ncol = 1L,
+            dimnames = c(x$dimnames, list(NULL))
+	)
+    } 
+    else 
+    if(length(dx) == 2L) {
+	simple_triplet_matrix(
+	    i = x$i[,1L],
+	    j = x$i[,2L],
+	    v = x$v,
+	    nrow = x$dim[1L],
+	    ncol = x$dim[2L],
+	    dimnames = x$dimnames
+	)
+    }
+    else
+	stop("Unsupported number of dimensions")
+}
+
+
 is.simple_triplet_matrix <-
 function(x)
     inherits(x, "simple_triplet_matrix")
@@ -336,18 +369,19 @@ dimnames.simple_triplet_matrix <-
 function(x)
     x$dimnames
 
-`dimnames<-.simple_triplet_matrix` <-
+`dimnames<-.simple_sparse_array` <-
+`dimnames<-.simple_triplet_matrix` <- 
 function(x, value)
 {
     if(!is.null(value)) {
         ## Should be a list of length 2.
-        if(!is.list(value) || (length(value) != 2L))
+        if(!is.list(value) || (length(value) != length(dim(x))))
             stop("Invalid dimnames.")
         ind <- sapply(value, length) == 0L
         if(all(ind))
             value <- NULL
         else {
-            dnx <- vector("list", 2L)
+            dnx <- vector("list", length(dim(x)))
             dnx[!ind] <- lapply(value[!ind], as.character)
             names(dnx) <- names(value)
         }

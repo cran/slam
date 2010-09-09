@@ -36,6 +36,8 @@ SEXP _row_tsums(SEXP x, SEXP R_index, SEXP R_na_rm, SEXP R_verbose) {
 
     // NOTE tapply ignores NA(s) in argument INDEX.
     //      So do we with a warning.
+    //      
+    // FIXME bailout if k * m > 2147483647.
     l = 0;
     for (int i = 0; i < LENGTH(_i); i++) {
 	k = INTEGER(R_index)[INTEGER(_j)[i] - 1];
@@ -76,12 +78,17 @@ SEXP _row_tsums(SEXP x, SEXP R_index, SEXP R_na_rm, SEXP R_verbose) {
 	ScalarInteger(LENGTH(getAttrib(R_index, R_LevelsSymbol))));
 
     SET_VECTOR_ELT(r, 5, (s = allocVector(VECSXP, 2)));
-    SET_VECTOR_ELT(s, 0, (LENGTH(x) > 5 && !isNull(VECTOR_ELT(x, 5))) 
-			 ? VECTOR_ELT(VECTOR_ELT(x, 5), 0) 
-			 : R_NilValue);
+    SET_VECTOR_ELT(s, 0, R_NilValue);
     SET_VECTOR_ELT(s, 1, getAttrib(R_index, R_LevelsSymbol));
-    if (LENGTH(x) > 5)
+    if (LENGTH(x) > 5) {
+	SEXP t = VECTOR_ELT(x, 5);
+	if (!isNull(t)) {
+	    SET_VECTOR_ELT(s, 0, VECTOR_ELT(t, 0));
+	    if (!isNull((t = getAttrib(t, R_NamesSymbol)))) 
+		setAttrib(s, R_NamesSymbol, t);
+	}
 	setAttrib(r, R_NamesSymbol, getAttrib(x, R_NamesSymbol));
+    }
     else {
 	setAttrib(r, R_NamesSymbol, (s = allocVector(STRSXP, 6)));
 	SEXP t = getAttrib(x, R_NamesSymbol);

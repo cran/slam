@@ -1,13 +1,11 @@
 
-R version 2.11.1 Patched (2010-07-21 r52589)
+R version 2.11.1 Patched (2010-09-04 r52871)
 Copyright (C) 2010 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
-
-  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -17,7 +15,6 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 'help.start()' for an HTML browser interface to help.
 Type 'q()' to quit R.
 
-> 
 > 
 > library("slam")
 > set.seed(201008)
@@ -31,9 +28,11 @@ Type 'q()' to quit R.
 > s <- as.simple_triplet_matrix(x)
 > z <- as.matrix(s)
 > 
-> identical(row_tsums(z, INDEX), as.matrix(row_tsums(s, INDEX)))
+> identical(rollup(z, 2L, INDEX, sum), 
++ 	  as.matrix(rollup(s, 2L, INDEX, sum)))
 [1] TRUE
-> identical(col_tsums(t(z), INDEX), as.matrix(col_tsums(t(s), INDEX)))
+> identical(rollup(t(z), 1L, INDEX, sum), 
++ 	  as.matrix(rollup(t(s), 1L, INDEX, sum)))
 [1] TRUE
 > 
 > ## NA indexes
@@ -41,15 +40,17 @@ Type 'q()' to quit R.
 > is.na(k) <- k == 1L
 > any(is.na(k))
 [1] TRUE
-> identical(as.matrix(row_tsums(s, k)), row_tsums(z, k))
+> identical(as.matrix(rollup(s, 2L, k, sum)), 
++ 	  rollup(z, 2L, k, sum))
 [1] TRUE
 Warning message:
-In row_tsums.simple_triplet_matrix(s, k) : NA(s) in 'index'
+NA(s) in 'index' 
 > 
 > ## other data types
 > s$v <- as.integer(s$v)
 > 
-> identical(row_tsums(z, INDEX), as.matrix(row_tsums(s, INDEX)))
+> identical(rollup(z, 2L, INDEX, sum), 
++ 	  as.matrix(rollup(s, 2L, INDEX, sum)))
 [1] TRUE
 > 
 > ## NA values
@@ -57,17 +58,27 @@ In row_tsums.simple_triplet_matrix(s, k) : NA(s) in 'index'
 > z   <- as.matrix(s)
 > z[] <- as.double(z) # coerce
 > 
-> identical(row_tsums(z, INDEX), as.matrix(row_tsums(s, INDEX)))
+> identical(rollup(z, 2L, INDEX, sum), 
++ 	  as.matrix(rollup(s, 2L, INDEX, sum)))
 [1] TRUE
-> identical(row_tsums(z, INDEX, na.rm = TRUE), 
-+ 	  as.matrix(row_tsums(s, INDEX, na.rm = TRUE)))
+> identical(rollup(z, 2L, INDEX, sum, na.rm = TRUE), 
++ 	  as.matrix(rollup(s, 2L, INDEX, sum, na.rm = TRUE)))
 [1] TRUE
 > 
 > ##
 > s$v <- as.double(s$v)
 > 
-> identical(row_tsums(z, INDEX, na.rm = TRUE), 
-+ 	  as.matrix(row_tsums(s, INDEX, na.rm = TRUE)))
+> identical(rollup(z, 2L, INDEX, sum, na.rm = TRUE), 
++ 	  as.matrix(rollup(s, 2L, INDEX, sum, na.rm = TRUE)))
+[1] TRUE
+> 
+> 
+> ##
+> s <- as.simple_sparse_array(s)
+> z <- as.array(z)
+> 
+> identical(rollup(z, 2L, INDEX, sum, na.rm = TRUE),
++ 	  as.array(rollup(s, 2L, INDEX, sum, na.rm = TRUE)))
 [1] TRUE
 > 
 > ###

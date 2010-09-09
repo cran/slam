@@ -10,6 +10,7 @@ S3method("[", "simple_triplet_matrix")
 S3method("Ops", "simple_triplet_matrix")
 S3method("Summary", "simple_triplet_matrix")
 S3method("as.matrix", "simple_triplet_matrix")
+S3method("as.simple_triplet_matrix", "simple_sparse_array")
 S3method("as.simple_triplet_matrix", "simple_triplet_matrix")
 S3method("as.simple_triplet_matrix", "matrix")
 S3method("as.simple_triplet_matrix", "default")
@@ -34,9 +35,7 @@ useDynLib(slam)
 export("row_sums",
        "col_sums",
        "row_means",
-       "col_means",
-       "row_tsums",
-       "col_tsums"
+       "col_means"
       )
 
 S3method("row_sums", "default")
@@ -51,13 +50,15 @@ S3method("row_means", "simple_triplet_matrix")
 S3method("col_means", "default")
 S3method("col_means", "simple_triplet_matrix")
 
-S3method("row_tsums", "matrix")
-S3method("row_tsums", "simple_triplet_matrix")
-
-S3method("col_tsums", "matrix")
-S3method("col_tsums", "simple_triplet_matrix")
-
 export("tcrossprod_simple_triplet_matrix")
+
+export("rollup")
+
+S3method("rollup", "default")
+S3method("rollup", "matrix")
+S3method("rollup", "array")
+S3method("rollup", "simple_sparse_array")
+S3method("rollup", "simple_triplet_matrix")
 
 ## array stuff
 export("as.simple_sparse_array",
@@ -68,10 +69,14 @@ export("as.simple_sparse_array",
 S3method("[", "simple_sparse_array")
 S3method("Summary", "simple_sparse_array")
 S3method("as.array", "simple_sparse_array")
+S3method("as.array", "simple_triplet_matrix")
 S3method("as.simple_sparse_array", "simple_sparse_array")
+S3method("as.simple_sparse_array", "simple_triplet_matrix")
 S3method("as.simple_sparse_array", "array")
+S3method("as.simple_sparse_array", "matrix")
 S3method("as.simple_sparse_array", "default")
 S3method("dim", "simple_sparse_array")
 S3method("dimnames", "simple_sparse_array")
+S3method("dimnames<-", "simple_sparse_array")
 S3method("mean", "simple_sparse_array")
 S3method("print", "simple_sparse_array")
