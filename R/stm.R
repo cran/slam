@@ -86,10 +86,28 @@ function(x, y = NULL) {
 	      environment(tcrossprod_simple_triplet_matrix), FALSE)
 }
 
+## For now internal.
+.ttcrossprod_simple_triplet_matrix <-
+function(x, y = NULL) {
+    if (is.null(y))
+	tcrossprod_simple_triplet_matrix(x)
+    else
+	.Call("tcrossprod_stm_matrix", x, y,
+	      environment(tcrossprod_simple_triplet_matrix), FALSE, TRUE)
+}
+
 ## FIXME warning?
 .tcrossprod.bailout <-
-function(x, y)
-    tcrossprod(as.matrix(x), y)
+function(x, y, transpose) {
+    if (transpose) {
+	if (is.null(y))
+	    tcrossprod(as.matrix(x))
+	else
+	    tcrossprod(y, as.matrix(x))
+    }
+    else
+	tcrossprod(as.matrix(x), y)
+}
 
 ##
 .nnz <- 

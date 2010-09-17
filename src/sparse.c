@@ -137,8 +137,10 @@ SEXP _sums_stm(SEXP x, SEXP R_dim, SEXP R_na_rm) {
 //       3) if y = NULL or contains special values we call some
 //          bailout function with y possibly coerced to REALSXP.
 //       4) pkgEnv = NULL deactivates the bailout.
+//       5) transpose 
 //
-SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose) {
+SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose,
+							  SEXP R_transpose) {
     if (!inherits(x, "simple_triplet_matrix") || _valid_stm(x))
 	error("'x' not of class simple_triplet_matrix");
     SEXP y = R_y;
@@ -179,7 +181,10 @@ SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose) {
 bailout:
 	    r = eval(PROTECT(LCONS(install(".tcrossprod.bailout"),
 			     LCONS(x,
-			     LCONS(y, R_NilValue)))), pkgEnv);
+			     LCONS(y, 
+			     LCONS((R_transpose && *LOGICAL(R_transpose)) ?
+				    R_transpose : ScalarLogical(FALSE),
+				    R_NilValue))))), pkgEnv);
 	    UNPROTECT(1);
 	    if (y != R_y)
 		UNPROTECT(1);
@@ -246,13 +251,23 @@ bailout:
     t2 = clock();
 #endif
     // transpose
-     v = r;
-    _y = REAL(v);
-     r = PROTECT(allocMatrix(REALSXP, n, m));
-    _r = REAL(r);
-    for (int i = 0; i < n * m; i++)
-	_r[i] = _y[i / n + (i % n) * m];
-    UNPROTECT_PTR(v);
+    if (!R_transpose || !*LOGICAL(R_transpose)) {
+	 v = r;
+	_y = REAL(v);
+	r = PROTECT(allocMatrix(REALSXP, n, m));
+	_r = REAL(r);
+	for (int i = 0; i < n * m; i++)
+	    _r[i] = _y[i / n + (i % n) * m];
+	UNPROTECT_PTR(v);
+    } else {
+	// NOTE we rely on setAttrib to not check if the dimnames
+	//      are consistent with dim. 
+	SEXP d = PROTECT(allocVector(INTSXP, 2));
+	INTEGER(d)[0] = m;
+	INTEGER(d)[1] = n;
+	setAttrib(r, R_DimSymbol, d);
+	UNPROTECT(1);
+    }
     // set dimnames and names of dimnames.
     SEXP dn = (LENGTH(x) > 5) ? VECTOR_ELT(x, 5) : R_NilValue;
 
@@ -314,6 +329,22 @@ bailout:
 	    }
 	}
     }
+    // swap dimnames
+    if (R_transpose && *LOGICAL(R_transpose)) {
+	dn = getAttrib(r, R_DimNamesSymbol);
+	if (!isNull(dn)) {
+	    SEXP t;
+	    t = VECTOR_ELT(dn, 0);
+	    SET_VECTOR_ELT(dn, 0, VECTOR_ELT(dn, 1));
+	    SET_VECTOR_ELT(dn, 1, t);
+	    dn = getAttrib(dn, R_NamesSymbol);
+	    if (!isNull(dn)) {
+		t = STRING_ELT(dn, 0);
+		SET_STRING_ELT(dn, 0, STRING_ELT(dn, 1));
+		SET_STRING_ELT(dn, 1, t);
+	    }
+	}
+    }
 #ifdef _TIME_H
     t3 = clock();
     if (R_verbose && *LOGICAL(R_verbose))
@@ -357,7 +388,9 @@ SEXP tcrossprod_stm_stm(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
 		error("NA/NaN handling deactivated");
 	    r = eval(PROTECT(LCONS(install(".tcrossprod.bailout"),
 			     LCONS(x,
-			     LCONS(y, R_NilValue)))), pkgEnv);
+			     LCONS(y, 
+			     LCONS(ScalarLogical(FALSE), 
+				   R_NilValue))))), pkgEnv);
 	    UNPROTECT(1);
 	    if (s != VECTOR_ELT(x, 2))
 		UNPROTECT(1);
