@@ -83,7 +83,7 @@ function(x, y = NULL) {
 	      environment(tcrossprod_simple_triplet_matrix), FALSE)
     else
 	.Call("tcrossprod_stm_matrix", x, y,
-	      environment(tcrossprod_simple_triplet_matrix), FALSE)
+	      environment(tcrossprod_simple_triplet_matrix), FALSE, FALSE)
 }
 
 ## For now internal.
