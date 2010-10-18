@@ -374,18 +374,31 @@ function(x)
 function(x, value)
 {
     if(!is.null(value)) {
-        ## Should be a list of length 2.
-        if(!is.list(value) || (length(value) != length(dim(x))))
+        ## NOTE that if length(value) < length(dim(x)) we
+	##      have to assume that the dimensions with index
+	##      seq_len(length(value)) are to be set. For 
+	##	example, we are called with a list of length
+	##      one if we call dimanmes(x)[[1L]] <- value and
+	##      dimnames(x) == NULL (because of [[<-)
+	##
+        if(!is.list(value) || length(value) > length(dim(x)))
             stop("Invalid dimnames.")
-        ind <- sapply(value, length) == 0L
-        if(all(ind))
+        if(!length(value))
             value <- NULL
         else {
             dnx <- vector("list", length(dim(x)))
-            dnx[!ind] <- lapply(value[!ind], as.character)
-            names(dnx) <- names(value)
+	    len <- sapply(value, length)
+	    ind <- which(len > 0L)
+	    if (any(len[ind] != dim(x)[ind]))
+		stop("Invalid component length.")
+            dnx[ind] <- lapply(value[ind], as.character)
+	    if (!is.null(names(value))) {
+		ind <- seq_len(length(value))
+		names(dnx)[ind] <- names(value)
+	    }
         }
     }
+    ## See the constructor (above).
     if(is.null(value))
         x["dimnames"] <- list(NULL)
     else

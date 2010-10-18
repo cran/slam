@@ -1,5 +1,5 @@
 
-R version 2.11.1 Patched (2010-09-04 r52871)
+R version 2.11.1 Patched (2010-09-30 r53135)
 Copyright (C) 2010 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -81,5 +81,16 @@ NA(s) in 'index'
 + 	  as.array(rollup(s, 2L, INDEX, sum, na.rm = TRUE)))
 [1] TRUE
 > 
+> ##
+> INDEX <- rep(1, dim(x)[2L])
+> 
+> identical(rollup(z, 2L, INDEX, sum, na.rm = TRUE),
++ 	  as.array(rollup(s, 2L, INDEX, sum, na.rm = TRUE)))
+[1] TRUE
+> 
+> s <- as.simple_triplet_matrix(s)
+> identical(rollup(z, 2L, INDEX, sum, na.rm = TRUE),
++ 	  as.array(rollup(s, 2L, INDEX, sum, na.rm = TRUE)))
+[1] TRUE
 > ###
 > 

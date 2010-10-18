@@ -52,4 +52,13 @@ z <- as.array(z)
 identical(rollup(z, 2L, INDEX, sum, na.rm = TRUE),
 	  as.array(rollup(s, 2L, INDEX, sum, na.rm = TRUE)))
 
+##
+INDEX <- rep(1, dim(x)[2L])
+
+identical(rollup(z, 2L, INDEX, sum, na.rm = TRUE),
+	  as.array(rollup(s, 2L, INDEX, sum, na.rm = TRUE)))
+
+s <- as.simple_triplet_matrix(s)
+identical(rollup(z, 2L, INDEX, sum, na.rm = TRUE),
+	  as.array(rollup(s, 2L, INDEX, sum, na.rm = TRUE)))
 ###

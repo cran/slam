@@ -8,6 +8,8 @@
 
 // test validity of list components.
 int _valid_stm(SEXP x) {
+    if (LENGTH(x) < 5)
+	error("invalid number of components");
     SEXP s = getAttrib(x, R_NamesSymbol);
     int ok = 
 	strcmp(CHAR(STRING_ELT(s, 0)), "i") ||
@@ -180,9 +182,9 @@ SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose,
 		error("NA/NaN handling deactivated");
 bailout:
 	    r = eval(PROTECT(LCONS(install(".tcrossprod.bailout"),
-			     LCONS(x,
-			     LCONS(y, 
-			     LCONS((R_transpose && *LOGICAL(R_transpose)) ?
+			      CONS(x,
+			      CONS(y, 
+			      CONS((R_transpose && *LOGICAL(R_transpose)) ?
 				    R_transpose : ScalarLogical(FALSE),
 				    R_NilValue))))), pkgEnv);
 	    UNPROTECT(1);
@@ -387,9 +389,9 @@ SEXP tcrossprod_stm_stm(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
 	    if (isNull(pkgEnv))
 		error("NA/NaN handling deactivated");
 	    r = eval(PROTECT(LCONS(install(".tcrossprod.bailout"),
-			     LCONS(x,
-			     LCONS(y, 
-			     LCONS(ScalarLogical(FALSE), 
+			      CONS(x,
+			      CONS(y, 
+			      CONS(ScalarLogical(FALSE), 
 				   R_NilValue))))), pkgEnv);
 	    UNPROTECT(1);
 	    if (s != VECTOR_ELT(x, 2))

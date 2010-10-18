@@ -26,7 +26,7 @@ function(x, MARGIN, INDEX, FUN, ...) {
 	m <- seq_along(dim(x))[-k]
 	f <- factor(INDEX[[as.character(k)]])
 	d <- dimnames(x)
-	d[[k]] <- levels(f)
+	d[k] <- list(levels(f))
 	x <- array(
 	    apply(x, m, tapply, f, FUN, ...),
 	    dim      = c(length(levels(f)), dim(x)[m]), 
@@ -50,6 +50,8 @@ function(x, MARGIN, INDEX, FUN, ...) {
     names(INDEX) <- MARGIN
     for (k in MARGIN) {
 	i <- factor(INDEX[[as.character(k)]])
+	if (length(i) != dim(x)[k])
+	    stop(gettextf("INDEX [%s] invalid length", k))
 	x$i[, k] <- l <- c(i)[x$i[, k, drop = TRUE]]
 	l <- !is.na(l)
 	if (!all(l)) {
@@ -59,8 +61,8 @@ function(x, MARGIN, INDEX, FUN, ...) {
 	ind <- apply(x$i, 1L, paste, collapse = ".")
 	x$v <- c(tapply(x$v, ind, FUN, ...))
 	x$i <- x$i[match(names(x$v), ind),, drop = FALSE]
-	x$dim[k]	      <- length(levels(i))
-	dimnames(x)[[k]]      <- levels(i)
+	x$dim[k]         <- length(levels(i))
+	dimnames(x)[k]   <- list(levels(i))
     }
     names(x$v) <- NULL
     x
