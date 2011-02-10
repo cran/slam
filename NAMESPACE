@@ -80,3 +80,6 @@ S3method("dimnames", "simple_sparse_array")
 S3method("dimnames<-", "simple_sparse_array")
 S3method("mean", "simple_sparse_array")
 S3method("print", "simple_sparse_array")
+
+if(getRversion() >= "2.13.0")
+    S3method("aperm", "simple_sparse_array")

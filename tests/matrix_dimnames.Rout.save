@@ -1,0 +1,40 @@
+
+R version 2.12.0 Patched (2010-12-05 r53790)
+Copyright (C) 2010 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: i486-pc-linux-gnu (32-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> library("slam")
+> 
+> x <- simple_triplet_diag_matrix(1, nrow = 3L)
+> rownames(x) <- letters[1:3]
+> 
+> identical(as.matrix(cbind(x, x)),
++ 	  cbind(as.matrix(x), as.matrix(x)))
+[1] TRUE
+> identical(as.matrix(rbind(t(x), t(x))),
++ 	  rbind(as.matrix(t(x)), as.matrix(t(x))))
+[1] TRUE
+> 
+> identical(as.matrix(cbind(x, t(x))),
++ 	  cbind(as.matrix(x), as.matrix(t(x))))
+[1] TRUE
+> identical(as.matrix(rbind(t(x), x)),
++ 	  rbind(as.matrix(t(x)), as.matrix(x)))
+[1] TRUE
+> 
+> ###
+> 

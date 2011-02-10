@@ -211,3 +211,23 @@ function(x, ...)
 {
     sum(x$v) / prod(dim(x))
 }
+
+aperm.simple_sparse_array <-
+function(a, perm = NULL, ...)
+{
+    s <- seq_along(a$dim)
+    if(is.null(perm))
+        perm <- rev(s)
+    else {
+        perm <- if(is.character(perm))
+            match(perm, names(a$dimnames))
+        else if(is.numeric(perm))
+            match(perm, s)
+        else NULL
+        if(length(perm) != length(s) || any(is.na(perm)))
+            stop("Invalid permutation.")
+    }
+    simple_sparse_array(a$i[, perm, drop = FALSE], a$v,
+                        a$dim[perm], a$dimnames[perm])
+    
+}

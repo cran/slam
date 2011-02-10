@@ -573,8 +573,19 @@ function(..., deparse.level = 1L)
     }, args)
     ## Handle dimnames in one final step.
     rnms <- lapply(args, rownames)
-    rnms <- if(!any(sapply(rnms, is.null)))
+    rnms <- if(!all(sapply(rnms, is.null))) {
+	rnms <- mapply(function(rnm, n)
+	    if(is.null(rnm))
+		rep.int("", n)
+	    else
+		rnm,
+	    rnms,
+	    lapply(args, nrow),
+	    SIMPLIFY = FALSE
+	)
+	
         do.call("c", rnms)
+    }
     else
         NULL
     cnms <- Find(Negate(is.null), lapply(args, colnames))
@@ -598,12 +609,22 @@ function(..., deparse.level = 1L)
                               nrow = nr, ncol = nc + ncol(y))
     }, args)
     ## Handle dimnames in one final step.
-    rnms <- Find(Negate(is.null), lapply(args, rownames))
-    cnms <- lapply(args, rownames)
-    cnms <- if(!any(sapply(cnms, is.null)))
+    cnms <- lapply(args, colnames)
+    cnms <- if(!all(sapply(cnms, is.null))) {
+	cnms <- mapply(function(cnm, n)
+	    if(is.null(cnm))
+		rep.int("", n)
+	    else
+		cnm,
+	    cnms,
+	    lapply(args, ncol),
+	    SIMPLIFY = FALSE
+	)
         do.call("c", cnms)
+    }
     else
         NULL
+    rnms <- Find(Negate(is.null), lapply(args, rownames))
     dimnames(out) <- list(rnms, cnms)
     out
 }

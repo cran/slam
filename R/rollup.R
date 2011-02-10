@@ -1,46 +1,56 @@
 
 ## NOTE this looks all very nice but actually is very
-##      inefficient especially as changing the attributes 
+##      inefficient, especially when changing the attributes 
 ##      of an object the object itself must be copied.
 ##
-## TBDS 1) how can we reliably test if FUN is scalar, e.g.
-##	   length(FUN(1:2)) == 1L?
-##      2) should we map character, e.g.
-##         if (is.character(MARGIN))
-##	       MARGIN <- match(MARGIN, names(dimnames(x)))
+## FIXME drop
+##
 
 rollup <- 
 function(x, MARGIN, INDEX, FUN, ...)
     UseMethod("rollup")
 
 rollup.array <-
-function(x, MARGIN, INDEX, FUN, ...) {
+function(x, MARGIN, INDEX, FUN = sum, ...) {
+    if (is.character(MARGIN))
+        MARGIN <- match(MARGIN, names(dimnames(x)))
     if (!all(match(MARGIN, seq_along(dim(x)), nomatch = 0L)))
-	stop("'MARGIN' invalid")
+        stop("'MARGIN' invalid")
     if (is.atomic(INDEX))
-	INDEX <- list(INDEX)
+        INDEX <- list(INDEX)
     if (length(INDEX) != length(MARGIN))
-	stop("'INDEX' invalid length")
+        stop("'INDEX' invalid length")
     names(INDEX) <- MARGIN
+    i <- arrayInd(seq_along(x), .dim = dim(x))
+    i <- apply(i, 2L, list)
+    i <- unlist(i, recursive = FALSE)
+    names(i) <- names(dimnames(x))
     for (k in MARGIN) {
-	m <- seq_along(dim(x))[-k]
 	f <- factor(INDEX[[as.character(k)]])
-	d <- dimnames(x)
-	d[k] <- list(levels(f))
-	x <- array(
-	    apply(x, m, tapply, f, FUN, ...),
-	    dim      = c(length(levels(f)), dim(x)[m]), 
-	    dimnames = d[c(k, m)]
-	)
-	x <- aperm(x, perm = order(c(k, m)))
+	if (length(f) != dim(x)[k])
+	    stop(gettextf("INDEX [%s] invalid length", k))
+	i[[k]] <- f[i[[k]]]
     }
-    x
+    i <- lapply(i, factor)
+    x <- lapply(split(x, i), FUN, ...)
+    if (all(unlist(lapply(x, length)) == 1L))
+	x <- unlist(x, recursive = FALSE)
+    i <- lapply(i, levels)
+    f <- unlist(lapply(i, length))
+    i[-MARGIN] <- list(NULL)
+    array(
+	data     = x, 
+	dim      = f,
+	dimnames = i
+    )
 }
 
 rollup.matrix <- rollup.array
 
 rollup.simple_sparse_array <-
-function(x, MARGIN, INDEX, FUN, ...) {
+function(x, MARGIN, INDEX, FUN = sum, ...) {
+    if (is.character(MARGIN)) 
+	MARGIN <- match(MARGIN, names(dimnames(x)))
     if (!all(match(MARGIN, seq_along(dim(x)), nomatch = 0L)))
 	stop("'MARGIN' invalid")
     if (is.atomic(INDEX))
@@ -48,30 +58,40 @@ function(x, MARGIN, INDEX, FUN, ...) {
     if (length(INDEX) != length(MARGIN))
 	stop("'INDEX' invalid length")
     names(INDEX) <- MARGIN
-    for (k in MARGIN) {
-	i <- factor(INDEX[[as.character(k)]])
-	if (length(i) != dim(x)[k])
-	    stop(gettextf("INDEX [%s] invalid length", k))
-	x$i[, k] <- l <- c(i)[x$i[, k, drop = TRUE]]
-	l <- !is.na(l)
-	if (!all(l)) {
-	    x$i <- x$i[l, ,drop = FALSE]
-	    x$v <- x$v[l]
+    FUN <- match.fun(FUN)
+    if (identical(FUN, sum)) {
+	for (k in MARGIN) {
+	    i <- factor(INDEX[[as.character(k)]])
+	    if (length(i) != dim(x)[k])
+		stop(gettextf("INDEX [%s] invalid length", k))
+	    x$dim[k]       <- length(levels(i))
+	    dimnames(x)[k] <- list(levels(i))
+	    i <- c(i)[x$i[, k, drop = TRUE]]
+	    x$i[, k] <- i 
+	    i <- is.na(i)
+	    if (any(i)) {
+		i <- !i
+		x$i <- x$i[i, ,drop = FALSE]
+		x$v <- x$v[i]
+	    }
+	    i <- apply(x$i, 1L, paste, collapse = "\r")
+	    x$v <- lapply(split(x$v, i), FUN, ...)
+	    x$i <- x$i[match(names(x$v), i),, drop = FALSE]
+	    x$v <- unlist(x$v, use.names = FALSE)
 	}
-	ind <- apply(x$i, 1L, paste, collapse = ".")
-	x$v <- c(tapply(x$v, ind, FUN, ...))
-	x$i <- x$i[match(names(x$v), ind),, drop = FALSE]
-	x$dim[k]         <- length(levels(i))
-	dimnames(x)[k]   <- list(levels(i))
-    }
-    names(x$v) <- NULL
-    x
+	x
+    } else 
+	stop("'FUN' not implemented")
 }
 
 rollup.simple_triplet_matrix <- 
-function(x, MARGIN, INDEX, FUN, ...) {
+function(x, MARGIN, INDEX, FUN = sum, ...) {
     FUN <- match.fun(FUN)
     if (identical(FUN, sum)) {
+	if (is.character(MARGIN)) 
+	    MARGIN <- match(MARGIN, names(dimnames(x)))
+	if (!all(match(MARGIN, seq_along(dim(x)), nomatch = 0L)))
+	    stop("'MARGIN' invalid")
 	if (is.atomic(INDEX))
 	    INDEX <- list(INDEX)
 	if (length(INDEX) != length(MARGIN))
@@ -94,17 +114,13 @@ function(x, MARGIN, INDEX, FUN, ...) {
 		stop("'MARGIN' invalid")
 	    )
 	x
-    } 
-    else {
-	x <- as.simple_sparse_array(x)
-	x <- rollup(x, MARGIN, INDEX, FUN, ...)
-	as.simple_triplet_matrix(x)
-    }
+    } else
+	stop("'FUN' not implemented")
 }
 
 ##
 rollup.default <-
-function(x, MARGIN, INDEX, FUN, ...) {
+function(x, MARGIN, INDEX, FUN = sum, ...) {
     if (length(dim(x)))
 	stop("dim(x) must have a positive length")
     x <- as.array(x)
