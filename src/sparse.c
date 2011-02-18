@@ -3,7 +3,7 @@
 #include <R_ext/BLAS.h>
 #include <time.h>
 
-// ceeboo 2009/5,10,12 2010/1,5,6 
+// ceeboo 2009/5,10,12 2010/1,5,6 2011/2
 //
 
 // test validity of list components.
@@ -17,9 +17,9 @@ int _valid_stm(SEXP x) {
 	strcmp(CHAR(STRING_ELT(s, 2)), "v") ||
 	strcmp(CHAR(STRING_ELT(s, 3)), "nrow") ||
 	strcmp(CHAR(STRING_ELT(s, 4)), "ncol") ||
-    (LENGTH(s) > 5) ?
-	strcmp(CHAR(STRING_ELT(s, 5)), "dimnames") : 0;
-    if (ok) {
+    ((LENGTH(s) > 5) ?
+	strcmp(CHAR(STRING_ELT(s, 5)), "dimnames") : 0);
+    if (!ok) {
 	s = VECTOR_ELT(x, 0);
 	if (LENGTH(s) != LENGTH(VECTOR_ELT(x, 1)) ||
 	    LENGTH(s) != LENGTH(VECTOR_ELT(x, 2)))
