@@ -38,6 +38,8 @@ as.simple_triplet_matrix.default <-
 function(x)
     as.simple_triplet_matrix(as.matrix(x))
 
+## Sparse matrix classes in package 'Matrix'.
+
 as.simple_triplet_matrix.dgTMatrix <-
 function(x)
 {
@@ -49,12 +51,56 @@ as.simple_triplet_matrix.dgCMatrix <-
 function(x)
 {
     nc <- x@Dim[2L]
-    simple_triplet_matrix(x@i + 1L, rep.int(seq_len(nc), diff(x@p)), x@x,
+    simple_triplet_matrix(x@i + 1L, rep.int(seq_len(nc), diff(x@p)),
+                          x@x,
                           x@Dim[1L], nc, x@Dimnames)
+}
+
+as.simple_triplet_matrix.dgRMatrix <-
+function(x)
+{
+    nr <- x@Dim[1L]
+    simple_triplet_matrix(rep.int(seq_len(nr), diff(x@p)), x@j + 1L,
+                          x@x,
+                          nr, x@Dim[2L], x@Dimnames)
 }
 
 ## See Work/Matrix.R for S4 methods for coercing simple triplet matrices
 ## to Matrix objects.
+
+## Sparse matrix classes in package 'SparseM'.
+
+as.simple_triplet_matrix.matrix.coo <-
+function(x)
+    simple_triplet_matrix(x@ia, x@ja, x@ra,
+                          x@dimension[1L], x@dimension[2L])
+
+as.simple_triplet_matrix.matrix.csc <-
+function(x)
+{
+    nc <- x@dimension[2L]
+    simple_triplet_matrix(x@ja, rep.int(seq_len(nc), diff(x@ia)), x@ra,
+                          x@dimension[1L], nc)
+}
+
+as.simple_triplet_matrix.matrix.csr <-
+function(x)
+{
+    nr <- x@dimension[1L]
+    simple_triplet_matrix(rep.int(seq_len(nr), diff(x@ia)), x@ja, x@ra,
+                          nr, x@dimension[2L])
+}
+
+## Sparse matrix class in package 'spam'.
+
+as.simple_triplet_matrix.spam <-
+function(x)
+{
+    nr <- x@dimension[1L]
+    simple_triplet_matrix(rep.int(seq_len(nr), diff(x@rowpointers)),
+                          x@colindices, x@entries,
+                          nr, x@dimension[2L])
+}
 
 as.matrix.simple_triplet_matrix <-
 function(x, ...)
