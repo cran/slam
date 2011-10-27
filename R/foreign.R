@@ -30,15 +30,24 @@ function(file)
     m <- simple_triplet_matrix(i, j, v, nRow, nCol)
 
     if(is.character(file)) {
-        ## Use col labels file if available.
-        if(file.exists(f <- sprintf("%s.clabel", file)))
-            colnames(m) <- readLines(f)
-        ## Use row labels file if available.
-        if(file.exists(f <- sprintf("%s.rlabel", file)))
-            rownames(m) <- readLines(f)
+        ## Use col labels file if available and valid.
+        if(file.exists(f <- sprintf("%s.clabel", file))) {
+            lines <- readLines(f)
+            if(length(lines) == nCol)
+                colnames(m) <- lines
+        }
+        ## Use row labels file if available and valid.
+        if(file.exists(f <- sprintf("%s.rlabel", file))) {
+            lines <- readLines(f)
+            if(length(lines) == nRow)
+                rownames(m) <- lines
+        }
         ## Use row class file if available.
-        if(file.exists(f <- sprintf("%s.rclass", file)))
-            attr(m, "rclass") <- readLines(f)
+        if(file.exists(f <- sprintf("%s.rclass", file))) {
+            lines <- readLines(f)
+            if(length(lines) == nRow)
+                attr(m, "rclass") <- lines
+        }
     }
         
     m
