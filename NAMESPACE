@@ -68,7 +68,15 @@ S3method("rollup", "simple_triplet_matrix")
 ## Simple sparse array stuff
 export("as.simple_sparse_array",
        "is.simple_sparse_array",
-       "simple_sparse_array"
+       "simple_sparse_array",
+       "simple_sparse_zero_array",
+	##
+	"simplify_simple_sparse_array",
+	"reduce_simple_sparse_array",
+	"drop_simple_sparse_array",
+	##
+	"extend_simple_sparse_array",
+	"abind_simple_sparse_array"
        )
 
 S3method("[", "simple_sparse_array")
@@ -83,11 +91,14 @@ S3method("as.simple_sparse_array", "default")
 S3method("dim", "simple_sparse_array")
 S3method("dimnames", "simple_sparse_array")
 S3method("dimnames<-", "simple_sparse_array")
+S3method("is.numeric", "simple_sparse_array")
 S3method("mean", "simple_sparse_array")
 S3method("print", "simple_sparse_array")
 
-if(getRversion() >= "2.13.0")
+if(getRversion() >= "2.13.0") {
+    S3method("aperm", "simple_triplet_matrix")
     S3method("aperm", "simple_sparse_array")
+}
 
 ## Sparse matrix format readers and writers
 export("read_stm_CLUTO",

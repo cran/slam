@@ -1,0 +1,68 @@
+
+R version 2.14.2 Patched (2012-02-29 r58546)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: i486-pc-linux-gnu (32-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ##
+> library("slam")
+> x <- matrix(1:12, 4, dimnames = list(NULL, B = 1:3))
+> s <- as.simple_sparse_array(x)
+> s
+A simple sparse array of dimension 4x3.
+> 
+> extend_simple_sparse_array(s,  0L)
+A simple sparse array of dimension 1x4x3.
+> extend_simple_sparse_array(s, -1L)  ## the same
+A simple sparse array of dimension 1x4x3.
+> extend_simple_sparse_array(s,  1L)
+A simple sparse array of dimension 4x1x3.
+> extend_simple_sparse_array(s,  2L)
+A simple sparse array of dimension 4x3x1.
+> extend_simple_sparse_array(s, -3L)  ## the same
+A simple sparse array of dimension 4x3x1.
+> 
+> extend_simple_sparse_array(s, c( 0L,  0L))
+A simple sparse array of dimension 1x1x4x3.
+> extend_simple_sparse_array(s, c(-3L, -3L))
+A simple sparse array of dimension 4x3x1x1.
+> 
+> ## automatic
+> z <- abind_simple_sparse_array(s, 1:3)
+> z
+A simple sparse array of dimension 5x3.
+> all.equal(as.array(z), rbind(x, 1:3))
+[1] "Attributes: < Component 2: names for target but not for current >"
+> z <- abind_simple_sparse_array(1:4, s, MARGIN = 2L)
+> z
+A simple sparse array of dimension 4x4.
+> all.equal(as.array(z), cbind(1:4, x))
+[1] "Attributes: < Component 2: names for target but not for current >"
+> 
+> abind_simple_sparse_array(1:3, array(2:4, c(1,3)), array(3:8, c(1,2,3)))
+A simple sparse array of dimension 2x2x3.
+> abind_simple_sparse_array(1:3, array(2:4, c(3,1)), array(3:8, c(3,2,1)), MARGIN = 3L) 
+A simple sparse array of dimension 3x2x2.
+> 
+> ## manual
+> abind_simple_sparse_array(1:3, 2:4)
+A simple sparse array of dimension 6.
+> abind_simple_sparse_array(1:3, 2:4, MARGIN = -1L)
+A simple sparse array of dimension 2x3.
+> abind_simple_sparse_array(1:3, 2:4, MARGIN = -2L)
+A simple sparse array of dimension 3x2.
+> 
+> ###
+> 

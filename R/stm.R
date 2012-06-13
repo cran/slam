@@ -110,15 +110,23 @@ function(x, y, transpose) {
 }
 
 ##
-.nnz <- 
+.nnzero <- 
 function(x, scale = FALSE) {
-    if (is.null(x['v']))
-	stop("'x' missing 'v' component")
-    v <- as.logical(x$v)
-    v <- table(factor(v, levels = c(TRUE, FALSE)), useNA = "always")
+    v <- c("simple_triplet_matrix", "simple_sparse_array")
+    if (inherits(x, v))
+	v <- x$v
+    else {
+	x <- as.array(x)
+	v <- x
+    }
+    v <- v == vector(typeof(v), 1L)
+    v <- v + 1L
+    n <- length(v)
+    v <- tabulate(v, 2L)
+    v <- c(v, n - sum(v))
+    names(v) <- c("nnzero", "nzero", NA)
     if (scale)
 	v <- v / prod(dim(x))
-    names(v) <- c("nzero", "zero", "NA")
     v
 }
 

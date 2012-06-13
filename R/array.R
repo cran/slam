@@ -7,20 +7,28 @@
 simple_sparse_array <-
 function(i, v, dim = NULL, dimnames = NULL)
 {
+    ## See examples
+    storage.mode(i) <- "integer"
+    if (!is.matrix(i))
+	dim(i) <- c(length(i), 1L)
     ## <FIXME>
     ## Add some sanity checking eventually ...
     ## i should be a matrix of indices (non-"zero" entries).
     ## v should be a "vector" of non-zero values, with length equal to
     ## the number of rows of i.
     ## </FIXME>
-    if(is.null(dim)) dim <- apply(i, 2L, max)
+    if(is.null(dim)) dim <- if(NROW(i)) apply(i, 2L, max) else c(0L, 0L)
     ## <FIXME>
     ## Add checks for dimnames: should be NULL or a list of entries
     ## which are either NULL or character vectors as long as the
     ## corresponding dim.
     ## </FIXME>
-    ssa <- list(i = i, v = v, dim = dim, dimnames = dimnames)
+    ssa <- list(i = i, v = v, dim = as.integer(dim), dimnames = dimnames)
     class(ssa) <- "simple_sparse_array"
+    ## Note that this should never be true as it implies that either
+    ## the class is wrong or the container is malformed.
+    if (!.Call("__valid_ssa", ssa))
+        stop("'ssa' not of class 'simple_sparse_array'")
     ssa
 }
 
@@ -33,12 +41,14 @@ as.simple_sparse_array.simple_sparse_array <- identity
 as.simple_sparse_array.array <-
 function(x)
 {
-    if(!prod(dim(x)))
-        simple_sparse_array(array(integer(), dim(x)), c(x),
-                            dim(x), dimnames(x))
+    x <- unclass(x)
+    dx <- dim(x)
+    if(!prod(dx))
+	return(simple_sparse_array(matrix(integer(), 0L, length(dx)), 
+				   c(x), dx, dimnames(x)))
     ind <- which(is.na(x) | (x != vector(typeof(x), 1L)), arr.ind = TRUE)
     dimnames(ind) <- NULL
-    simple_sparse_array(ind, x[ind], dim(x), dimnames(x))
+    simple_sparse_array(ind, x[ind], dx, dimnames(x))
 }
 
 as.simple_sparse_array.matrix <- as.simple_sparse_array.array
@@ -49,7 +59,7 @@ function(x)
 
 as.simple_sparse_array.default <-
 function(x)
-    as.simple_sparse_array(as.array(x))
+    as.simple_sparse_array(unclass(as.array(x)))
 
 as.array.simple_sparse_array <-
 function(x, ...)
@@ -231,3 +241,13 @@ function(a, perm = NULL, ...)
                         a$dim[perm], a$dimnames[perm])
     
 }
+
+simple_sparse_zero_array <-
+function(dim, mode = "double")
+{
+    ld <- length(dim)
+    if (!ld)
+	stop("length-0 'dim' is invalid")
+    simple_sparse_array(matrix(integer(), 0L, ld), vector(mode, 0L), dim)
+}
+

@@ -1,0 +1,49 @@
+
+R version 2.14.2 Patched (2012-02-29 r58546)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: i486-pc-linux-gnu (32-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> ##
+> library(slam)
+> 
+> ## zero dimension
+> a <- as.simple_sparse_array(array(0L, 0L))
+> drop_simple_sparse_array(a)
+integer(0)
+> 
+> ## invalid
+> a <- simple_sparse_array(rep(1L, 2L), c(1L, -1L))
+> a <- reduce_simple_sparse_array(a)
+Warning message:
+In reduce_simple_sparse_array(a) : NAs introduced by reduction
+> as.array(a)
+[1] NA
+> 
+> ## not minimal
+> x <- matrix(1:6, 3L, 2, dimnames = list(NULL, NULL))
+> a <- as.simple_sparse_array(x)
+> z <- reduce_simple_sparse_array(a)
+> identical(a, z)
+[1] FALSE
+> 
+> ##
+> v <- c("logical", "integer", "double", "complex", "character", "list")
+> stopifnot(any(sapply(v, function(v) 
++     !.Call("__valid_v", vector(typeof(v), 1L)))))
+> 
+> ##
+> 

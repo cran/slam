@@ -1,10 +1,97 @@
 #include <R.h>
 #include <Rdefines.h>
 #include <R_ext/BLAS.h>
+#include <R_ext/Complex.h>
 #include <time.h>
 
-// ceeboo 2009/5,10,12 2010/1,5,6 2011/2
+// ceeboo 2009/5,10,12 2010/1,5,6 2011/2 2012/4,5
 //
+
+// remove attributes from payload vector (see src/main/coerce.c)
+SEXP _unattr(SEXP x) {
+    if (!isVector(x) || ATTRIB(x) == R_NilValue)
+	return x;
+    if (NAMED(x) == 2) {
+	SEXP s = x;
+	SEXP a = PROTECT(ATTRIB(x));
+	SET_ATTRIB(x, R_NilValue);
+	x = duplicate(x);
+	SET_ATTRIB(s, a);
+	UNPROTECT_PTR(a);
+    } else
+	SET_ATTRIB(x, R_NilValue);
+    if (OBJECT(x))
+	SET_OBJECT(x, 0);
+    if (IS_S4_OBJECT(x))
+	UNSET_S4_OBJECT(x);
+    return x;
+}
+
+// test validity of payload vector
+int _valid_v(SEXP x) {
+    if (!isVector(x))
+	error("'x' not a vector");
+    int i;
+    i = LENGTH(x);
+    switch(TYPEOF(x)) {
+	case LGLSXP:
+	    // test for FALSE (see below)
+	case INTSXP: 
+	    {
+		int *v = INTEGER(x);
+		while (i-- > 0)
+		    if (v[i] == 0)
+			break;
+	    }
+	    break;
+	case REALSXP: 
+	    {
+		double *v = REAL(x);
+		while (i-- > 0)
+		    if (v[i] == (double) 0)
+			break;
+	    }
+	    break;
+	case RAWSXP:
+	    { 
+		unsigned char *v = RAW(x);
+		while (i-- > 0)
+		    if (v[i] == (unsigned char) 0)
+			break;
+	    }
+	    break;
+	case CPLXSXP:
+	    {
+		Rcomplex *v = COMPLEX(x);
+		while (i-- > 0)
+		    if (v[i].i == (double) 0 || 
+			v[i].r == (double) 0)
+			break;
+	    }
+	    break;
+	case EXPRSXP:
+	case VECSXP:
+	    while (i-- > 0)
+		if (VECTOR_ELT(x, i) == R_NilValue)
+		    break;
+	    break;
+	case STRSXP:
+	    while (i-- > 0)
+		if (STRING_ELT(x, i) == R_BlankString)
+		    break;
+	    break;
+	default:
+	    error("type not implemented");
+	
+    }
+    return i + 1;
+}
+
+// wrapper
+SEXP __valid_v(SEXP x) {
+    return ScalarLogical(_valid_v(x) == FALSE);
+}
+
 
 // test validity of list components.
 int _valid_stm(SEXP x) {
@@ -20,6 +107,13 @@ int _valid_stm(SEXP x) {
     ((LENGTH(s) > 5) ?
 	strcmp(CHAR(STRING_ELT(s, 5)), "dimnames") : 0);
     if (!ok) {
+	if (TYPEOF(VECTOR_ELT(x, 0)) != INTSXP ||
+	    TYPEOF(VECTOR_ELT(x, 1)) != INTSXP ||
+	    TYPEOF(VECTOR_ELT(x, 3)) != INTSXP ||
+	    TYPEOF(VECTOR_ELT(x, 4)) != INTSXP)
+	    error("'i, j, nrow, ncol' invalid type");
+	if (!isVector(VECTOR_ELT(x, 2)))
+	    error("'v' not a vector");
 	s = VECTOR_ELT(x, 0);
 	if (LENGTH(s) != LENGTH(VECTOR_ELT(x, 1)) ||
 	    LENGTH(s) != LENGTH(VECTOR_ELT(x, 2)))
@@ -32,6 +126,9 @@ int _valid_stm(SEXP x) {
 	xj = INTEGER(VECTOR_ELT(x, 1));
 	nr = INTEGER(VECTOR_ELT(x, 3))[0];
 	nc = INTEGER(VECTOR_ELT(x, 4))[0];
+	if (nr < 0 || nr == NA_INTEGER ||
+	    nc < 0 || nc == NA_INTEGER)
+	    error("'nrow, ncol' invalid");
 	for (int k = 0; k < LENGTH(s); k++)
 	    if (xi[k] < 1 || xi[k] > nr ||
 		xj[k] < 1 || xj[k] > nc)
@@ -39,17 +136,28 @@ int _valid_stm(SEXP x) {
 	if (LENGTH(x) > 5) {
 	    s = VECTOR_ELT(x, 5);
 	    if (!isNull(s)) {
+		if (TYPEOF(s) != VECSXP)
+		    error("'dimnames' invalid type");
 		if (LENGTH(s) != 2)
 		    error("'dimnames' invalid length");
 		if ((!isNull(VECTOR_ELT(s, 0)) &&
-		      LENGTH(VECTOR_ELT(s, 0)) != nr) ||	
+		     (LENGTH(VECTOR_ELT(s, 0)) != nr ||
+		   !isString(VECTOR_ELT(s, 0)))) ||	
 		    (!isNull(VECTOR_ELT(s, 1)) &&
-		      LENGTH(VECTOR_ELT(s, 1)) != nc))
-		    error("rownames, colnames invalid length'");
+		     (LENGTH(VECTOR_ELT(s, 1)) != nc ||
+		   !isString(VECTOR_ELT(s, 1)))))
+		    error("'dimnames' component invalid length or type'");
 	    }
 	}
     }
     return ok;
+}
+
+// wrapper
+SEXP __valid_stm(SEXP x) {
+    if (!inherits(x, "simple_triplet_matrix"))
+	return ScalarLogical(FALSE);
+    return ScalarLogical(_valid_stm(x) == FALSE);
 }
 
 // row or column sums of some triplet matrix
@@ -514,5 +622,77 @@ SEXP tcrossprod_stm_stm(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
 
 
 
-//
+// test validity of list components.
+int _valid_ssa(SEXP x) {
+    if (LENGTH(x) < 3)
+	error("invalid number of components");
+    SEXP s = getAttrib(x, R_NamesSymbol);
+    int ok = 
+	strcmp(CHAR(STRING_ELT(s, 0)), "i") ||
+	strcmp(CHAR(STRING_ELT(s, 1)), "v") ||
+	strcmp(CHAR(STRING_ELT(s, 2)), "dim") ||
+    ((LENGTH(s) > 3) ?
+	strcmp(CHAR(STRING_ELT(s, 3)), "dimnames") : 0);
+    if (!ok) {
+	if (TYPEOF(VECTOR_ELT(x, 0)) != INTSXP ||
+	    TYPEOF(VECTOR_ELT(x, 2)) != INTSXP)
+	    error("'i, dim' invalid type");
+	if (!isVector(VECTOR_ELT(x, 1)))
+	    error("'v' not a vector");
+	int *xi, *xd, nr, nc;
+	s = VECTOR_ELT(x, 0);
+	if (!isMatrix(s))
+	    error("'i' not a matrix");
+	xi = INTEGER(s);
+	s  = getAttrib(s, R_DimSymbol);
+	nr = INTEGER(s)[0];
+	if (nr != LENGTH(VECTOR_ELT(x, 1)))
+	    error("'i, v' invalid length");
+	nc = INTEGER(s)[1];
+	s  = VECTOR_ELT(x, 2);
+	if (nc != LENGTH(s))
+	    error("'i, dim' invalid length");
+	xd = INTEGER(s);
+	for (int j = 0; j < nc; j++) {
+	    int n = xd[j];
+	    if (n > 0) {
+		if (n == NA_INTEGER)
+		    error("'dim' invalid");
+		for (int i = 0; i < nr; i++)
+		    if (xi[i] < 1 || xi[i] > n)
+			error("i invalid");
+	    } else
+		if (n < 0)
+		    error("'dim' invalid");
+		else
+		    if (nr > 0)
+			error("'dim, i' invalid number of rows");
+	    xi += nr;
+	}
+	if (LENGTH(x) > 3) {
+	    s = VECTOR_ELT(x, 3);
+	    if (!isNull(s)) {
+		if (TYPEOF(s) != VECSXP)
+		    error("'dimnames' invalid type");
+		if (LENGTH(s) != nc)
+		    error("'dimnames' invalid length");
+		for (int j = 0; j < nc; j++)
+		    if (!isNull(VECTOR_ELT(s, j)) &&
+			(LENGTH(VECTOR_ELT(s, j)) != xd[j] ||
+		      !isString(VECTOR_ELT(s, j))))
+		    error("'dimnames' component invalid length or type'");
+	    }
+	}
+    }
+    return ok;
+}
 
+// wrapper
+SEXP __valid_ssa(SEXP x) {
+    if (!inherits(x, "simple_sparse_array"))
+	return ScalarLogical(FALSE);
+    return ScalarLogical(_valid_ssa(x) == FALSE);
+}
+
+
+//

@@ -11,6 +11,8 @@ function(i, j, v, nrow = max(i), ncol = max(j), dimnames = NULL)
                 nrow = as.integer(nrow), ncol = as.integer(ncol),
                 dimnames = dimnames)
     class(stm) <- "simple_triplet_matrix"
+    if(!.Call("__valid_stm", stm))
+	stop("'stm' not of class 'simple_triplet_matrix'")
     stm
 }
 
@@ -23,6 +25,7 @@ as.simple_triplet_matrix.simple_triplet_matrix <- identity
 as.simple_triplet_matrix.matrix <-
 function(x)
 {
+    x <- unclass(x)
     if(!prod(dim(x)))
         return(simple_triplet_matrix(integer(), integer(), c(x),
                                      nrow = nrow(x), ncol = ncol(x),
@@ -36,7 +39,7 @@ function(x)
 
 as.simple_triplet_matrix.default <-
 function(x)
-    as.simple_triplet_matrix(as.matrix(x))
+    as.simple_triplet_matrix(unclass(as.matrix(x)))
 
 ## Sparse matrix classes in package 'Matrix'.
 
@@ -123,11 +126,15 @@ function(x) {
     if(length(dx) == 1L) {
         simple_triplet_matrix(
 	    i = x$i[, 1L],
-            j = rep.int(1L, dx),
+            j = rep.int(1L, nrow(x$i)),
             v = x$v,
             nrow = dx,
             ncol = 1L,
-            dimnames = c(x$dimnames, list(NULL))
+            dimnames = 
+		if (!is.null(x$dimnames))
+		    c(x$dimnames, list(NULL))
+		else
+		    NULL
 	)
     } 
     else 
@@ -150,6 +157,7 @@ is.simple_triplet_matrix <-
 function(x)
     inherits(x, "simple_triplet_matrix")
 
+is.numeric.simple_sparse_array <-
 is.numeric.simple_triplet_matrix <-
 function(x)
     is.numeric(x$v)
@@ -214,10 +222,11 @@ function(e1, e2)
         stop("Not implemented.")
 
     if(op %in% c("==", "!=", "<", "<=", ">", ">=")) {
-        if(length(v <- e2) == 1L) {
-            if(is.na(v))
+        if(length(e2) == 1L) {
+            if(is.na(e2))
                 stop("NA/NaN handling not implemented.")
-            ind <- if(do.call(.Generic, list(0, v))) {
+	    names(e2) <- NULL
+            ind <- if(do.call(.Generic, list(0, e2))) {
                 ## This inverts the sparse storage advantage, and hence
                 ## will typically be inefficient.  Need to find the row
                 ## and column positions of the zero entries.
@@ -226,7 +235,7 @@ function(e1, e2)
                 which(m, arr.ind = TRUE)
             } else 
 		integer()
-            e1$v <- do.call(.Generic, list(e1$v, v))
+            e1$v <- do.call(.Generic, list(e1$v, e2))
 	    e1 <- .reduce(e1)
             if(n <- NROW(ind)) {
                 e1$i <- c(e1$i, ind[, 1L])
@@ -243,6 +252,7 @@ function(e1, e2)
         if(is.object(e2) || (length(e2) != 1L) ||
            !is.finite(e2) || (e2 <= 0))
             stop("Not implemented.")
+	names(e2) <- NULL
         e1$v <- e1$v ^ e2
         return(e1)
     }
@@ -275,24 +285,35 @@ function(e1, e2)
             if(length(e2) == 1L) {
 		if(!is.finite(e2))
 		    return(as.simple_triplet_matrix(as.matrix(e1) * e2))
+		names(e2) <- NULL
 		e1$v <- e1$v * e2
 		if(!e2)
 		    e1 <- .reduce(e1)
                 return(e1)
             }
             if(length(e2) == e1$nrow) {
+		names(e2) <- NULL
 		pos <- which(!is.finite(e2))
 		if(length(pos)) {
 		    ## replace with dense rows
 		    ind <- match(e1$i, pos, nomatch = 0L) == 0L
-		    e1$v <- c(e1$v[ind], as.matrix(e1[pos,]))
-		    e1$i <- c(e1$i[ind], rep.int(pos, e1$ncol))
-		    e1$j <- c(e1$j[ind], rep(seq_len(e1$ncol), 
-					     each = length(pos)))
+		    e1$v <- c(e1$v[ind],
+                              as.matrix(e1[pos, ]))
+		    e1$i <- c(e1$i[ind],
+                              rep.int(pos, e1$ncol))
+		    e1$j <- c(e1$j[ind],
+                              rep(seq_len(e1$ncol), each = length(pos)))
 		}
                 e1$v <- e1$v * e2[e1$i]
-		if (any(!e2))
+		if(any(!e2))
 		    e1 <- .reduce(e1)
+                ## Could add something like
+                ##    if(is.null(e1$dimnames) &&
+                ##       !is.null(nms <- names(e2))) {
+                ##        e1$dimnames <- list(nms, NULL)
+                ##    }
+                ## but then multiplying a matrix and a vector does not
+                ## seem to do this either ...
                 return(e1)
             }
 	    if(is.matrix(e2)) {
@@ -312,6 +333,7 @@ function(e1, e2)
 		e1$v <- e1$v * e2[cbind(e1$i, e1$j)]
 		if (any(!e2))
 		    e1 <- .reduce(e1)
+                e1$dimnames <- .make_dimnames(e1, e2)
 		return(e1)
 	    }
 	    stop("Not implemented.")
@@ -339,7 +361,7 @@ function(e1, e2)
 	    e2$i <- c(e2$i[ind], e2$i[-ind], e1$i[-pos])
 	    e2$j <- c(e2$j[ind], e2$j[-ind], e1$j[-pos])
 	    e2$v <- c(e2$v[ind] * e1$v[pos],
-		vector(typeof(e2$v), 1L) * c(e2$v[-ind], e1$v[-pos]))
+                      vector(typeof(e2$v), 1L) * c(e2$v[-ind], e1$v[-pos]))
 	    e2$dimnames <- .make_dimnames(e1, e2)
 	    return(.reduce(e2))
 	} else
@@ -743,6 +765,25 @@ mean.simple_triplet_matrix <-
 function(x, ...)
 {
     sum(x$v) / prod(dim(x))
+}
+
+aperm.simple_triplet_matrix <-
+function(a, perm = NULL, ...)
+{
+    s <- c(1L, 2L)
+    if(!is.null(perm)) {
+        perm <- if(is.character(perm))
+            match(perm, names(a$dimnames))
+        else if(is.numeric(perm))
+            match(perm, s)
+        else NULL
+        if(length(perm) != length(s) || any(is.na(perm)))
+            stop("Invalid permutation.")
+        if(all(perm == s))
+            return(a)
+    }
+    ## Transpose.
+    t.simple_triplet_matrix(a)
 }
 
 ## Utilities for creating special simple triplet matrices:
