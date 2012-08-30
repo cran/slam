@@ -5,11 +5,11 @@
 .means_simple_triplet_matrix <-
 function(x, DIM, na.rm)
 {
-    s <- .Call("_sums_stm", x, DIM, na.rm)
+    s <- .Call(R_sums_stm, x, DIM, na.rm)
     n <- c(x$nrow, x$ncol)[-DIM]
     if (na.rm) {
 	x$v <- is.na(x$v)
-	nna <- .Call("_sums_stm", x, DIM, FALSE)
+	nna <- .Call(R_sums_stm, x, DIM, FALSE)
 	s / (n - nna)
     }
     else
@@ -29,7 +29,7 @@ function(x, na.rm = FALSE, dims = 1, ...)
 
 row_sums.simple_triplet_matrix <-
 function(x, na.rm = FALSE, dims = 1, ...)
-    .Call("_sums_stm", x, 1L, na.rm)
+    .Call(R_sums_stm, x, 1L, na.rm)
 
 col_sums <-
 function(x, na.rm = FALSE, dims = 1, ...)
@@ -41,7 +41,7 @@ function(x, na.rm = FALSE, dims = 1, ...)
 
 col_sums.simple_triplet_matrix <-
 function(x, na.rm = FALSE, dims = 1, ...)
-    .Call("_sums_stm", x, 2L, na.rm)
+    .Call(R_sums_stm, x, 2L, na.rm)
 
 row_means <-
 function(x, na.rm = FALSE, dims = 1, ...)
@@ -79,10 +79,10 @@ function(x, na.rm = FALSE, dims = 1, ...)
 tcrossprod_simple_triplet_matrix <-
 function(x, y = NULL) {
     if (is.null(y))
-	.Call("tcrossprod_stm_stm", x, y, 
+	.Call(R_tcrossprod_stm_stm, x, y, 
 	      environment(tcrossprod_simple_triplet_matrix), FALSE)
     else
-	.Call("tcrossprod_stm_matrix", x, y,
+	.Call(R_tcrossprod_stm_matrix, x, y,
 	      environment(tcrossprod_simple_triplet_matrix), FALSE, FALSE)
 }
 
@@ -92,7 +92,7 @@ function(x, y = NULL) {
     if (is.null(y))
 	tcrossprod_simple_triplet_matrix(x)
     else
-	.Call("tcrossprod_stm_matrix", x, y,
+	.Call(R_tcrossprod_stm_matrix, x, y,
 	      environment(tcrossprod_simple_triplet_matrix), FALSE, TRUE)
 }
 

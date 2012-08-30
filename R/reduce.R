@@ -11,16 +11,16 @@
 reduce_simple_sparse_array <- 
 function(x, strict = FALSE, order = FALSE) 
 {
-    if (!.Call("__valid_ssa", x))
+    if (!.Call(R__valid_ssa, x))
 	stop("'x' not of class 'simple_sparse_array'")
     I <- x$i
     if (length(i <- attributes(I)) > 1L)
 	dim(I) <- i$dim
     rm(i)
-    V <- .Call("_unattr", x$v)
+    V <- .Call(R_unattr, x$v)
     if (length(V)) {
 	## reduce multiple entries
-	i <- .Call("_match_matrix", I)
+	i <- .Call(R_match_matrix, I)
 	if (length(i[[1L]]) > length(i[[2L]])) {
 	    if (strict)
 		stop("multiple entries")
@@ -58,7 +58,7 @@ function(x, strict = FALSE, order = FALSE)
 	rm(i)
 	## order entries
 	if (order) {
-	    i <- do.call("order", rev(.Call("_split_col", I)))
+	    i <- do.call("order", rev(.Call(R_split_col, I)))
 	    if (!identical(i, seq_along(i))) {
 		V <- V[i]
 		I <- I[i,, drop = FALSE]

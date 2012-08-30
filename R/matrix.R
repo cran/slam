@@ -11,7 +11,7 @@ function(i, j, v, nrow = max(i), ncol = max(j), dimnames = NULL)
                 nrow = as.integer(nrow), ncol = as.integer(ncol),
                 dimnames = dimnames)
     class(stm) <- "simple_triplet_matrix"
-    if(!.Call("__valid_stm", stm))
+    if(!.Call(R__valid_stm, stm))
 	stop("'stm' not of class 'simple_triplet_matrix'")
     stm
 }

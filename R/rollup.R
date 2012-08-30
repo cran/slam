@@ -45,7 +45,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE) {
 	n[[k]] <- z
 	rm(z)
     }
-    i <- .Call("_vector_index", d, i)
+    i <- .Call(R_vector_index, d, i)
     i <- structure(
 	i,
 	levels = seq_len(prod(d)),
@@ -109,7 +109,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	N <- vector("list", length(D))
     V <- x$v
     if (EXPAND < 4L &&
-	!.Call("__valid_v", V))
+	!.Call(R__valid_v, V))
 	stop("component 'v' contains 'ZERO' value(s)")
     for (k in MARGIN) {
 	z <- INDEX[[as.character(k)]]
@@ -131,7 +131,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	i <- I[, k]
 	if (EXPAND > 1L) {
 	    if (EXPAND > 2L) {
-		p <- .Call("_part_index", z)
+		p <- .Call(R_part_index, z)
 		T[[k]] <- attr(p, "table")
 		P[, k] <- p[i]
 		rm(p)
@@ -158,13 +158,13 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	k <- prod(D)
 	if (k > 1073741824L)
 	    stop("number of cells %d too large for hashing", k)
-	i <- .Call("_vector_index", D, I)
+	i <- .Call(R_vector_index, D, I)
 	I <- arrayInd(seq_len(k), .dim = D)
-	k <- .Call("_vector_index", D, I)
+	k <- .Call(R_vector_index, D, I)
 	i <- match(i, k)
 	rm(k)
     } else {
-	i <- .Call("_match_matrix", I)
+	i <- .Call(R_match_matrix, I)
 	I <- I[i[[2L]],, drop = FALSE]
 	i <-   i[[1L]]
     }
@@ -191,7 +191,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 		    ##	    and memory than
 		    ## z <- array(vector(typeof(V),1L), z)
 		    ## z[P[i,, drop = FALSE]] <- V[i]
-		    z <- .Call("_ini_array", z, P, V, i)
+		    z <- .Call(R_ini_array, z, P, V, i)
 		    FUN(z, ...)
 		} else
 		    FUN(V[i], prod(z) - length(i), ...)
@@ -264,7 +264,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ...) {
 			stop(gettextf("INDEX [%s] invalid length", k))
 		    factor(z)
 		}
-		.Call("_row_tsums", 
+		.Call(R_row_tsums, 
 		      x, z, 
 		      if (is.null(list(...)$na.rm))
 			  FALSE

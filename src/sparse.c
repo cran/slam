@@ -146,7 +146,7 @@ int _valid_stm(SEXP x) {
 		    (!isNull(VECTOR_ELT(s, 1)) &&
 		     (LENGTH(VECTOR_ELT(s, 1)) != nc ||
 		   !isString(VECTOR_ELT(s, 1)))))
-		    error("'dimnames' component invalid length or type'");
+		    error("'dimnames' component invalid length or type");
 	    }
 	}
     }
@@ -680,7 +680,7 @@ int _valid_ssa(SEXP x) {
 		    if (!isNull(VECTOR_ELT(s, j)) &&
 			(LENGTH(VECTOR_ELT(s, j)) != xd[j] ||
 		      !isString(VECTOR_ELT(s, j))))
-		    error("'dimnames' component invalid length or type'");
+		    error("'dimnames' component invalid length or type");
 	    }
 	}
     }

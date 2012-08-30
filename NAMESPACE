@@ -35,13 +35,28 @@ S3method("t", "simple_triplet_matrix")
 S3method("unique", "simple_triplet_matrix")
 
 ## enhanced stuff
-useDynLib("slam")
+useDynLib("slam",
+          "__valid_stm",
+          "__valid_ssa",
+          "__valid_v",
+          "_split_col",
+          "_part_index",
+          "_vector_index",
+          "_ini_array",
+          "_match_matrix",
+          "_unattr",
+          "_sums_stm",
+          "_row_tsums",   ## used by skmeans
+          "_tcrossprod_stm_stm"    = "tcrossprod_stm_stm",
+          "_tcrossprod_stm_matrix" = "tcrossprod_stm_matrix",
+          .fixes = "R"
+          )
 
 export("row_sums",
        "col_sums",
        "row_means",
        "col_means"
-      )
+       )
 
 S3method("row_sums", "default")
 S3method("row_sums", "simple_triplet_matrix")
@@ -70,13 +85,13 @@ export("as.simple_sparse_array",
        "is.simple_sparse_array",
        "simple_sparse_array",
        "simple_sparse_zero_array",
-	##
-	"simplify_simple_sparse_array",
-	"reduce_simple_sparse_array",
-	"drop_simple_sparse_array",
-	##
-	"extend_simple_sparse_array",
-	"abind_simple_sparse_array"
+       ##
+       "simplify_simple_sparse_array",
+       "reduce_simple_sparse_array",
+       "drop_simple_sparse_array",
+       ##
+       "extend_simple_sparse_array",
+       "abind_simple_sparse_array"
        )
 
 S3method("[", "simple_sparse_array")
@@ -102,5 +117,6 @@ if(getRversion() >= "2.13.0") {
 
 ## Sparse matrix format readers and writers
 export("read_stm_CLUTO",
-       "write_stm_CLUTO")
+       "write_stm_CLUTO"
+       )
 

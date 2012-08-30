@@ -27,7 +27,7 @@ function(i, v, dim = NULL, dimnames = NULL)
     class(ssa) <- "simple_sparse_array"
     ## Note that this should never be true as it implies that either
     ## the class is wrong or the container is malformed.
-    if (!.Call("__valid_ssa", ssa))
+    if (!.Call(R__valid_ssa, ssa))
         stop("'ssa' not of class 'simple_sparse_array'")
     ssa
 }
