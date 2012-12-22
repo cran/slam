@@ -1,0 +1,279 @@
+
+R version 2.14.2 Patched (2012-02-29 r58546)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: i486-pc-linux-gnu (32-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ##
+> library("slam")
+> ##
+> x <- simple_sparse_zero_array(dim = c(3, 2))
+> 
+> x[1]
+[1] 0
+> x[matrix(c(1, 1), nrow = 1)]
+[1] 0
+> 
+> ##
+> x <- as.simple_sparse_array(matrix(1:6, ncol = 2))
+> x[1]
+[1] 1
+> x[matrix(c(1, 1), nrow = 1)]
+[1] 1
+> 
+> x[1.1]				## truncation
+[1] 1
+> 
+> x[integer()]
+integer(0)
+> x[matrix(integer(), ncol = 2)]
+integer(0)
+> 
+> 
+> 				## missing values
+> x[c(1, 0, NA, 2)]
+[1]  1 NA  2
+> 
+> k <- matrix(c(1, 1, 1, 0, 1, NA), ncol = 2, byrow = TRUE)
+> k
+     [,1] [,2]
+[1,]    1    1
+[2,]    1    0
+[3,]    1   NA
+> x[k]
+[1]  1 NA
+> 
+> 				## wrong dimensions 
+> dim(k) <- c(2,3)
+> as.vector(k)
+[1]  1  1  1  1  0 NA
+> x[k]
+[1]  1  1  1  1 NA
+> 
+> 
+> z <- x[c(1,3),]
+> data.frame(v = z$v, i = z$i,
++     k = .Call("_vector_index", z$dim, z$i))
+  v i.1 i.2 k
+1 1   1   1 1
+2 3   2   1 2
+3 4   1   2 3
+4 6   2   2 4
+> 
+> 
+> ## drop not implemented
+> x[ 1,]
+A simple sparse array of dimension 1x2.
+> x[-1,]
+A simple sparse array of dimension 2x2.
+> try(x[1, NA_integer_]) 		## not implemented
+Error in `[.simple_sparse_array`(x, 1, NA_integer_) : 
+  NA indices currently not allowed
+> str(x[0,])
+List of 4
+ $ i       : int[0 , 1:2] 
+ $ v       : int(0) 
+ $ dim     : int [1:2] 0 2
+ $ dimnames: NULL
+ - attr(*, "class")= chr "simple_sparse_array"
+> str(x[0, 0])
+List of 4
+ $ i       : int[0 , 1:2] 
+ $ v       : int(0) 
+ $ dim     : int [1:2] 0 0
+ $ dimnames: NULL
+ - attr(*, "class")= chr "simple_sparse_array"
+> 
+> x[c(1, 8)]			## out of bounds allowed
+[1]  1 NA
+> try(x[1, 8])			## not allowed
+Error in `[.simple_sparse_array`(x, 1, 8) : subscript out of bounds
+> 
+> dim(k) <- c(3,2)
+> k[6] <- 3
+> k
+     [,1] [,2]
+[1,]    1    1
+[2,]    1    0
+[3,]    1    3
+> try(x[k])			## not allowed
+Error in `[.simple_sparse_array`(x, k) : subscript out of bounds
+> 
+> ##
+> x <- simple_triplet_zero_matrix(nrow = 3, ncol = 2)
+> 
+> x[1]
+[1] 0
+> x[matrix(c(1, 1), nrow = 1)]
+[1] 0
+> 
+> ##
+> x <- as.simple_triplet_matrix(matrix(1:6, ncol = 2))
+> x[1]
+[1] 1
+> x[matrix(c(1, 1), nrow = 1)]
+[1] 1
+> 
+> x[1.1]				## truncation
+[1] 1
+> 
+> x[integer()]
+integer(0)
+> x[matrix(integer(), ncol = 2)]
+integer(0)
+> 
+> 
+> 				## missing values
+> x[c(1, 0, NA, 2)]
+[1]  1 NA  2
+> 
+> k <- matrix(c(1, 1, 1, 0, 1, NA), ncol = 2, byrow = TRUE)
+> k
+     [,1] [,2]
+[1,]    1    1
+[2,]    1    0
+[3,]    1   NA
+> x[k]
+[1]  1 NA
+> 
+> 				## wrong dimensions 
+> dim(k) <- c(2,3)
+> as.vector(k)
+[1]  1  1  1  1  0 NA
+> x[k]
+[1]  1  1  1  1 NA
+> 
+> 
+> z <- x[c(1,3),]
+> data.frame(v = z$v, i = z$i, j = z$j,
++     k = .Call("_vector_index", c(z$nrow, z$ncol), cbind(z$i, z$j)))
+  v i j k
+1 1 1 1 1
+2 3 2 1 2
+3 4 1 2 3
+4 6 2 2 4
+> 
+> 
+> ## drop not implemented
+> x[ 1,]
+A 1x2 simple triplet matrix.
+> x[-1,]
+A 2x2 simple triplet matrix.
+> try(x[1, NA_integer_]) 		## not implemented
+Error in `[.simple_triplet_matrix`(x, 1, NA_integer_) : 
+  NA indices not allowed.
+> str(x[0,])
+List of 6
+ $ i       : int(0) 
+ $ j       : int(0) 
+ $ v       : int(0) 
+ $ nrow    : int 0
+ $ ncol    : int 2
+ $ dimnames: NULL
+ - attr(*, "class")= chr "simple_triplet_matrix"
+> str(x[0, 0])
+List of 6
+ $ i       : int(0) 
+ $ j       : int(0) 
+ $ v       : int(0) 
+ $ nrow    : int 0
+ $ ncol    : int 0
+ $ dimnames: NULL
+ - attr(*, "class")= chr "simple_triplet_matrix"
+> 
+> x[c(1, 8)]			## out of bounds allowed
+[1]  1 NA
+> try(x[1, 8])			## not allowed
+Error in `[.simple_triplet_matrix`(x, 1, 8) : subscript out of bounds
+> 
+> dim(k) <- c(3,2)
+> k[6] <- 3
+> k
+     [,1] [,2]
+[1,]    1    1
+[2,]    1    0
+[3,]    1    3
+> try(x[k])			## not allowed
+Error in `[.simple_triplet_matrix`(x, k) : subscript out of bounds
+> 
+> 
+> x[c(TRUE, FALSE)]
+[1] 1 3 5
+> x[c(TRUE, FALSE),]
+A 2x2 simple triplet matrix.
+> 
+> ## reference
+> x <- matrix(1:6, ncol = 2)
+> x[c(1, 0, NA, 2)]
+[1]  1 NA  2
+> 
+> try(x[-c(1, NA)])		## not allowed
+Error in x[-c(1, NA)] : only 0's may be mixed with negative subscripts
+> 
+> 				## missing allowed
+> k <- matrix(c(1, 1, 1, 0, 1, NA), ncol = 2, byrow = TRUE)
+> k
+     [,1] [,2]
+[1,]    1    1
+[2,]    1    0
+[3,]    1   NA
+> x[k]
+[1]  1 NA
+> 
+> dim(k) <- c(2, 3)
+> as.vector(k)
+[1]  1  1  1  1  0 NA
+> x[k]
+[1]  1  1  1  1 NA
+> 
+> 
+> x[ 1,]
+[1] 1 4
+> x[-1,]
+     [,1] [,2]
+[1,]    2    5
+[2,]    3    6
+> x[ 1, NA]			## wildcard
+[1] NA NA
+> 
+> x[0,]				## does not drop
+     [,1] [,2]
+> x[0,0]
+<0 x 0 matrix>
+> 
+> x[c(1, 8)]			## out of bounds allowed
+[1]  1 NA
+> try(x[1, 8])			## not allowed
+Error in try(x[1, 8]) : subscript out of bounds
+> 
+> dim(k) <- c(3,2)
+> k[6] <- 3
+> k
+     [,1] [,2]
+[1,]    1    1
+[2,]    1    0
+[3,]    1    3
+> try(x[k])			## not allowed
+Error in x[k] : subscript out of bounds
+> 
+> x[c(TRUE, FALSE)]
+[1] 1 3 5
+> x[c(TRUE, FALSE),]
+     [,1] [,2]
+[1,]    1    4
+[2,]    3    6
+> 
+> ###
+> 

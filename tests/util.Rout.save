@@ -209,13 +209,6 @@ expression(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 > .Call("_ini_array", 3L, c(1L,2L), c(1L,1L), 2L)
 [1] 0 1 0
 > 
-> .Call("_split_row", array(c(1L,2L), c(2L, 2L)))
-[[1]]
-[1] 1 1
-
-[[2]]
-[1] 2 2
-
 > .Call("_split_col", array(c(1L,2L), c(2L, 2L)))
 [[1]]
 [1] 1 2
@@ -234,13 +227,36 @@ expression(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 [3,]    1    2
 [4,]    1    3
 [5,]    1    2
-> .Call("_match_matrix", x)
+> .Call("_match_matrix", x, NULL, NULL)
 [[1]]
 [1] 1 1 2 3 2
 
 [[2]]
 [1] 1 3 4
 
+> .Call("_match_matrix", x, x[1:3,], 0L)
+[[1]]
+[1] 1 1 2 3 2
+
+[[2]]
+[1] 1 1 2
+
+> 
+> 
+> ##
+> x <- matrix(c(1L,2L,2L,2L,NA,1L,NA,2L,NA,NA), 
++ 	    ncol = 2, byrow = TRUE)
+> x
+     [,1] [,2]
+[1,]    1    2
+[2,]    2    2
+[3,]   NA    1
+[4,]   NA    2
+[5,]   NA   NA
+> .Call("_all_row", x > 1L, FALSE)
+[1] FALSE  TRUE    NA    NA    NA
+> .Call("_all_row", x > 1L, TRUE)
+[1] FALSE  TRUE FALSE  TRUE  TRUE
 > 
 > ###
 > 

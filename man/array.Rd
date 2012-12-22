@@ -65,6 +65,10 @@ drop_simple_sparse_array(x)
   elements are never extended and unused dimensions never dropped.
 
   \code{drop_simple_sparse_array} drops unused dimensions.
+
+  If \code{prod(dim(x)) > 2^24} empty and negative indexing are disabled
+  for \code{[} and \code{[<-}. Further, non-negative single (vector)
+  indexing is limited to 52 bits of representation.
 }
 \seealso{
   \code{\link{simple_triplet_matrix}} for sparse matrices.

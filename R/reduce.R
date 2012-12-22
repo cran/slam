@@ -20,7 +20,7 @@ function(x, strict = FALSE, order = FALSE)
     V <- .Call(R_unattr, x$v)
     if (length(V)) {
 	## reduce multiple entries
-	i <- .Call(R_match_matrix, I)
+	i <- .Call(R_match_matrix, I, NULL, NULL)
 	if (length(i[[1L]]) > length(i[[2L]])) {
 	    if (strict)
 		stop("multiple entries")

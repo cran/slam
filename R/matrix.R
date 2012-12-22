@@ -12,7 +12,7 @@ function(i, j, v, nrow = max(i), ncol = max(j), dimnames = NULL)
                 dimnames = dimnames)
     class(stm) <- "simple_triplet_matrix"
     if(!.Call(R__valid_stm, stm))
-	stop("'stm' not of class 'simple_triplet_matrix'")
+	stop("failed to create a valid 'simple_sparse_matrix' object")
     stm
 }
 
@@ -209,13 +209,15 @@ function(e1, e2)
             return(e1)
         }
         stop(gettextf("Unary '%s' not defined for \"%s\" objects.",
-                      .Generic, .Class))
+                      .Generic, .Class),
+             domain = NA)
     }
 
     if(!(op %in% c("+", "-", "*", "/", "^",
                    "==", "!=", "<", "<=", ">", ">=")))
         stop(gettextf("Generic '%s' not defined for \"%s\" objects.",
-                      .Generic, .Class))
+                      .Generic, .Class),
+             domain = NA)
 
     ## Require numeric operands for the arithmetic operators.
     if(!is.numeric(e1) || !is.numeric(e2))
@@ -429,9 +431,30 @@ dim.simple_triplet_matrix <-
 function(x)
     c(x$nrow, x$ncol)
 
-## <TODO>
-## Add a dim setter.
-## </TODO>
+`dim<-.simple_triplet_matrix` <-
+function(x, value)
+{
+    value <- as.integer(value)
+    if((length(value) != 2L) || any(is.na(value)))
+        stop("invalid dim replacement value")
+    nr <- x$nrow
+    nc <- x$ncol
+    if(prod(value) != nr * nc)
+        stop("invalid dim replacement value")
+
+    pos <- nr * (x$j - 1L) + x$i - 1L
+
+    nr <- value[1L]
+    nc <- value[2L]
+
+    x$i <- pos %%  nr + 1L
+    x$j <- pos %/% nr + 1L
+    x$nrow <- nr
+    x$ncol <- nc
+    x$dimnames <- NULL
+
+    x
+}
 
 dimnames.simple_triplet_matrix <-
 function(x)
@@ -446,7 +469,7 @@ function(x, value)
 	##      have to assume that the dimensions with index
 	##      seq_len(length(value)) are to be set. For 
 	##	example, we are called with a list of length
-	##      one if we call dimanmes(x)[[1L]] <- value and
+	##      one if we call dimnames(x)[[1L]] <- value and
 	##      dimnames(x) == NULL (because of [[<-)
 	##
         if(!is.list(value) || length(value) > length(dim(x)))
@@ -500,18 +523,38 @@ function(x, i, j, drop = FALSE)
         if(is.character(i))
             out <- vector(typeof(x$v))[rep.int(NA, length(i))]
         else if(!is.matrix(i)) {
-            if(is.logical(i))
-                i <- which(rep(i, length.out = nr))
+            if(is.logical(i)) {
+		if(nr * nc > 16777216L)
+		  stop("Logical vector subscripting disabled for this object.")
+                i <- which(rep(i, length.out = nr * nc))
+	    }
             else if(!is.numeric(i))
-                stop(gettextf("Invalid subscript type: %s.", typeof(i)))
+                stop(gettextf("Invalid subscript type: %s.",
+                              typeof(i)),
+                     domain = NA)
+	    else
+		## 52-bit safe
+		if(nr * nc > 4503599627370496)
+		  stop("Numeric vector subscripting disabled for this object.")
+	    ## Shortcut
+	    if(!length(i))
+		return(vector(mode = typeof(x$v), length = 0L))
+	    if(is.double(i))
+		i <- trunc(i)
             ## Let's hope we have a vector.
             ## What if we have both negatives and positives?
-            if(all(i >= 0)) {
+            if(all(i >= 0, na.rm = TRUE)) {
                 i <- i[i > 0]
                 out <- vector(mode = typeof(x$v), length = length(i))
-                pos <- match(i, (x$j - 1L) * nr + x$i, 0L)
-                out[pos > 0L] <- x$v[pos]
-            } else if(all(i <= 0)) {
+		if(length(out)) {
+		    is.na(i) <- i > nr * nc
+		    is.na(out) <- is.na(i)
+		    i <- match(i, (x$j - 1L) * nr + x$i, 0L)
+		    out[i > 0L] <- x$v[i]
+		}
+            } else if(!any(is.na(i)) && all(i <= 0)) {
+		if(nr * nc > 16777216L)
+		  stop("Negative vector subscripting disabled for this object.")
                 out <- vector(mode = typeof(x$v), nr * nc)
                 out[(x$j - 1L) * nr + x$i] <- x$v
                 out <- out[i]
@@ -519,23 +562,40 @@ function(x, i, j, drop = FALSE)
             else stop("Cannot mix positive and negative subscripts.")
         }
         else {
+	    ## Shortcut
+	    if(!nrow(i))
+		return(vector(mode = typeof(x$v), length = 0L))
+	    ## Ignore dimensions
+	    if(ncol(i) != 2L)
+		return(do.call("[.simple_triplet_matrix",
+			       list(x = x, as.vector(i))))
+
             ## Note that negative values are not allowed in a matrix
             ## subscript.
-            if((ncol(i) != 2L) || (any(i < 0)))
+	    if(is.double(i))
+		i <- trunc(i)
+            if(any(i < 0, na.rm = TRUE))
                 stop("Invalid subscript.")
             ## Rows containing zero indices can be dropped.
             ## Rows with NA indices should give NA (at least for
             ## non-recursive x).
-            i <- i[!apply(i == 0, 1L, any), , drop = FALSE]
+	    k <- .Call(R_all_row, i > 0, FALSE)
+            i <- i[k, ,drop = FALSE]
             out <- vector(mode = typeof(x$v), length = nrow(i))
-            ##  pi <- match(i[, 1L], x$i)
-            ##  pj <- match(i[, 2L], x$j)
-            ##  ind <- which(pi == pj)
-            ##  out[ind] <- x$v[pi[ind]]
-            pos <- match(paste(i[,1L], i[,2L], sep = "\r"),
-                         paste(x$i, x$j, sep = "\r"),
-                         nomatch = 0L)
-            out[pos > 0L] <- x$v[pos]
+	    if(length(out)) {
+		if (any(i > rep(c(nr, nc), each = nrow(i)), na.rm = TRUE))
+		    stop("subscript out of bounds")
+		k <- k[k]
+		is.na(out) <- is.na(k)
+		rm(k)
+		## See duplicated.matrix
+		## pos <- match(paste(i[, 1L], i[, 2L], sep = "\r"),
+		##	     paste(x$i, x$j, sep = "\r"),
+		##	     nomatch = 0L)
+		storage.mode(i) <- "integer"
+		i <- .Call(R_match_matrix, cbind(x$i, x$j), i, 0L)[[2L]]
+		out[i > 0L] <- x$v[i]
+	    }
         }
     }
     else {
@@ -545,6 +605,8 @@ function(x, i, j, drop = FALSE)
         ## columns must be unique.
         pos <- NULL
         if(!missing(i)) {
+	    if(any(is.na(i)))
+		stop("NA indices not allowed.")
             pi <- seq_len(nr)
             if(is.logical(i)) {
                 i <- rep(i, length.out = nr)
@@ -558,8 +620,12 @@ function(x, i, j, drop = FALSE)
                     if(any(duplicated(i)))
                         stop("Repeated indices currently not allowed.")
                 } else if(is.numeric(i)) {
+		    if(is.double(i))
+			i <- trunc(i)
                     if(all(i >= 0)) {
                         i <- i[i > 0]
+			if(any(i > nr))
+			    stop("subscript out of bounds")
                         if(any(duplicated(i)))
                             stop("Repeated indices currently not allowed.")
                     } else if(all(i <= 0))
@@ -568,7 +634,8 @@ function(x, i, j, drop = FALSE)
                         stop("Cannot mix positive and negative subscripts.")
                 } else {
                     stop(gettextf("Invalid subscript type: %s.",
-                                  typeof(i)))
+                                  typeof(i)),
+                         domain = NA)
                 }
                 nr <- length(i)
                 pos <- match(x$i, i, 0L) > 0L
@@ -576,6 +643,8 @@ function(x, i, j, drop = FALSE)
             pi[i] <- seq_len(nr)
         }
         if(!missing(j)) {
+	    if(any(is.na(j)))
+		stop("NA indices not allowed.")
             pj <- seq_len(nc)
             if(is.logical(j)) {
                 j <- rep(j, length.out = nc)
@@ -592,8 +661,12 @@ function(x, i, j, drop = FALSE)
                     if(any(duplicated(j)))
                         stop("Repeated indices currently not allowed.")
                 } else if(is.numeric(j)) {
+		    if(is.double(j))
+			j <- trunc(j)
                     if(all(j >= 0)) {
                         j <- j[j > 0]
+			if(any(j > nc))
+			    stop("subscript out of bounds")
                         if(any(duplicated(j)))
                             stop("Repeated indices currently not allowed.")
                     } else if(all(j <= 0))
@@ -602,7 +675,8 @@ function(x, i, j, drop = FALSE)
                         stop("Cannot mix positive and negative subscripts.")
                 } else {
                     stop(gettextf("Invalid subscript type: %s.",
-                                  typeof(j)))
+                                  typeof(j)),
+                         domain = NA)
                 }
                 nc <- length(j)
                 pos <- if(is.null(pos))
@@ -756,8 +830,8 @@ function(..., recursive = FALSE)
 print.simple_triplet_matrix <-
 function(x, ...)
 {
-    writeLines(sprintf("A %s simple triplet matrix.",
-                       paste(dim(x), collapse = "x")))
+    writeLines(gettextf("A %s simple triplet matrix.",
+                        paste(dim(x), collapse = "x")))
     invisible(x)
 }
 
@@ -785,6 +859,10 @@ function(a, perm = NULL, ...)
     ## Transpose.
     t.simple_triplet_matrix(a)
 }
+
+as.vector.simple_triplet_matrix <-
+function(x, mode = "any")
+    as.vector(as.matrix(x), mode)
 
 ## Utilities for creating special simple triplet matrices:
 

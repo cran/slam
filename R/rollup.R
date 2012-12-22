@@ -36,7 +36,8 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE) {
 	    )
 	else {
 	    if (length(z) != d[k])
-		stop(gettextf("INDEX [%s] invalid length", k))
+		stop(gettextf("INDEX [%s] invalid length", k),
+                     domain = NA)
 	    factor(z)
 	}
 	i[, k] <- z[i[, k]]
@@ -122,7 +123,8 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	    )
 	else {
 	    if (length(z) != D[k])
-		stop(gettextf("INDEX [%s] invalid length", k))
+		stop(gettextf("INDEX [%s] invalid length", k),
+                     domain = NA)
 	    factor(z)
 	}
 	l <- levels(z)
@@ -164,7 +166,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	i <- match(i, k)
 	rm(k)
     } else {
-	i <- .Call(R_match_matrix, I)
+	i <- .Call(R_match_matrix, I, NULL, NULL)
 	I <- I[i[[2L]],, drop = FALSE]
 	i <-   i[[1L]]
     }
@@ -180,7 +182,8 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	V <- lapply(V, FUN, ...)
     } else {
 	.pt <- proc.time()
-	cat(sprintf("processing %d cells ... ", dim(I)[1L]))
+	message(gettextf("processing %d cells ... ", dim(I)[1L]),
+                domain = NA)
 	i <- split.default(seq_along(i), i)
 	names(i) <- NULL
 	V <- mapply(function(i, z) {
@@ -203,7 +206,8 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	rm(i, T)
 	if (EXPAND > 2L)
 	    rm(P)
-	cat(sprintf("[%.2fs]\n", (proc.time() - .pt)[3L])) 
+	message(sprintf("[%.2fs]\n", (proc.time() - .pt)[3L]),
+                domain = NA)
     }
     if (all(unlist(lapply(V, length)) == 1L)) {
 	V <- unlist(V, recursive = FALSE, use.names = FALSE)
@@ -261,7 +265,8 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ...) {
 		    )
 		else {
 		    if (length(z) != dim(x)[k])
-			stop(gettextf("INDEX [%s] invalid length", k))
+			stop(gettextf("INDEX [%s] invalid length", k),
+                             domain = NA)
 		    factor(z)
 		}
 		.Call(R_row_tsums, 

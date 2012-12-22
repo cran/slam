@@ -1,5 +1,5 @@
 #include <R.h>
-#include <Rdefines.h>
+#include <Rinternals.h>
 #include <R_ext/Complex.h>
 #include <time.h>
 
@@ -54,8 +54,13 @@ SEXP _vector_index(SEXP d, SEXP x) {
 
     if (m > 2) {
 	dd = PROTECT(duplicate(d));
-	for (int i = 1; i < m - 1; i++)
-	    INTEGER(dd)[i] *= INTEGER(dd)[i-1];
+	for (int i = 1; i < m; i++) {
+	    double z = INTEGER(dd)[i] * (double) INTEGER(dd)[i-1];
+	    if (z < INT_MAX)
+		INTEGER(dd)[i] = (int) z;
+	    else
+		error("'d' too large for integer");
+	}
     } else
 	dd = d;
 
@@ -197,32 +202,6 @@ SEXP _ini_array(SEXP d, SEXP p, SEXP v, SEXP s) {
     return r;
 }
 
-// FIXME other storage types
-SEXP _split_row(SEXP x) {
-    if (TYPEOF(x) != INTSXP)
-	error("'x' not integer");
-    int n, m;
-    SEXP r;
-
-    if (!isMatrix(x))
-	error("'x' not a matrix");
-    r = getAttrib(x, R_DimSymbol);
-    n = INTEGER(r)[0];
-    m = INTEGER(r)[1];
-
-    r = PROTECT(allocVector(VECSXP, n));
-
-    for (int i = 0; i < n; i++) {
-	SEXP s;
-	SET_VECTOR_ELT(r, i, (s = allocVector(INTSXP, m)));
-	for (int j = 0, k = i; j < m; j++, k += n)
-	    INTEGER(s)[j] = INTEGER(x)[k];
-    }
-
-    UNPROTECT(1);
-    return r;
-}
-
 SEXP _split_col(SEXP x) {
     if (TYPEOF(x) != INTSXP)
 	error("'x' not integer");
@@ -250,15 +229,63 @@ SEXP _split_col(SEXP x) {
 }
 
 
+SEXP _all_row(SEXP x, SEXP _na_rm) {
+    if (TYPEOF(x) != LGLSXP)
+	error("'x' not logical");
+    if (!isMatrix(x))
+	error("'x' not a matrix");
+    int n, m;
+    SEXP r;
+    r = getAttrib(x, R_DimSymbol);
+    n = INTEGER(r)[0];
+    m = INTEGER(r)[1];
+
+    int na_rm;
+    if (TYPEOF(_na_rm) != LGLSXP)
+	error("'na_rm' not logical");
+    if (!LENGTH(_na_rm))
+	error("'na_rm' invalid length");
+    na_rm = LOGICAL(_na_rm)[0] == TRUE;
+
+    r = PROTECT(allocVector(LGLSXP, n));
+
+    for (int i = 0; i < n; i++) {
+	int k = i;
+	Rboolean l = TRUE;
+	for (int j = 0; j < m; j++, k += n) {
+	    Rboolean ll = LOGICAL(x)[k];
+	    if (ll == NA_LOGICAL) {
+		if (na_rm)
+		    continue;
+		else {
+		    l = ll;
+		    break;
+		}
+	    }
+	    if (ll == FALSE) {
+		l = ll;
+		if (na_rm)
+		    break;
+	    }
+	}
+	LOGICAL(r)[i] = l;
+    }
+
+    UNPROTECT(1);
+    return r;
+}
+
+
+
 // See src/main/unique.c in the R source code.
 
 // Compare integer.
-static int _ieq(int *x, int *y, int i, int l) {
+static int _ieq(int *x, int *y, int i, int j, int l) {
     while (l-- > 0) {
 	if (*x != *y)
 	    return 0;
 	x += i;
-	y += i;
+	y += j;
     }
     return 1;
 }
@@ -277,22 +304,24 @@ static int _ihash(int *x, int i, int l, int k) {
 }
 
 // Add index to hash table for integer.
-static int _ihadd(int *x, int nr, int nc, int i, SEXP h, int k) {
+static int 
+_ihadd(int *x, int nr, int nc, int i, int *t, int nt, SEXP h, int k) {
     int *s, j;
 
     s = x + i;
     k = _ihash(s, nr, nc, k);
     while ((j = INTEGER(h)[k]) > -1) {
-	if (_ieq(x + j, s, nr, nc))
+	if (_ieq(t + j, s, nt, nr, nc))
 	    return j;
 	k = (k + 1) % LENGTH(h);
     }
-    INTEGER(h)[k] = i;
+    if (t == x)
+	INTEGER(h)[k] = i;
 
     return -1;
 }
 
-SEXP _match_matrix(SEXP x) {
+SEXP _match_matrix(SEXP x, SEXP y, SEXP _nm) {
     if (TYPEOF(x) != INTSXP)
 	error("'x' not integer");
     int nr, nc;
@@ -304,6 +333,29 @@ SEXP _match_matrix(SEXP x) {
 
     nr = INTEGER(r)[0];
     nc = INTEGER(r)[1];
+
+    int ny = 0, 
+	nm = NA_INTEGER;
+
+    if (!isNull(y)) {
+	if (TYPEOF(y) != INTSXP)
+	    error("'y' not integer");
+	if (!isMatrix(y))
+	    error("'y' not a matrix");
+
+	r = getAttrib(y, R_DimSymbol);
+
+	ny = INTEGER(r)[0];
+	if (nc != INTEGER(r)[1])
+	    error("'x, y' number of columns don't match");
+
+	if (!isNull(_nm)) {
+	    if (TYPEOF(_nm) != INTSXP)
+		error("'nm' not integer");
+	    if (LENGTH(_nm))
+		nm = INTEGER(_nm)[0];
+	}
+    }
 
     // Initialize hash table.
     int hk, k, n;
@@ -329,7 +381,7 @@ SEXP _match_matrix(SEXP x) {
 
     n = 0;
     for (k = 0; k < nr; k++) {
-	int j = _ihadd(INTEGER(x), nr, nc, k, ht, hk);
+	int j = _ihadd(INTEGER(x), nr, nc, k, INTEGER(x), nr, ht, hk);
 	if (j > -1)
 	    INTEGER(s)[k] = INTEGER(s)[j];
 	else {
@@ -337,6 +389,24 @@ SEXP _match_matrix(SEXP x) {
 	    INTEGER(s)[k] = n;
 	}
     }
+
+    if (ny) {
+	SEXP t;
+	SET_VECTOR_ELT(r, 1, (t = allocVector(INTSXP, ny)));
+	
+	for (k = 0; k < ny; k++) {
+	    int j = _ihadd(INTEGER(y), ny, nc, k, INTEGER(x), nr, ht, hk);
+	    if (j > -1)
+		INTEGER(t)[k] = INTEGER(s)[j];
+	    else 
+		INTEGER(t)[k] = nm;
+	}
+
+	UNPROTECT(2);
+	return r;
+    }
+
+    // Unique.
     UNPROTECT_PTR(ht);
 
     SEXP t;
