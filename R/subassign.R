@@ -21,8 +21,7 @@ function(x, ..., value) {
 	    stop("Empty subscripting disabled.")
 	else
 	    return(
-		do.call("[<-.simple_sparse_array",
-			list(x = x, seq_len(pd), value = value))
+		`[<-.simple_sparse_array`(x, seq_len(pd), value = value)
 	    )
 	    
     ## Single index subscripting.
@@ -73,8 +72,7 @@ function(x, ..., value) {
 	    if (ncol(I) != nd) {
 		dim(I) <- NULL
 		return(
-		    do.call("[<-.simple_sparse_array", 
-			    list(x = x, I, value = value))
+		    `[<-.simple_sparse_array`(x, I, value = value)
 		)
 	    }
 	    ## Map.
@@ -126,8 +124,7 @@ function(x, ..., value) {
 	    ncol = length(args)
 	)
 	return(
-	    do.call("[<-.simple_sparse_array", 
-		    list(x = x, args, value = value))
+	    `[<-.simple_sparse_array`(x, args, value = value)
 	)
     }
 
@@ -165,35 +162,11 @@ function(x, ..., value) {
 
 ##
 `[<-.simple_triplet_matrix` <- 
-function(x, i, j, value) {
-    x <- structure(list(
-	    v = x$v, 
-	    i = cbind(x$i, x$j), 
-	    dim = c(x$nrow, x$ncol),
-	    dimnames = x$dimnames
-	),
-	class =  "simple_sparse_array"
-    )
-    x <- list(x = x)
-    if (!missing(i))
-	x$i <- i
-    if (!missing(j))
-	x$j <- j
-    x$value <- value
-    x <- do.call("[<-.simple_sparse_array", x)
-    if (inherits(x, "simple_sparse_array")) {
-	x$i <- .Call(R_split_col, x$i)
-	x <- structure(list(
-		v = x$v, 
-		i = x$i[[1L]], 
-		j = x$i[[2L]], 
-		nrow = x$dim[1L], 
-		ncol = x$dim[2L], 
-		dimnames = x$dimnames
-	    ),
-	    class = "simple_triplet_matrix"
-	)
-    }
+function(x, ..., value) {
+    x <- `[<-.simple_sparse_array`(as.simple_sparse_array(x), ..., 
+	value = value)
+    if (inherits(x, "simple_sparse_array"))
+	x <- as.simple_triplet_matrix(x)
     x
 }
 
