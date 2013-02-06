@@ -15,4 +15,15 @@ as.matrix(s)
 s[] <- 1:8
 as.matrix(s)
 
+##
+local({
+    k <- 2:3
+    ## Implementing class.
+    a <- as.simple_sparse_array(s)
+    a[,k]
+    a[,k] <- 1:8
+    s[,k] <- 1:8
+    stopifnot(identical(as.array(a), as.array(s)))
+})
+
 ###

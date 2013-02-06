@@ -218,16 +218,13 @@ function(x, ...)
     else {
         if(na != (nd + 1L))
             stop("Incorrect number of dimensions.")
-        ## Figure out the missing arguments (if any).
-        args <- substitute(list(...))
-        ## Replace missing arguments by NULL for now.
-        args[sapply(args,
-                    function(a)
-                    (length(a) == 1L) && (as.character(a) == ""))] <-
-                        list(NULL)
-        ## (Could also test args for identical(as.character(a), "").)
-        ## And evaluate.
-        args <- eval(args)
+        ## Get indices.
+	args <- vector("list", na - 1L)
+	for(k in seq_along(args)) {
+	    n <- as.name(sprintf("..%i", k))
+	    if (!do.call(missing, list(n)))
+		args[[k]] <- eval(n)
+	}
         ## Ready to go.
         dx <- x$dim
         pos <- rep.int(TRUE, length(x$v))

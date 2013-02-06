@@ -183,6 +183,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
     } else {
 	.pt <- proc.time()
 	message(gettextf("processing %d cells ... ", dim(I)[1L]),
+		appendLF = FALSE,
                 domain = NA)
 	i <- split.default(seq_along(i), i)
 	names(i) <- NULL
@@ -207,6 +208,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	if (EXPAND > 2L)
 	    rm(P)
 	message(sprintf("[%.2fs]\n", (proc.time() - .pt)[3L]),
+		appendLF = FALSE,
                 domain = NA)
     }
     if (all(unlist(lapply(V, length)) == 1L)) {

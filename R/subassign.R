@@ -92,15 +92,18 @@ function(x, ..., value) {
     } else {
 	if (na != nd + 2L)
 	    stop("incorrect number of dimensions")
-        ## Replace missing dimensions. 
-        args <- substitute(list(...))
-	for (k in seq_along(args)[-1L])
-	    if (identical(as.character(args[[k]]), ""))
+        ## Get indices. 
+        args <- vector("list", na - 2L)
+	for (k in seq_along(args)) {
+	    n <- as.name(sprintf("..%i", k))
+	    if (!do.call(missing, list(n)))
+		args[[k]] <- eval(n)
+	    else
 		if (.protect)
 		    stop("Missing dimensions disabled for this object.")
 		else
-		    args[[k]] <- seq_len(x$dim[k - 1L])
-        args <- eval(args)
+		    args[[k]] <- seq_len(x$dim[k])
+	}
 	if (!all(sapply(args, is.numeric)))
 	    stop("Only numeric subscripting is implemented.")
 	## Replace negative subscripts.
