@@ -10,7 +10,8 @@
   simple triplet representation.}
 
 \usage{
-simple_triplet_matrix(i, j, v, nrow = max(i), ncol = max(j), dimnames = NULL)
+simple_triplet_matrix(i, j, v, nrow = max(i), ncol = max(j),
+                      dimnames = NULL)
 simple_triplet_zero_matrix(nrow, ncol = nrow, mode = "double")
 simple_triplet_diag_matrix(v, nrow = length(v))
 

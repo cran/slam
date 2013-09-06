@@ -64,15 +64,23 @@ export("row_sums",
 
 S3method("row_sums", "default")
 S3method("row_sums", "simple_triplet_matrix")
+S3method("row_sums", "dgTMatrix")
+S3method("row_sums", "dgCMatrix")
 
 S3method("col_sums", "default")
 S3method("col_sums", "simple_triplet_matrix")
+S3method("col_sums", "dgTMatrix")
+S3method("col_sums", "dgCMatrix")
 
 S3method("row_means", "default")
 S3method("row_means", "simple_triplet_matrix")
+S3method("row_means", "dgTMatrix")
+S3method("row_means", "dgCMatrix")
 
 S3method("col_means", "default")
 S3method("col_means", "simple_triplet_matrix")
+S3method("col_means", "dgTMatrix")
+S3method("col_means", "dgCMatrix")
 
 export("tcrossprod_simple_triplet_matrix")
 
@@ -124,6 +132,6 @@ if(getRversion() >= "2.13.0") {
 
 ## Sparse matrix format readers and writers
 export("read_stm_CLUTO",
-       "write_stm_CLUTO"
+       "write_stm_CLUTO",
+       "read_stm_MC"
        )
-

@@ -25,11 +25,18 @@ function(x, na.rm = FALSE, dims = 1, ...)
 
 row_sums.default <-
 function(x, na.rm = FALSE, dims = 1, ...)
-    base:::rowSums(x, na.rm, dims, ...)
+    base::rowSums(x, na.rm, dims, ...)
 
 row_sums.simple_triplet_matrix <-
 function(x, na.rm = FALSE, dims = 1, ...)
     .Call(R_sums_stm, x, 1L, na.rm)
+
+row_sums.dgCMatrix <-
+function(x, na.rm = FALSE, dims = 1, ...)
+    Matrix::rowSums(x, na.rm = na.rm, dims = dims, ...)
+row_sums.dgTMatrix <-
+function(x, na.rm = FALSE, dims = 1, ...)
+    Matrix::rowSums(x, na.rm = na.rm, dims = dims, ...)
 
 col_sums <-
 function(x, na.rm = FALSE, dims = 1, ...)
@@ -37,11 +44,18 @@ function(x, na.rm = FALSE, dims = 1, ...)
 
 col_sums.default <-
 function(x, na.rm = FALSE, dims = 1, ...)
-    base:::colSums(x, na.rm, dims, ...)
+    base::colSums(x, na.rm, dims, ...)
 
 col_sums.simple_triplet_matrix <-
 function(x, na.rm = FALSE, dims = 1, ...)
     .Call(R_sums_stm, x, 2L, na.rm)
+
+col_sums.dgCMatrix <-
+function(x, na.rm = FALSE, dims = 1, ...)
+    Matrix::colSums(x, na.rm = na.rm, dims = dims, ...)
+col_sums.dgTMatrix <-
+function(x, na.rm = FALSE, dims = 1, ...)
+    Matrix::colSums(x, na.rm = na.rm, dims = dims, ...)
 
 row_means <-
 function(x, na.rm = FALSE, dims = 1, ...)
@@ -49,11 +63,18 @@ function(x, na.rm = FALSE, dims = 1, ...)
 
 row_means.default <-
 function(x, na.rm = FALSE, dims = 1, ...)
-    base:::rowMeans(x, na.rm, dims, ...)
+    base::rowMeans(x, na.rm, dims, ...)
 
 row_means.simple_triplet_matrix <-
 function(x, na.rm = FALSE, dims = 1, ...)
     .means_simple_triplet_matrix(x, DIM = 1L, na.rm)
+
+row_means.dgCMatrix <-
+function(x, na.rm = FALSE, dims = 1, ...)
+    Matrix::rowMeans(x, na.rm = na.rm, dims = dims, ...)
+row_means.dgTMatrix <-
+function(x, na.rm = FALSE, dims = 1, ...)
+    Matrix::rowMeans(x, na.rm = na.rm, dims = dims, ...)
 
 col_means <-
 function(x, na.rm = FALSE, dims = 1, ...)
@@ -61,11 +82,18 @@ function(x, na.rm = FALSE, dims = 1, ...)
 
 col_means.default <-
 function(x, na.rm = FALSE, dims = 1, ...)
-    base:::colMeans(x, na.rm, dims, ...)
+    base::colMeans(x, na.rm, dims, ...)
 
 col_means.simple_triplet_matrix <-
 function(x, na.rm = FALSE, dims = 1, ...)
     .means_simple_triplet_matrix(x, DIM = 2L, na.rm)
+
+col_means.dgCMatrix <-
+function(x, na.rm = FALSE, dims = 1, ...)
+    Matrix::colMeans(x, na.rm = na.rm, dims = dims, ...)
+col_means.dgTMatrix <-
+function(x, na.rm = FALSE, dims = 1, ...)
+    Matrix::colMeans(x, na.rm = na.rm, dims = dims, ...)
 
 
 ## NOTE the C code must always check for special values and
