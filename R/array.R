@@ -76,6 +76,21 @@ is.simple_sparse_array <-
 function(x)
     inherits(x, "simple_sparse_array")
 
+Math.simple_sparse_array <-
+function(x, ...)
+{
+    ## Functions in the Math group mapping 0 to 0:
+    funs <- c("abs", "sign", "sqrt",
+              "floor", "ceiling", "trunc", "round", "signif")
+    if(is.na(match(as.character(.Generic), funs)))
+        stop(gettextf("Generic '%s' not defined for \"%s\" objects.",
+                      .Generic, .Class),
+             domain = NA)
+
+    x$v <- get(.Generic)(x$v, ...)
+    x
+}
+
 Summary.simple_sparse_array <-
 function(..., na.rm = FALSE)
 {

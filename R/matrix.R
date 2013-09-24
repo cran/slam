@@ -162,6 +162,20 @@ is.numeric.simple_triplet_matrix <-
 function(x)
     is.numeric(x$v)
 
+Math.simple_triplet_matrix <-
+function(x, ...)
+{
+    ## Functions in the Math group mapping 0 to 0:
+    funs <- c("abs", "sign", "sqrt",
+              "floor", "ceiling", "trunc", "round", "signif")
+    if(is.na(match(as.character(.Generic), funs)))
+        stop(gettextf("Generic '%s' not defined for \"%s\" objects.",
+                      .Generic, .Class),
+             domain = NA)
+
+    x$v <- get(.Generic)(x$v, ...)
+    x
+}
 
 Ops.simple_triplet_matrix <-
 function(e1, e2)

@@ -95,6 +95,31 @@ col_means.dgTMatrix <-
 function(x, na.rm = FALSE, dims = 1, ...)
     Matrix::colMeans(x, na.rm = na.rm, dims = dims, ...)
 
+row_norms <-
+function(x, p = 2)
+{
+    if(p == 2)
+        sqrt(row_sums(x ^ 2))
+    else if(p == 1)
+        row_sums(abs(x))
+    else if(p == Inf)
+        c(rollup(abs(x), 2L, FUN = max))
+    else
+        row_sums(abs(x) ^ p) ^ (1/p)
+}
+
+col_norms <-
+function(x, p = 2)
+{
+    if(p == 2)
+        sqrt(col_sums(x ^ 2))
+    else if(p == 1)
+        col_sums(abs(x))
+    else if(p == Inf)
+        c(rollup(abs(x), 1L, FUN = max))
+    else
+        col_sums(abs(x) ^ p) ^ (1/p)
+}
 
 ## NOTE the C code must always check for special values and
 ##      therefore has control over how to proceed. For now

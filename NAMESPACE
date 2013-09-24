@@ -8,6 +8,7 @@ export("as.simple_triplet_matrix",
 
 S3method("[", "simple_triplet_matrix")
 S3method("[<-", "simple_triplet_matrix")
+S3method("Math", "simple_triplet_matrix")
 S3method("Ops", "simple_triplet_matrix")
 S3method("Summary", "simple_triplet_matrix")
 S3method("as.matrix", "simple_triplet_matrix")
@@ -82,6 +83,9 @@ S3method("col_means", "simple_triplet_matrix")
 S3method("col_means", "dgTMatrix")
 S3method("col_means", "dgCMatrix")
 
+export("row_norms",
+       "col_norms")
+
 export("tcrossprod_simple_triplet_matrix")
 
 export("rollup")
@@ -108,6 +112,7 @@ export("as.simple_sparse_array",
 
 S3method("[", "simple_sparse_array")
 S3method("[<-", "simple_sparse_array")
+S3method("Math", "simple_sparse_array")
 S3method("Summary", "simple_sparse_array")
 S3method("as.array", "simple_sparse_array")
 S3method("as.array", "simple_triplet_matrix")
