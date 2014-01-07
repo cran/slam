@@ -1,7 +1,8 @@
 
-R version 2.10.1 Patched (2009-12-21 r50815)
-Copyright (C) 2009 The R Foundation for Statistical Computing
+R version 2.14.2 Patched (2012-02-29 r58546)
+Copyright (C) 2012 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
+Platform: i486-pc-linux-gnu (32-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -128,6 +129,9 @@ A 20x5 simple triplet matrix.
 [1] TRUE
 > identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(xst, x))
 [1] TRUE
+> identical(tcrossprod(x[1:10,], x[11:20,]),
++ 	  tcrossprod_simple_triplet_matrix(xst[1:10,], xst[11:20,]))
+[1] TRUE
 > 
 > x <- matrix(c(1, 0, 0, 2, 1, NA), nrow = 3)
 > x
@@ -140,6 +144,12 @@ A 20x5 simple triplet matrix.
 > identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(s))
 [1] TRUE
 > identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(s, x))
+[1] TRUE
+> identical(tcrossprod(x[2:3,], x[1,, drop = FALSE]), 
++ 	  tcrossprod_simple_triplet_matrix(s[2:3,], s[1,]))
+[1] TRUE
+> identical(tcrossprod(x[1,, drop = FALSE], x[2:3,]), 
++ 	  tcrossprod_simple_triplet_matrix(s[1,], s[2:3,]))
 [1] TRUE
 > 
 > ###

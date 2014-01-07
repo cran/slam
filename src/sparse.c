@@ -4,7 +4,7 @@
 #include <R_ext/Complex.h>
 #include <time.h>
 
-// ceeboo 2009/5,10,12 2010/1,5,6 2011/2 2012/4,5
+// ceeboo 2009/5,10,12 2010/1,5,6 2011/2 2012/4,5 2013/10
 //
 
 // remove attributes from payload vector (see src/main/coerce.c)
@@ -240,26 +240,247 @@ SEXP _sums_stm(SEXP x, SEXP R_dim, SEXP R_na_rm) {
     return r;
 }
 
+// tcrossprod for some triplet matrices. 
+//
+// NOTES 1) y is now implemented.
+//       2) pkgEnv = NULL deactivates the bailout to dense 
+//          computation.
+//
+SEXP tcrossprod_stm_stm(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
+    if (!inherits(x, "simple_triplet_matrix") || _valid_stm(x))
+	error("'x' not of class simple_triplet_matrix");
+    if (!isNull(y) &&
+	(!inherits(y, "simple_triplet_matrix") || _valid_stm(y)))
+	error("'y' not of class simple_triplet_matrix");
+    int *_ix, *_jx, *_nx, k, fx, l, n, m;
+    double *_vx, *_vy = NULL, *_r;
+    SEXP r, vx, vy = NULL;
+
+    l = INTEGER(VECTOR_ELT(x, 4))[0];
+    if (!isNull(y) &&
+	l != INTEGER(VECTOR_ELT(y, 4))[0])
+	error("the number of columns of 'x' and 'y' do not conform");
+
+#ifdef _TIME_H
+    clock_t t2, t1, t0 = clock();
+#endif
+    vx = VECTOR_ELT(x, 2);
+    if (TYPEOF(vx) != REALSXP)
+	vx = PROTECT(coerceVector(vx, REALSXP));
+    _vx = REAL(vx);
+    for (k = 0; k < LENGTH(vx); k++)
+	if (!R_FINITE(_vx[k])) {
+	    if (isNull(pkgEnv))
+		error("NA/NaN handling deactivated");
+	    if (vx != VECTOR_ELT(x, 2))
+		UNPROTECT(1);
+	    r = eval(PROTECT(LCONS(install(".tcrossprod_bailout"),
+			      CONS(x,
+			      CONS(y, 
+			      CONS(ScalarLogical(FALSE), 
+				   R_NilValue))))), pkgEnv);
+	    UNPROTECT(1);
+	    return r;
+	}
+
+    n = INTEGER(VECTOR_ELT(x, 3))[0];
+
+    if (!isNull(y)) {
+	vy = VECTOR_ELT(y, 2);
+	if (TYPEOF(vy) != REALSXP)
+	    vy = PROTECT(coerceVector(vy, REALSXP));
+	_vy = REAL(vy);
+	for (k = 0; k < LENGTH(vy); k++)
+	    if (!R_FINITE(_vy[k])) {
+		if (isNull(pkgEnv))
+		    error("NA/NaN handling deactivated");
+		if (vy != VECTOR_ELT(y, 2))
+		    UNPROTECT(1);
+		if (vx != VECTOR_ELT(x, 2))
+		    UNPROTECT(1);
+		r = eval(PROTECT(LCONS(install(".tcrossprod_bailout"),
+				  CONS(x,
+				  CONS(y, 
+				  CONS(ScalarLogical(FALSE), 
+				       R_NilValue))))), pkgEnv);
+		UNPROTECT(1);
+		return r;
+	    }
+
+	m = INTEGER(VECTOR_ELT(y, 3))[0];
+    } else
+	m = n;
+
+    r = PROTECT(allocMatrix(REALSXP, n, m));
+    memset(REAL(r), 0, sizeof(double) * n * m);
+    {
+	SEXP sx, dx, sy, dy;
+	sx = dx = sy = dy = R_NilValue; 
+	if (LENGTH(x) > 5) {
+	    sx = VECTOR_ELT(x, 5);
+	    if (!isNull(sx)) {
+		dx = VECTOR_ELT(sx, 0);
+		sx = getAttrib(sx, R_NamesSymbol);
+		if (!isNull(sx))
+		    sx = STRING_ELT(sx, 0);
+	    }
+	}
+	if (!isNull(y)) {
+	    if (LENGTH(y) > 5) {
+		sy = VECTOR_ELT(y, 5);
+		if (!isNull(sy)) {
+		    dy = VECTOR_ELT(sy, 0);
+		    sy = getAttrib(sy, R_NamesSymbol);
+		    if (!isNull(sy))
+			sy = STRING_ELT(sy, 0);
+		}
+	    }
+	} else {
+	    sy = sx;
+	    dy = dx;
+	}
+	if (!isNull(dx) || !isNull(dy)) {
+	    SEXP d;
+	    setAttrib(r, R_DimNamesSymbol, (d = allocVector(VECSXP, 2)));
+	    SET_VECTOR_ELT(d, 0, dx);
+	    SET_VECTOR_ELT(d, 1, dy);
+	    if (!isNull(sx) || !isNull(sy)) {
+		SEXP s;
+		setAttrib(d, R_NamesSymbol, (s = allocVector(STRSXP, 2)));
+		SET_STRING_ELT(s, 0, isNull(sx) ? R_BlankString : sx);
+		SET_STRING_ELT(s, 1, isNull(sy) ? R_BlankString : sy);
+	    }
+	}
+    }
+    if (!l || !n || !LENGTH(vx) || 
+	(!isNull(y) && (!m || !LENGTH(vy)))) {
+	UNPROTECT(1);
+	if (vx != VECTOR_ELT(x, 2))
+	    UNPROTECT(1);
+	if (!isNull(y) &&
+	    vy != VECTOR_ELT(y, 2))
+	    UNPROTECT(1);
+	return r;
+    }
+    // Arrange the data in blocks of equal column
+    // indexes. Note that the order within (of)
+    // the blocks is not relevant (see below).
+
+    _jx = INTEGER(VECTOR_ELT(x, 1));	    // column indexes
+    _nx = INTEGER(PROTECT(allocVector(INTSXP, l + 1)));
+    memset(_nx, 0, sizeof(int) * (l + 1));
+    for (k = 0; k < LENGTH(vx); k++)
+	_nx[_jx[k]]++;
+    for (k = 1; k < l + 1; k++)
+	_nx[k] += _nx[k-1];
+    {
+	int *__i;
+	double *__v;
+
+	__i = INTEGER(VECTOR_ELT(x, 0));    // row indexs
+	__v = _vx;
+
+	_ix = INTEGER(PROTECT(allocVector(INTSXP, LENGTH(vx))));
+	_vx = REAL(PROTECT(allocVector(REALSXP, LENGTH(vx))));
+
+	_nx -= 1;
+	for (k = 0; k < LENGTH(vx); k++) {
+	    int *__n = _nx + _jx[k];
+	    _ix[*__n] = __i[k];
+	    _vx[*__n] = __v[k];
+	    (*__n)++;
+	}
+	// reset
+	_nx += 1;
+	for (k = l; k > 0; k--)
+	    _nx[k] = _nx[k-1];
+	_nx[0] = 0;
+    }
+
+#ifdef _TIME_H
+    t1 = clock();
+#endif
+    // Aggregate the outer products of the columns.
+    if (isNull(y)) {
+	_r = REAL(r) - n - 1;
+	fx = _nx[0];
+	for (k = 1; k < l + 1; k++) {
+	    int lx = _nx[k];
+	    for (int j = fx; j < lx; j++) {
+		double  z =      _vx[j],
+		      *_z = _r + _ix[j] * n;
+		for (int i = fx; i < j + 1; i++)
+		    _z[_ix[i]] += _vx[i] * z;
+	    }
+	    fx = lx;
+	}
+	// Aggregate the lower and upper half.
+	_r = REAL(r);
+	for (k = 1; k < n; k++) {
+	    int j = k * n;
+	    // NOTE the off-diagonal array indexes are i * n + k, 
+	    //	    and k * n + i for i = 0, 1, ..., k-1. For the
+	    //      former (k - 1) * n + k < k * n  <=>  k < n,
+	    //      and adding k to the right sides does not
+	    //      change that.
+	    for (int i = k; i < j; i += n, j++) {
+		_r[j] += _r[i];
+		_r[i]  = _r[j];
+	    }
+	}
+    } else {
+	int *_iy, *_jy;
+
+	_r = REAL(r) - n - 1;
+	_iy = INTEGER(VECTOR_ELT(y, 0));
+	_jy = INTEGER(VECTOR_ELT(y, 1));	    // column indexes
+	for (k = 0; k < LENGTH(vy); k++) {
+	    int    j = _jy[k];
+	    double z = _vy[k],
+		   *_z = _r + _iy[k] * n;
+	    for (int i = _nx[j-1]; i < _nx[j]; i++)
+		_z[_ix[i]] += _vx[i] * z;
+	}
+    }
+	
+#ifdef _TIME_H
+    t2 = clock();
+    if (R_verbose && *LOGICAL(R_verbose))
+	Rprintf("tcrossprod_stm_stm: %.3fs [%.3fs/%.3fs]\n",
+		((double) t2 - t0) / CLOCKS_PER_SEC,
+		((double) t1 - t0) / CLOCKS_PER_SEC,
+		((double) t2 - t1) / CLOCKS_PER_SEC);
+#endif
+    UNPROTECT(4);
+    if (vx != VECTOR_ELT(x, 2))
+	UNPROTECT(1);
+    if (!isNull(y) &&
+	vy != VECTOR_ELT(y, 2))
+	UNPROTECT(1);
+
+    return r;
+}
+
 // tcrossprod for some triplet matrix and matrix
 //
 // NOTES 1) tcrossprod does not implement na.rm, so neither do we.
 //       2) triplet on triplet does not fit in here.
-//       3) if y = NULL or contains special values we call some
-//          bailout function with y possibly coerced to REALSXP.
+//       3) if y contains special values we call some bailout
+//          function.
 //       4) pkgEnv = NULL deactivates the bailout.
 //       5) transpose 
 //
 SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose,
 							  SEXP R_transpose) {
+    if (isNull(R_y))
+	return tcrossprod_stm_stm(x, R_y, pkgEnv, R_verbose);
     if (!inherits(x, "simple_triplet_matrix") || _valid_stm(x))
 	error("'x' not of class simple_triplet_matrix");
-    SEXP y = R_y;
-    if (isNull(y))
-	goto bailout;
-    if (!isMatrix(y))
+    if (!isMatrix(R_y))
 	error("'y' not of class matrix");
 
     int n, m;
+    SEXP y = R_y;
 
     n = INTEGER(VECTOR_ELT(x, 4))[0];
 
@@ -288,8 +509,7 @@ SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose,
 	if (!R_FINITE(*_y)) {
 	    if (isNull(pkgEnv))
 		error("NA/NaN handling deactivated");
-bailout:
-	    r = eval(PROTECT(LCONS(install(".tcrossprod.bailout"),
+	    r = eval(PROTECT(LCONS(install(".tcrossprod_bailout"),
 			      CONS(x,
 			      CONS(y, 
 			      CONS((R_transpose && *LOGICAL(R_transpose)) ?
@@ -471,154 +691,6 @@ bailout:
     return r;
 }
 
-// tcrossprod for some triplet matrices. 
-//
-// NOTES 1) y is not implemented.
-//       2) pkgEnv = NULL deactivates the bailout to dense 
-//          computation.
-//
-SEXP tcrossprod_stm_stm(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
-    if (!inherits(x, "simple_triplet_matrix") || _valid_stm(x))
-	error("'x' not of class simple_triplet_matrix");
-    if (!isNull(y))
-	error("'y' not implemented");
-    int *_i, *_j, *_n, k, f, n, m;
-    double *_v, *_r;
-    SEXP r, s;
-#ifdef _TIME_H
-    clock_t t2, t1, t0 = clock();
-#endif
-    s = VECTOR_ELT(x, 2);
-    if (TYPEOF(s) != REALSXP)
-	s = PROTECT(coerceVector(s, REALSXP));
-    _v = REAL(s);
-    for (k = 0; k < LENGTH(s); k++)
-	if (!R_FINITE(_v[k])) {
-	    if (isNull(pkgEnv))
-		error("NA/NaN handling deactivated");
-	    r = eval(PROTECT(LCONS(install(".tcrossprod.bailout"),
-			      CONS(x,
-			      CONS(y, 
-			      CONS(ScalarLogical(FALSE), 
-				   R_NilValue))))), pkgEnv);
-	    UNPROTECT(1);
-	    if (s != VECTOR_ELT(x, 2))
-		UNPROTECT(1);
-	    return r;
-	}
-
-    n = INTEGER(VECTOR_ELT(x, 3))[0];
-    if (!n) {
-	if (s != VECTOR_ELT(x, 2))
-	    UNPROTECT(1);
-	return allocMatrix(REALSXP, 0, 0);
-    }
-    m = INTEGER(VECTOR_ELT(x, 4))[0];
-    r = PROTECT(allocMatrix(REALSXP, n, n));
-    memset(REAL(r), 0, sizeof(double) * n * n);
-    if (LENGTH(x) > 5) {
-	SEXP s = VECTOR_ELT(x, 5);
-	if (!isNull(s)) {
-	    SEXP t = VECTOR_ELT(s, 0);
-	    if (!isNull(t)) {
-		SEXP d;
-		setAttrib(r, R_DimNamesSymbol, (d = allocVector(VECSXP, 2)));
-		SET_VECTOR_ELT(d, 0, t);
-		SET_VECTOR_ELT(d, 1, t);
-		s = getAttrib(s, R_NamesSymbol);
-		if (!isNull(s)) {
-		    t = STRING_ELT(s, 0);
-		    setAttrib(d, R_NamesSymbol, (s = allocVector(STRSXP, 2)));
-		    SET_STRING_ELT(s, 0, t);
-		    SET_STRING_ELT(s, 1, t);
-		}
-	    }
-	}
-    }
-    if (!m || !LENGTH(s)) {
-	UNPROTECT(1);
-	if (s != VECTOR_ELT(x, 2))
-	    UNPROTECT(1);
-	return r;
-    }
-    // Arrange the data in blocks of equal column
-    // indexes. Note that the order of and within
-    // the blocks is not relevant (see below).
-
-    _j = INTEGER(VECTOR_ELT(x, 1));	    // column indexes
-    _n = INTEGER(PROTECT(allocVector(INTSXP, m + 1)));
-    memset(_n, 0, sizeof(int) * (m + 1));
-    for (k = 0; k < LENGTH(s); k++)
-	_n[_j[k]]++;
-    for (k = 1; k < m + 1; k++)
-	_n[k] += _n[k-1];
-    {
-	int *__i;
-	double *__v;
-
-	__i = INTEGER(VECTOR_ELT(x, 0));    // row indexs
-	__v = _v;
-
-	_i = INTEGER(PROTECT(allocVector(INTSXP, LENGTH(s))));
-	_v = REAL(PROTECT(allocVector(REALSXP, LENGTH(s))));
-
-	_n -= 1;
-	for (k = 0; k < LENGTH(s); k++) {
-	    int *__n = _n + _j[k];
-	    _i[*__n] = __i[k];
-	    _v[*__n] = __v[k];
-	    (*__n)++;
-	}
-	// reset
-	_n += 1;
-	for (k = m; k > 0; k--)
-	    _n[k] = _n[k-1];
-	_n[0] = 0;
-    }
-#ifdef _TIME_H
-    t1 = clock();
-#endif
-    // Aggregate the outer products of the columns.
-    _r = REAL(r) - n - 1;
-     f = _n[0];
-    for (k = 1; k < m + 1; k++) {
-	int l = _n[k];
-	for (int j = f; j < l; j++) {
-	    double  z =      _v[j],
-		  *_z = _r + _i[j] * n;
-	    for (int i = f; i < j + 1; i++)
-		_z[_i[i]] += _v[i] * z;
-	}
-	f = l;
-    }
-    // Aggregate the lower and upper half.
-    _r = REAL(r);
-    for (k = 1; k < n; k++) {
-	f = k * n;
-	// NOTE the off-diagonal array indexes are i * n + k, 
-	//	and k * n + i for i = 0, 1, ..., k-1. For the
-	//      former (k - 1) * n + k < k * n  <=>  k < n,
-	//      and adding k to the right-hand sides does
-	//      change that.
-	for (int i = k; i < f; i += n, f++) {
-	    _r[f] += _r[i];
-	    _r[i]  = _r[f];
-	}
-    }
-#ifdef _TIME_H
-    t2 = clock();
-    if (R_verbose && *LOGICAL(R_verbose))
-	Rprintf("_crossprod_stm: %.3fs [%.3fs/%.3fs]\n",
-		((double) t2 - t0) / CLOCKS_PER_SEC,
-		((double) t1 - t0) / CLOCKS_PER_SEC,
-		((double) t2 - t1) / CLOCKS_PER_SEC);
-#endif
-    UNPROTECT(4);
-    if (s != VECTOR_ELT(x, 2))
-	UNPROTECT(1);
-
-    return r;
-}
 
 
 

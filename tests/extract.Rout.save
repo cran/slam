@@ -1,8 +1,7 @@
 
-R version 2.14.2 Patched (2012-02-29 r58546)
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: i486-pc-linux-gnu (32-bit)
+R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
+Copyright (C) 2013 The R Foundation for Statistical Computing
+Platform: i686-pc-linux-gnu (32-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -256,7 +255,7 @@ Error in x[-c(1, NA)] : only 0's may be mixed with negative subscripts
 > x[c(1, 8)]			## out of bounds allowed
 [1]  1 NA
 > try(x[1, 8])			## not allowed
-Error in try(x[1, 8]) : subscript out of bounds
+Error in x[1, 8] : subscript out of bounds
 > 
 > dim(k) <- c(3,2)
 > k[6] <- 3
@@ -277,3 +276,6 @@ Error in x[k] : subscript out of bounds
 > 
 > ###
 > 
+> proc.time()
+   user  system elapsed 
+  0.380   0.024   0.400 

@@ -3,7 +3,7 @@
 #include <R_ext/Complex.h>
 #include <time.h>
 
-// ceeboo 2012/3+4
+// ceeboo 2012/3+4 2013/10
 //
 
 SEXP _part_index(SEXP x) {
@@ -421,5 +421,14 @@ SEXP _match_matrix(SEXP x, SEXP y, SEXP _nm) {
 
     UNPROTECT(1);
     return r;
+}
+
+
+// Use with care!
+SEXP _stripDimNamesNames(SEXP x) {
+    SEXP d = getAttrib(x, R_DimNamesSymbol);
+    if (!isNull(d))
+	setAttrib(d, R_NamesSymbol, R_NilValue);
+    return x;
 }
 

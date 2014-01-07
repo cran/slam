@@ -1,23 +1,28 @@
 \name{crossprod}
 \alias{tcrossprod_simple_triplet_matrix}
+\alias{crossprod_simple_triplet_matrix}
+\alias{matprod_simple_triplet_matrix}
 \title{
 Matrix Crossproduct
 }
 \description{
-Compute the matrix cross-product of a sparse and dense matrix.
+Compute the matrix cross-product of a sparse and a dense or sparse matrix.
 }
 \usage{
 tcrossprod_simple_triplet_matrix(x, y = NULL)
+##
+crossprod_simple_triplet_matrix(x, y = NULL)
+matprod_simple_triplet_matrix(x, y)
 }
 \arguments{
-  \item{x}{a matrix in \code{simple_triplet_matrix}-form.
-}
-  \item{y}{a numeric matrix.
+  \item{x, y}{a matrix in \code{simple_triplet_matrix}-form and/or a dense
+matrix, where one must be of the form indicated by the suffix.
 }
 }
 \details{
-Provides fast computation of \code{x \%*\% t(x)} and 
-\code{x \%*\% t(y)} (\code{tcrossprod}).
+Function \code{tcrossprod_simple_triplet_matrix} implements fast computation 
+of \code{x \%*\% t(x)} and \code{x \%*\% t(y)} (\code{tcrossprod}). The
+remaining functions are (optimized) wrappers.
 }
 \value{
 A double matrix, with appropriate \code{dimnames} taken from \code{x}
@@ -27,9 +32,9 @@ and \code{y}.
 Christian Buchta
 }
 \note{
-If \code{y} (or \code{x}) contains any of the special values \code{NA},
-\code{NaN}, or \code{Inf} (if \code{y = NULL}) then \code{x} is coerced
-to \code{matrix} and the computation is delegated to \code{tcrossprod}.
+The computation is delegated to \code{tcrossprod} if \code{y} (or \code{x}
+if \code{y == NULL}) contains any of the special values \code{NA},
+\code{NaN}, or \code{Inf}.
 }
 \seealso{
 \code{\link[base]{crossprod}} for dense-on-dense computations.
@@ -42,6 +47,8 @@ s <- as.simple_triplet_matrix(x)
 tcrossprod_simple_triplet_matrix(s, x)
 ##
 tcrossprod_simple_triplet_matrix(s)
+##
+tcrossprod_simple_triplet_matrix(s[1L, ], s[2:3, ])
 }
 \keyword{algebra}
 \keyword{array}

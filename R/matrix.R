@@ -505,7 +505,7 @@ function(x, value)
     }
     ## See the constructor (above).
     if(is.null(value))
-        x["dimnames"] <- list(NULL)
+        x$dimnames <- NULL
     else
         x$dimnames <- dnx
     x
@@ -701,8 +701,20 @@ function(x, i, j, drop = FALSE)
             pj[j] <- seq_len(nc)
         }
 
-        if(!is.null(dnx <- x$dimnames))
-            dnx[] <- list(dnx[[1L]][i], dnx[[2L]][j])
+        if(!is.null(dnx <- x$dimnames)) {
+	    if (!missing(i)) {
+		dnx[1L] <- list(dnx[[1L]][i])
+		if (!length(dnx[[1L]]))
+		    dnx[1L] <- list(NULL)
+	    }
+	    if (!missing(j)) {
+		dnx[2L] <- list(dnx[[2L]][j])
+		if (!length(dnx[[2L]]))
+		    dnx[2L] <- list(NULL)
+	    }
+	    if (!length(dnx[[1L]]) && !length(dnx[[2L]]))
+		dnx <- NULL
+	}
 
         i <- if(missing(i)) x$i[pos] else pi[x$i[pos]]
         j <- if(missing(j)) x$j[pos] else pj[x$j[pos]]

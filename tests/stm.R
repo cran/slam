@@ -47,6 +47,8 @@ identical(colMeans(xna, na.rm = TRUE), col_means(xnast, na.rm = TRUE))
 
 identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(xst))
 identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(xst, x))
+identical(tcrossprod(x[1:10,], x[11:20,]),
+	  tcrossprod_simple_triplet_matrix(xst[1:10,], xst[11:20,]))
 
 x <- matrix(c(1, 0, 0, 2, 1, NA), nrow = 3)
 x
@@ -54,6 +56,10 @@ s <- as.simple_triplet_matrix(x)
 
 identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(s))
 identical(tcrossprod(x), tcrossprod_simple_triplet_matrix(s, x))
+identical(tcrossprod(x[2:3,], x[1,, drop = FALSE]), 
+	  tcrossprod_simple_triplet_matrix(s[2:3,], s[1,]))
+identical(tcrossprod(x[1,, drop = FALSE], x[2:3,]), 
+	  tcrossprod_simple_triplet_matrix(s[1,], s[2:3,]))
 
 ###
 

@@ -12,3 +12,6 @@ x <- array(seq_len(prod(d)), d)
 s <- as.simple_sparse_array(x)
 dim(s) <- dim(x) <- c(d[length(d)], d[-length(d)])
 stopifnot(identical(as.array(s), x))
+
+dimnames(s) <- dimnames(x) <- NULL
+stopifnot(identical(as.array(s), x))

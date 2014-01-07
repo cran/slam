@@ -54,6 +54,7 @@ useDynLib("slam",
           "_row_tsums",   ## used by skmeans
           "_tcrossprod_stm_stm"    = "tcrossprod_stm_stm",
           "_tcrossprod_stm_matrix" = "tcrossprod_stm_matrix",
+          "_col_apply_stm",
           .fixes = "R"
           )
 
@@ -86,8 +87,17 @@ S3method("col_means", "dgCMatrix")
 export("row_norms",
        "col_norms")
 
-export("tcrossprod_simple_triplet_matrix")
+##
+export("tcrossprod_simple_triplet_matrix",
+       "crossprod_simple_triplet_matrix",
+       "matprod_simple_triplet_matrix")
 
+export("rowapply_simple_triplet_matrix",
+       "colapply_simple_triplet_matrix",
+       "crossapply_simple_triplet_matrix",
+       "tcrossapply_simple_triplet_matrix")
+
+##
 export("rollup")
 
 S3method("rollup", "default")
@@ -138,5 +148,6 @@ if(getRversion() >= "2.13.0") {
 ## Sparse matrix format readers and writers
 export("read_stm_CLUTO",
        "write_stm_CLUTO",
-       "read_stm_MC"
+       "read_stm_MC",
+       "write_stm_MC"
        )

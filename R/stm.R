@@ -1,7 +1,8 @@
 
-## CB 2009/5,6,10 2010/6
+## CB 2009/5,6,10 2010/6 2013/10
 
 
+## NOTE the C code does not use long double for accumulation.
 .means_simple_triplet_matrix <-
 function(x, DIM, na.rm)
 {
@@ -119,47 +120,6 @@ function(x, p = 2)
         c(rollup(abs(x), 1L, FUN = max))
     else
         col_sums(abs(x) ^ p) ^ (1/p)
-}
-
-## NOTE the C code must always check for special values and
-##      therefore has control over how to proceed. For now
-##      it calls the bailout function below. For verbose
-##      information set the last argument to TRUE.
-##
-##      The symmetric case is now also handled in C. Runtime
-##      could be further improved if data need not to be 
-##      ordered (see the C code).
-tcrossprod_simple_triplet_matrix <-
-function(x, y = NULL) {
-    if (is.null(y))
-	.Call(R_tcrossprod_stm_stm, x, y, 
-	      environment(tcrossprod_simple_triplet_matrix), FALSE)
-    else
-	.Call(R_tcrossprod_stm_matrix, x, y,
-	      environment(tcrossprod_simple_triplet_matrix), FALSE, FALSE)
-}
-
-## For now internal.
-.ttcrossprod_simple_triplet_matrix <-
-function(x, y = NULL) {
-    if (is.null(y))
-	tcrossprod_simple_triplet_matrix(x)
-    else
-	.Call(R_tcrossprod_stm_matrix, x, y,
-	      environment(tcrossprod_simple_triplet_matrix), FALSE, TRUE)
-}
-
-## FIXME warning?
-.tcrossprod.bailout <-
-function(x, y, transpose) {
-    if (transpose) {
-	if (is.null(y))
-	    tcrossprod(as.matrix(x))
-	else
-	    tcrossprod(y, as.matrix(x))
-    }
-    else
-	tcrossprod(as.matrix(x), y)
 }
 
 ##

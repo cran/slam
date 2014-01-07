@@ -2,15 +2,17 @@
 \alias{read_stm_CLUTO}
 \alias{write_stm_CLUTO}
 \alias{read_stm_MC}
+\alias{write_stm_MC}
 \title{Read and Write Sparse Matrix Format Files}
 \description{
-  Read and write CLUTO sparse matrix format files, or read the CCS
-  format variant employed by the MC toolkit.
+  Read and write CLUTO sparse matrix format files, or the CCS format
+  variant employed by the MC toolkit.
 }
 \usage{
 read_stm_CLUTO(file)
 write_stm_CLUTO(x, file)
 read_stm_MC(file, scalingtype = NULL)
+write_stm_MC(x, file)
 }
 \arguments{
   \item{file}{a character string with the name of the file to read or
@@ -47,5 +49,9 @@ read_stm_MC(file, scalingtype = NULL)
   \code{read_stm_MC} reads such sparse matrix information with argument
   \code{file} giving the path with the base file name, and returns a
   \link[slam:matrix]{simple triplet matrix}.
+
+  \code{write_stm_MC} writes matrices in MC CCS sparse matrix format.
+  Argument \code{x} must be coercible to a simple triplet matrix via
+  \code{\link[slam:matrix]{as.simple_triplet_matrix}}.
 }
 \keyword{IO}

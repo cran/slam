@@ -1,0 +1,121 @@
+
+R version 2.14.2 Patched (2012-02-29 r58546)
+Copyright (C) 2012 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: i486-pc-linux-gnu (32-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> library("slam")
+> set.seed(201311)
+> 
+> ###
+> x <- matrix(rnorm(100), nrow = 20,
++     dimnames =  list(1:20, LETTERS[1:5])
++ )
+> x[sample(100, 80)] <- 0
+> 
+> s <- as.simple_triplet_matrix(x)
+> s
+A 20x5 simple triplet matrix.
+> 
+> ##
+> identical(apply(x, 2L, var), colapply_simple_triplet_matrix(s, var))
+[1] TRUE
+> identical(apply(x, 1L, var), rowapply_simple_triplet_matrix(s, var))
+[1] TRUE
+> 
+> ##
+> k <- 1:2
+> z <- var(x[, k], x[, -k])
+> identical(z, crossapply_simple_triplet_matrix(s[, k], s[, -k], FUN = var))
+[1] TRUE
+> identical(z, crossapply_simple_triplet_matrix(x[, k], s[, -k], FUN = var))
+[1] TRUE
+> 
+> identical(z, 
++     tcrossapply_simple_triplet_matrix(t(s[, k]), t(s[, -k]), FUN = var))
+[1] TRUE
+> identical(z, 
++     tcrossapply_simple_triplet_matrix(t(x[, k]), t(s[, -k]), FUN = var))
+[1] TRUE
+> 
+> z <- var(x)
+> identical(z, crossapply_simple_triplet_matrix(s, FUN = var))
+[1] TRUE
+> 
+> ## null-dimensions
+> z <- var(x[, 0], x)
+> z
+     A B C D E
+> all.equal(z, crossapply_simple_triplet_matrix(s[, 0], s, FUN = var))
+[1] TRUE
+> all.equal(z, crossapply_simple_triplet_matrix(x[, 0], s, FUN = var))
+[1] TRUE
+> 
+> try(crossapply_simple_triplet_matrix(x[, 0], s, FUN = var, use = "all.obs"))
+Error in FUN(x, y, ...) : 'x' is empty
+> 
+> z <- var(x, x[, 0])
+> z
+
+A
+B
+C
+D
+E
+> all.equal(z, crossapply_simple_triplet_matrix(s, s[, 0], FUN = var))
+[1] TRUE
+> all.equal(z, crossapply_simple_triplet_matrix(x, s[, 0], FUN = var))
+[1] TRUE
+> 
+> 
+> z <- var(x[, 0])
+> z
+<0 x 0 matrix>
+> all.equal(z, crossapply_simple_triplet_matrix(s[, 0], s[, 0], FUN = var))
+[1] TRUE
+> all.equal(z, crossapply_simple_triplet_matrix(x[, 0], s[, 0], FUN = var))
+[1] TRUE
+> 
+> all.equal(z, crossapply_simple_triplet_matrix(s[, 0], FUN = var))
+[1] TRUE
+> 
+> z <- var(x[0, ])
+> z
+   A  B  C  D  E
+A NA NA NA NA NA
+B NA NA NA NA NA
+C NA NA NA NA NA
+D NA NA NA NA NA
+E NA NA NA NA NA
+> all.equal(z, crossapply_simple_triplet_matrix(s[0, ], s[0, ], FUN = var))
+[1] TRUE
+> all.equal(z, crossapply_simple_triplet_matrix(x[0, ], s[0, ], FUN = var))
+[1] TRUE
+> 
+> all.equal(z, crossapply_simple_triplet_matrix(s[0, ], FUN = var))
+[1] TRUE
+> 
+> ## non-scalar
+> z <- crossapply_simple_triplet_matrix(s, s, FUN = ">")
+> all.equal(z, crossapply_simple_triplet_matrix(x, s, FUN = ">"))
+[1] TRUE
+> 
+> all.equal(z[lower.tri(z)],
++     crossapply_simple_triplet_matrix(s, FUN = ">")[lower.tri(z)])
+[1] TRUE
+> 
+> ###
+> 

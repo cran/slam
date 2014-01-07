@@ -29,6 +29,7 @@ x[matrix(integer(), nrow = 0, ncol = 3)] <- 1
 str(x)
 
 try(x[c(NA, 2, 3)] <- 1:2)	    ## not allowed
+## works with R >= 3.x
 try(x[-c(.Machine$integer.max + 1, 1)] <- c(1, 2))
 
 
