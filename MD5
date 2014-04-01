@@ -1,5 +1,5 @@
-5d9298e9e6858fac817ae9e5c20fafb0 *DESCRIPTION
-ea2bd8203745a646b525d93b9b00202f *NAMESPACE
+2a39ca4e715e80d34c89842a14c12fcc *DESCRIPTION
+f56b06f385a4253280d909f000a1c1f1 *NAMESPACE
 6da5f4bb978d5d2ab7de8ddd6c977571 *R/abind.R
 b94f005638ee208bb4417ccb4893aa68 *R/apply.R
 bae6cb5d24e86d83d09c93a0c15fd103 *R/array.R
@@ -22,10 +22,10 @@ f75048a25feebac938f74e1ed79fe683 *man/sums.Rd
 2fa4c7011c2bc0f7449ae151d5cc44ae *src/Makevars
 dc088b0ac562f358ced61cdedbbf757d *src/apply.c
 9073b9f0973185bf58235f4c640f21e7 *src/grouped.c
-ac1d43b99ac584023d2b6c422f3ea0b8 *src/sparse.c
+63ba179c0961b98315f55b2cf0fd359b *src/sparse.c
 f404802b0bc9fbc1c7062fabcacbcdfa *src/util.c
 6e9231824027888adde90f5b525bed48 *tests/abind.R
-b3af542bdf164790ec572da54d869648 *tests/abind.Rout.save
+2a747ac2d11d058340e8f0c8bc01d71e *tests/abind.Rout.save
 9d8026ba97ffb2ae9da0d60bfec7cbab *tests/apply.R
 8f7e0558465a3d7bc38c914a3bc08997 *tests/apply.Rout.save
 0163073a0b1bc0d95defebb7bbeebcdd *tests/crossprod.R

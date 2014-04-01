@@ -11,7 +11,7 @@
 SEXP _unattr(SEXP x) {
     if (!isVector(x) || ATTRIB(x) == R_NilValue)
 	return x;
-    if (NAMED(x) == 2) {
+    if (NAMED(x) > 1) {
 	SEXP s = x;
 	SEXP a = PROTECT(ATTRIB(x));
 	SET_ATTRIB(x, R_NilValue);
