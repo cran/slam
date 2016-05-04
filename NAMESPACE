@@ -153,3 +153,18 @@ export("read_stm_CLUTO",
        "read_stm_MC",
        "write_stm_MC"
        )
+
+##
+## export("unfold",
+##        "fold")
+## S3method("unfold", "default")
+## S3method("unfold", "matrix")
+## S3method("unfold", "array")
+## S3method("unfold", "simple_triplet_matrix")
+## S3method("unfold", "simple_sparse_array")
+## S3method("fold",   "default")
+## S3method("fold",   "matrix")
+## S3method("fold",   "array")
+## S3method("fold",   "simple_triplet_matrix")
+## S3method("fold",   "simple_sparse_array")
+

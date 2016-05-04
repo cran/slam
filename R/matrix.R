@@ -368,9 +368,11 @@ function(e1, e2)
             e2 <- e3
         }
         ## Find duplicated indices.
-        pos <- match(paste(e2$i, e2$j, sep = "\r"),
-                     paste(e1$i, e1$j, sep = "\r"),
-                     nomatch = 0L)
+        ## pos <- match(paste(e2$i, e2$j, sep = "\r"),
+        ##              paste(e1$i, e1$j, sep = "\r"),
+        ##              nomatch = 0L)
+        pos <- .Call(R_match_matrix, cbind(e1$i, e1$j),
+                                     cbind(e2$i, e2$j), 0L)[[2L]]
         ind <- which(pos > 0L)
         if(!all(is.finite(e1$v)) || !all(is.finite(e2$v))) {
 	    ## Augment and reduce
@@ -414,9 +416,11 @@ function(e1, e2)
         e2 <- e3
     }
     ## Find duplicated indices.
-    pos <- match(paste(e2$i, e2$j, sep = "\r"),
-                 paste(e1$i, e1$j, sep = "\r"),
-                 nomatch = 0L)
+    ## pos <- match(paste(e2$i, e2$j, sep = "\r"),
+    ##              paste(e1$i, e1$j, sep = "\r"),
+    ##              nomatch = 0L)
+    pos <- .Call(R_match_matrix, cbind(e1$i, e1$j),
+                                 cbind(e2$i, e2$j), 0L)[[2L]]
     ind <- which(pos == 0L)
     ## Notice 0 + special value = special value.
     e1$v[pos] <- e1$v[pos] + e2$v[pos > 0L]
