@@ -5,7 +5,8 @@ function(x, MARGIN, INDEX, FUN, ...)
     UseMethod("rollup")
 
 rollup.array <-
-function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE) {
+function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
+	    MODE = "double") {
     if (is.character(MARGIN))
         MARGIN <- match(MARGIN, names(dimnames(x)))
     if (!all(match(MARGIN, seq_along(dim(x)), nomatch = 0L)))
@@ -55,8 +56,11 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE) {
     i <- split.default(x, i)
     names(i) <- NULL
     i <- lapply(i, FUN, ...)
-    if (all(unlist(lapply(i, length)) == 1L))
+    if (all(unlist(lapply(i, length)) == 1L)) {
 	i <- unlist(i, recursive = FALSE, use.names = FALSE)
+	if (is.null(i))
+	    i <- vector(MODE, 0L)
+    }
     ## NOTE see drop_simple_sparse_array
     if (DROP) {
 	if (any(d == 0L))
@@ -77,7 +81,7 @@ rollup.matrix <- rollup.array
 
 rollup.simple_sparse_array <-
 function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
-	    EXPAND = c("none", "sparse", "dense", "all")) {
+	    EXPAND = c("none", "sparse", "dense", "all"), MODE = "double") {
     if (is.character(MARGIN)) 
 	MARGIN <- match(MARGIN, names(dimnames(x)))
     if (!all(match(MARGIN, seq_along(dim(x)), nomatch = 0L)))
@@ -114,18 +118,24 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	stop("component 'v' contains 'ZERO' value(s)")
     for (k in MARGIN) {
 	z <- INDEX[[as.character(k)]]
-	z <-
-	if (is.null(z))
-	    structure(
+	if (is.null(z)) {
+	    ## NOTE defer processing.
+	    if (EXPAND < 3L) {
+		if (EXPAND > 1L)
+		    T[[k]] <- D[k]
+		D[k] <- -1L
+		next
+	    }
+	    z <- structure(
 		rep(1L, D[k]),
 		levels = "1",
 		class  = "factor"
 	    )
-	else {
+	} else {
 	    if (length(z) != D[k])
 		stop(gettextf("INDEX [%s] invalid length", k),
                      domain = NA)
-	    factor(z)
+	    z <- factor(z)
 	}
 	l <- levels(z)
 	D[k]   <- length(l)
@@ -166,6 +176,14 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	i <- match(i, k)
 	rm(k)
     } else {
+	if (EXPAND < 3L) {
+	    i <- which(D == -1L)
+	    if (length(i)) {
+		D[i]   <- 1L
+		N[i]   <- list("1")
+		I[, i] <- 1L
+	    }
+	}
 	i <- .Call(R_match_matrix, I, NULL, NULL)
 	I <- I[i[[2L]],, drop = FALSE]
 	i <-   i[[1L]]
@@ -213,6 +231,8 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
     }
     if (all(unlist(lapply(V, length)) == 1L)) {
 	V <- unlist(V, recursive = FALSE, use.names = FALSE)
+	if (is.null(V)) 
+	    V <- vector(MODE, 0L)
 	i <- V == vector(typeof(V), 1L)
 	i <- which(i)
 	if (length(i)) {
@@ -287,10 +307,10 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ...) {
 
 ##
 rollup.default <-
-function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE) {
+function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE, MODE = "double") {
     if (!length(dim(x)))
 	stop("dim(x) must have a positive length")
-    rollup(as.array(x), MARGIN, INDEX, FUN, ..., DROP = DROP)
+    rollup(as.array(x), MARGIN, INDEX, FUN, ..., DROP = DROP, MODE = MODE)
 }
 
 ###

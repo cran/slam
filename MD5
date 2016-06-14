@@ -1,4 +1,4 @@
-0359c2a5108557b8f928c793590334f0 *DESCRIPTION
+6261d2308eb5a475ce26d7c94c935c6d *DESCRIPTION
 f42134b69149c7fda6d76b7e90399b7b *NAMESPACE
 6da5f4bb978d5d2ab7de8ddd6c977571 *R/abind.R
 b94f005638ee208bb4417ccb4893aa68 *R/apply.R
@@ -7,7 +7,7 @@ bae6cb5d24e86d83d09c93a0c15fd103 *R/array.R
 c4c13f3dd3aa408f21c3588a110790ac *R/foreign.R
 9a83aa8c9941d92b47d2fd0dcbf1c1f0 *R/matrix.R
 dd2ab1bd69bd82fa36c13b5832354e9c *R/reduce.R
-b3b8a760dce607548a5b0199751acdcf *R/rollup.R
+e395e9940bcc492437c42e03681abd3d *R/rollup.R
 081170556760537396d1c76b108027f2 *R/stm.R
 9f47c841773753b7d83c09d6daeb461d *R/subassign.R
 21736500a7b5530d1c2d5e75faee4c35 *man/abind.Rd
@@ -17,7 +17,7 @@ b549d8099a6034335d09c825532c0fca *man/apply.Rd
 70074ed00c0a76ffec8f177b7c8264ca *man/foreign.Rd
 2e276d68899202ed1793e18793a53a50 *man/matrix.Rd
 c654d2bd652ea6876766d95d6d8e8ca5 *man/norms.Rd
-833e72b8fbf64075a6c9bf5f082205e1 *man/rollup.Rd
+923f20660847259d08f0b02b4f3bcddb *man/rollup.Rd
 f75048a25feebac938f74e1ed79fe683 *man/sums.Rd
 2fa4c7011c2bc0f7449ae151d5cc44ae *src/Makevars
 dc088b0ac562f358ced61cdedbbf757d *src/apply.c
@@ -37,8 +37,8 @@ a3f7839ed3a231dc02f704df7333ba70 *tests/matrix.R
 b86c28c833275f95a0640bda242e0cbb *tests/matrix.Rout.save
 1aedaf99201b77a1074e9118bc5704d2 *tests/matrix_dimnames.R
 0a73c3fcb1cf31632db30941809f2b1d *tests/matrix_dimnames.Rout.save
-f0982dad0cd3b3b4be0ba3b4c6c6ad2a *tests/rollup.R
-88b56aa248dca90739fdeb1133164e5d *tests/rollup.Rout.save
+81f3ceea72c7debaeded0e0a38dee245 *tests/rollup.R
+4c4203fcac718fc625cf1be8614981a3 *tests/rollup.Rout.save
 46fd1f36f27c217c9840e0de65dcc4ad *tests/ssa_valid.R
 643da57c362b62fa828dbf402b42ac9d *tests/ssa_valid.Rout.save
 c9b9eb21094294bd1a5df45a757c7961 *tests/stm.R
@@ -57,5 +57,5 @@ d6b3420aa02e332ae1642bea3accce10 *tests/stm_zeros.R
 c88b4e2f403e1a8f3ba07fadcc73c7e4 *tests/stm_zeros.Rout.save
 1de2d8f2c87f9310d610bca4723a6960 *tests/subassign.R
 74f90d3fb160859744e5e9f4f33ef091 *tests/subassign.Rout.save
-6d0876bf6323e5b96be806e62876a011 *tests/util.R
-ffc8148a014f55ce7602d4d476c0e5fb *tests/util.Rout.save
+1f68ccd580113a76cd2dc23865cd169d *tests/util.R
+e517bb7d1e982da24057ea91442e92ab *tests/util.Rout.save

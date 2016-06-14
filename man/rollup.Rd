@@ -16,9 +16,12 @@ rollup(x, MARGIN, INDEX, FUN, ...)
 
 \method{rollup}{simple_triplet_matrix}(x, MARGIN, INDEX = NULL, FUN = sum, \dots)
 \method{rollup}{simple_sparse_array}(x, MARGIN, INDEX = NULL, FUN = sum, \dots, 
-       DROP = FALSE, EXPAND = c("none", "sparse", "dense", "all"))
-\method{rollup}{matrix}(x, MARGIN, INDEX = NULL, FUN = sum, \dots, DROP = FALSE)
-\method{rollup}{array}(x, MARGIN, INDEX = NULL, FUN = sum, \dots, DROP = FALSE)
+       DROP = FALSE, EXPAND = c("none", "sparse", "dense", "all"), 
+       MODE = "double")
+\method{rollup}{matrix}(x, MARGIN, INDEX = NULL, FUN = sum, \dots,
+       DROP = FALSE, MODE = "double")
+\method{rollup}{array}(x, MARGIN, INDEX = NULL, FUN = sum, \dots, 
+       DROP = FALSE, MODE = "double")
 }
 \arguments{
   \item{x}{a sparse (or dense) array, typically of numeric or logical values.
@@ -31,14 +34,16 @@ rollup(x, MARGIN, INDEX, FUN, ...)
   \item{DROP}{option to delete the dimensions of the result which have only one level.}
   \item{EXPAND}{the cell expansion method to use (see Details).
 }
+  \item{MODE}{the type to use for the values if the result is empty.
+}
   \item{\dots}{optional arguments to \code{FUN}.
 }
 }
 \details{
-Provides fast summation over the rows or columns of sparse matrices in
+Provides aggregation of sparse and dense arrays, in particular fast summation over the rows or columns of sparse matrices in
 \code{simple_triplet}-form.
 
-If (a component of) \code{INDEX} contains \code{NA} values the 
+If (a component of) \code{INDEX} contains \code{NA} values the
 corresponding parts of \code{x} are omitted.
 
 For \code{simple_sparse_array} the following cell expansion methods are

@@ -2,6 +2,7 @@
 library("slam")
 
 ##
+.Call("_part_index", factor(rep(1L, 4L)))
 .Call("_part_index", factor(1:4))
 .Call("_part_index", factor(c(1L,2L,2L,1L)))
 .Call("_part_index", factor(c(1L,2L,NA,1L)))

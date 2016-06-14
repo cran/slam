@@ -47,4 +47,11 @@ z <- rollup(x, 2L, FUN = min, na.rm = TRUE)
 identical(as.matrix(z),
 	  as.matrix(rollup(s, 2L, FUN = min, na.rm = TRUE, EXPAND = "dense")))
 
+
+## 2016/6
+s <- simple_sparse_zero_array(dim = c(2, 3, 4))
+z <- rollup(s, 1:2)
+identical(as.array(z), 
+	  rollup(as.array(s), 1:2))
+
 ###
