@@ -14,7 +14,8 @@ Rollup (aggregate) sparse arrays along arbitrary dimensions.
 \usage{
 rollup(x, MARGIN, INDEX, FUN, ...)
 
-\method{rollup}{simple_triplet_matrix}(x, MARGIN, INDEX = NULL, FUN = sum, \dots)
+\method{rollup}{simple_triplet_matrix}(x, MARGIN, INDEX = NULL, FUN = sum, \dots,
+       REDUCE = FALSE)
 \method{rollup}{simple_sparse_array}(x, MARGIN, INDEX = NULL, FUN = sum, \dots, 
        DROP = FALSE, EXPAND = c("none", "sparse", "dense", "all"), 
        MODE = "double")
@@ -31,6 +32,7 @@ rollup(x, MARGIN, INDEX, FUN, ...)
   \item{INDEX}{a corresponding (\code{list} of) \code{factor} (components) in the sense that \code{as.factor} defines the grouping(s). If \code{NULL} collapses the corresponding dimension(s) (default).}
   \item{FUN}{the name of the function to be applied.
 }
+  \item{REDUCE}{option to remove zeros from the result.}
   \item{DROP}{option to delete the dimensions of the result which have only one level.}
   \item{EXPAND}{the cell expansion method to use (see Details).
 }

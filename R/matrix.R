@@ -534,25 +534,37 @@ function(x, i, j, drop = FALSE)
     nr <- x$nrow
     nc <- x$ncol
 
+    pd <- nr * nc
+
+    .protect <- pd > 16777216L
+    .unsafe  <- pd > 4503599627370496
+
     if(na == 2L) {
         ## Single index subscripting.
         ## Mimic subscripting matrices: no named argument handling in
         ## this case.
+
+	## FIXME use cases.
+	if (is.simple_triplet_matrix(i))
+	    if (is.logical(i$v) && 
+		nr == i$nrow && nc == i$ncol) 
+		i <- sort(((i$j - 1L) * nr + i$i)[i$v])
+	    else
+		stop("Not implemented.")
         if(is.character(i))
             out <- vector(typeof(x$v))[rep.int(NA, length(i))]
         else if(!is.matrix(i)) {
             if(is.logical(i)) {
-		if(nr * nc > 16777216L)
+		if(.protect)
 		  stop("Logical vector subscripting disabled for this object.")
-                i <- which(rep(i, length.out = nr * nc))
+                i <- which(rep_len(i, pd))
 	    }
-            else if(!is.numeric(i))
+            else if(!is.numeric(unclass(i)))
                 stop(gettextf("Invalid subscript type: %s.",
                               typeof(i)),
                      domain = NA)
 	    else
-		## 52-bit safe
-		if(nr * nc > 4503599627370496)
+		if(.unsafe)
 		  stop("Numeric vector subscripting disabled for this object.")
 	    ## Shortcut
 	    if(!length(i))
@@ -565,15 +577,15 @@ function(x, i, j, drop = FALSE)
                 i <- i[i > 0]
                 out <- vector(mode = typeof(x$v), length = length(i))
 		if(length(out)) {
-		    is.na(i) <- i > nr * nc
+		    is.na(i) <- i > pd
 		    is.na(out) <- is.na(i)
 		    i <- match(i, (x$j - 1L) * nr + x$i, 0L)
 		    out[i > 0L] <- x$v[i]
 		}
             } else if(!any(is.na(i)) && all(i <= 0)) {
-		if(nr * nc > 16777216L)
+		if(.protect)
 		  stop("Negative vector subscripting disabled for this object.")
-                out <- vector(mode = typeof(x$v), nr * nc)
+                out <- vector(mode = typeof(x$v), pd)
                 out[(x$j - 1L) * nr + x$i] <- x$v
                 out <- out[i]
             }
@@ -584,21 +596,21 @@ function(x, i, j, drop = FALSE)
 	    if(!nrow(i))
 		return(vector(mode = typeof(x$v), length = 0L))
 	    ## Ignore dimensions
-	    if(ncol(i) != 2L)
+	    if(ncol(i) != 2L || !is.numeric(i))
 		return(do.call("[.simple_triplet_matrix",
 			       list(x = x, as.vector(i))))
 
-            ## Note that negative values are not allowed in a matrix
-            ## subscript.
 	    if(is.double(i))
 		i <- trunc(i)
-            if(any(i < 0, na.rm = TRUE))
-                stop("Invalid subscript.")
             ## Rows containing zero indices can be dropped.
             ## Rows with NA indices should give NA (at least for
             ## non-recursive x).
 	    k <- .Call(R_all_row, i > 0, FALSE)
             i <- i[k, ,drop = FALSE]
+            ## Note that negative values are not allowed in a matrix
+            ## subscript.
+            if(any(i < 0, na.rm = TRUE))
+                stop("Invalid subscript.")
             out <- vector(mode = typeof(x$v), length = nrow(i))
 	    if(length(out)) {
 		if (any(i > rep(c(nr, nc), each = nrow(i)), na.rm = TRUE))
@@ -627,7 +639,7 @@ function(x, i, j, drop = FALSE)
 		stop("NA indices not allowed.")
             pi <- seq_len(nr)
             if(is.logical(i)) {
-                i <- rep(i, length.out = nr)
+                i <- rep_len(i, nr)
                 nr <- sum(i)
                 pos <- i[x$i]
             } else {
@@ -665,7 +677,7 @@ function(x, i, j, drop = FALSE)
 		stop("NA indices not allowed.")
             pj <- seq_len(nc)
             if(is.logical(j)) {
-                j <- rep(j, length.out = nc)
+                j <- rep_len(j, nc)
                 nc <- sum(j)
                 pos <- if(is.null(pos))
                     j[x$j]
@@ -904,7 +916,7 @@ function(nrow, ncol = nrow, mode = "double")
 simple_triplet_diag_matrix <-
 function(v, nrow = length(v))
 {
-    v <- rep(v, length.out = nrow)
+    v <- rep_len(v, nrow)
     i <- seq_len(nrow)
     simple_triplet_matrix(i, i, v, nrow, nrow)
 }

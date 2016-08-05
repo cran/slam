@@ -1,4 +1,4 @@
-## CB 2012/9
+## CB 2012/9 2016/8
 ##
 ## FIXME extending might be useful unless implemented
 ##	 as for dense arrays.
@@ -12,8 +12,8 @@ function(x, ..., value) {
     nd <- length(x$dim)
     pd <- prod(x$dim)
 
-    ## Disable features that may exhaust resources.
     .protect <- pd > 16777216L
+    .unsafe  <- pd > 4503599627370496
 
     na <- nargs()
     if (na == 3L && missing(..1))
@@ -27,8 +27,15 @@ function(x, ..., value) {
     ## Single index subscripting.
     if (na == 3L) {
 	I <- ..1
-	if (!is.numeric(I))
-	    stop("Only numeric subscripting is implemented.")
+	## see matrix.R
+	if (is.simple_triplet_matrix(I))
+	    if (is.logical(I$v) &&
+		identical(x$dim, c(I$nrow, I$ncol)))
+		I <- sort(((I$j - 1L) * I$nrow + I$i)[I$v])
+	    else
+		stop("Not implemented.")
+	if (!is.numeric(unclass(I)))
+	    stop("Only numeric / matrix subscripting is implemented.")
 	if (!length(I))
 	    return(x)
 	## Missing values in subscripts.
@@ -41,8 +48,7 @@ function(x, ..., value) {
 	rm(k)
 	## Vector subscripting.
 	if (!is.matrix(I)) {
-	    ## 52-bit safe
-	    if (pd > 4503599627370496)
+	    if (.unsafe)
 		stop("Vector subscripting disabled for this object.")
 	    ## Map.
 	    if (is.double(I))
@@ -134,7 +140,7 @@ function(x, ..., value) {
     ## Recycling.
     if (nrow(I) %% length(value))
 	warning("number of items to replace is not a multiple of replacement length")
-    V <- rep(value, length.out = nrow(I))
+    V <- rep_len(value, nrow(I))
 
     ## Merge. 
     ##

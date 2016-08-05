@@ -15,6 +15,12 @@ s
 identical(apply(x, 2L, var), colapply_simple_triplet_matrix(s, var))
 identical(apply(x, 1L, var), rowapply_simple_triplet_matrix(s, var))
 
+local({
+    x[] <- as.complex(x)
+    s   <- as.simple_triplet_matrix(x)
+    identical(apply(x, 2L, var), colapply_simple_triplet_matrix(s, var))
+})
+
 ##
 k <- 1:2
 z <- var(x[, k], x[, -k])

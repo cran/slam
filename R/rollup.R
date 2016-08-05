@@ -30,11 +30,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	z <- INDEX[[as.character(k)]]
 	z <-
 	if (is.null(z))
-	    structure(
-		rep(1L, d[k]),
-		levels = "1",
-		class  = "factor"
-	    )
+	    rep(factor(1L), d[k])
 	else {
 	    if (length(z) != d[k])
 		stop(gettextf("INDEX [%s] invalid length", k),
@@ -48,11 +44,9 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	rm(z)
     }
     i <- .Call(R_vector_index, d, i)
-    i <- structure(
-	i,
-	levels = seq_len(prod(d)),
-	class  = "factor"
-    )
+    attributes(i) <-
+	list(levels = seq_len(prod(d)),
+	     class  = "factor")
     i <- split.default(x, i)
     names(i) <- NULL
     i <- lapply(i, FUN, ...)
@@ -126,11 +120,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 		D[k] <- -1L
 		next
 	    }
-	    z <- structure(
-		rep(1L, D[k]),
-		levels = "1",
-		class  = "factor"
-	    )
+	    z <- rep(factor(1L), D[k])
 	} else {
 	    if (length(z) != D[k])
 		stop(gettextf("INDEX [%s] invalid length", k),
@@ -188,11 +178,9 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	I <- I[i[[2L]],, drop = FALSE]
 	i <-   i[[1L]]
     }
-    i <- structure(
-	i, 
-	levels = seq_len(dim(I)[1L]), 
-	class  = "factor"
-    )
+    attributes(i) <-
+	list(levels = seq_len(dim(I)[1L]),
+	     class  = "factor")
     if (EXPAND == 1L) {
 	V <- split.default(V, i)
 	rm(i)
@@ -250,7 +238,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 
 
 rollup.simple_triplet_matrix <- 
-function(x, MARGIN, INDEX = NULL, FUN = sum, ...) {
+function(x, MARGIN, INDEX = NULL, FUN = sum, ..., REDUCE = FALSE) {
     FUN <- match.fun(FUN)
     if (!identical(FUN, sum)) {
 	if (!is.null(list(...)$DROP))
@@ -280,11 +268,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ...) {
 		z <- INDEX[[as.character(k)]]
 		z <- 
 		if (is.null(z))
-		    structure(
-			rep(1L, dim(x)[k]),
-			levels = "1",
-			class  = "factor"
-		    )
+		    rep(factor(1L), dim(x)[k])
 		else {
 		    if (length(z) != dim(x)[k])
 			stop(gettextf("INDEX [%s] invalid length", k),
@@ -297,7 +281,8 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ...) {
 			  FALSE
 		      else
 			  as.logical(list(...)$na.rm), 
-		      FALSE
+		      as.logical(REDUCE),
+		      FALSE	## verbose
 		)
 	    }
 	)

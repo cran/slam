@@ -141,9 +141,14 @@ function(x, ...)
         return(x)
 
     nd <- length(x$dim)
+    pd <- prod(x$dim)
+
+    ## Disable features that may exhaust resources.
+    .protect <-  pd > 16777216L
+    .unsafe  <-  pd > 4503599627370496	## 52-bit
 
     ## Note there is a limit to representing integer numbers as 
-    ## doubles.
+    ## doubles (see above).
     spos <- function(i) {
 	if(!nrow(i)) 
 	    return(vector(mode = typeof(i), length = 0L))
@@ -166,8 +171,11 @@ function(x, ...)
         else if(is.character(i))
             stop("Character subscripting currently not implemented.")
         else if(!is.matrix(i)) {
-	    ## 52-bit safe
-	    if(prod(x$dim) > 4503599627370496)
+	    if (!is.numeric(unclass(i)))
+                stop(gettextf("Invalid subscript type: %s.",
+                              typeof(i)),
+                     domain = NA)
+	    if(.unsafe)
 	      stop("Numeric vector subscripting disabled for this object.")
 	     ## Shortcut
 	     if(!length(i)) 
@@ -181,13 +189,13 @@ function(x, ...)
                 out <- vector(mode = typeof(x$v), length = length(i))
 		if(length(out)) {
 		    ## Missing values.
-		    is.na(i) <- i > prod(x$dim)
+		    is.na(i) <- i > pd
 		    is.na(out) <- is.na(i)
 		    i <- match(i, spos(x$i), 0L)
 		    out[i > 0L] <- x$v[i]
 		}
             } else if(!any(is.na(i)) && all(i <= 0)) {
-		if(prod(x$dim) > 16777216L)
+		if(.protect)
 		  stop("Negative vector subsripting disabled for this object.")
                 out <- vector(mode = typeof(x$v), prod(x$dim))
                 out[spos(x$i)] <- x$v
@@ -202,17 +210,17 @@ function(x, ...)
 	     if(!nrow(i)) 
 		return(vector(mode = typeof(x$v), length = 0L))
 	     ## Ignore dimensions. 
-	     if(ncol(i) != nd) 
+	     if(ncol(i) != nd || !is.numeric(i)) 
 		return(do.call("[.simple_sparse_array", 
 			       list(x = x, as.vector(i))))
-            ## Note that negative values are not allowed in a matrix
-            ## subscript.
 	    if(is.double(i))
 		i <- trunc(i)
-            if(any(i < 0, na.rm = TRUE))
-                stop("Invalid subscript.")
 	    k <- .Call(R_all_row, i > 0, FALSE)
             i <- i[k, , drop = FALSE]
+            ## Note that negative values are not allowed in a matrix
+            ## subscript.
+            if(any(i < 0, na.rm = TRUE))
+                stop("Invalid subscript.")
             out <- vector(mode = typeof(x$v), length = nrow(i))
 	    if(length(out)) {
 		if(any(i > rep(x$dim, each = nrow(i)), na.rm = TRUE))

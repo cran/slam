@@ -25,11 +25,10 @@ function(x, strict = FALSE, order = FALSE)
 	    if (strict)
 		stop("multiple entries")
 	    I <- I[i[[2L]],, drop = FALSE]
-	    i <- structure(
-		i[[1L]],
-		levels = seq_len(dim(I)[1L]),
-		class  = "factor"
-	    )
+	    i <- i[[1L]]
+	    attributes(i) <-
+		list(levels = seq_len(dim(I)[1L]), 
+		     class  = "factor")
 	    V <- split(V, i)
 	    rm(i)
 	    names(V) <- NULL

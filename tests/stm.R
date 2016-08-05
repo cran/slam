@@ -17,6 +17,18 @@ identical(colSums(x), col_sums(xst))
 identical(rowMeans(x), row_means(xst))
 identical(colMeans(x), col_means(xst))
 
+local({
+    x[] <- as.double(x)
+    xst <- as.simple_triplet_matrix(x)
+    identical(rowSums(x), row_sums(xst))
+})
+
+local({
+    x[] <- as.complex(x)
+    xst <- as.simple_triplet_matrix(x)
+    identical(rowSums(x), row_sums(xst))
+})
+
 ## NAs
 
 xna <- x
@@ -38,10 +50,34 @@ identical(colSums(xna), col_sums(xnast))
 identical(rowMeans(xna), row_means(xnast))
 identical(colMeans(xna), col_means(xnast))
 
+local({
+    xna[] <- as.double(xna)
+    xnast <- as.simple_triplet_matrix(xna)
+    identical(rowSums(xna), row_sums(xnast))
+})
+
+local({
+    xna[] <- as.complex(xna)
+    xnast <- as.simple_triplet_matrix(xna)
+    identical(rowSums(xna), row_sums(xnast))
+})
+
 identical(rowSums(xna, na.rm = TRUE), row_sums(xnast, na.rm = TRUE))
 identical(colSums(xna, na.rm = TRUE), col_sums(xnast, na.rm = TRUE))
 identical(rowMeans(xna, na.rm = TRUE), row_means(xnast, na.rm = TRUE))
 identical(colMeans(xna, na.rm = TRUE), col_means(xnast, na.rm = TRUE))
+
+local({
+    xna[] <- as.double(xna)
+    xnast <- as.simple_triplet_matrix(xna)
+    identical(rowSums(xna, na.rm = TRUE), row_sums(xnast, na.rm = TRUE))
+})
+
+local({
+    xna[] <- as.complex(xna)
+    xnast <- as.simple_triplet_matrix(xna)
+    identical(rowSums(xna, na.rm = TRUE), row_sums(xnast, na.rm = TRUE))
+})
 
 ## cross-product
 

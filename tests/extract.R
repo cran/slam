@@ -24,6 +24,7 @@ k <- matrix(c(1, 1, 1, 0, 1, NA), ncol = 2, byrow = TRUE)
 k
 x[k]
 
+try(x[as.logical(k)])		## wrong type
 				## wrong dimensions 
 dim(k) <- c(2,3)
 as.vector(k)
@@ -50,6 +51,8 @@ k[6] <- 3
 k
 try(x[k])			## not allowed
 
+x[cbind(c(0, 1), c(-1, 0))]	## allowed
+
 ##
 x <- simple_triplet_zero_matrix(nrow = 3, ncol = 2)
 
@@ -74,6 +77,7 @@ k <- matrix(c(1, 1, 1, 0, 1, NA), ncol = 2, byrow = TRUE)
 k
 x[k]
 
+x[as.logical(k)]		## wrong type
 				## wrong dimensions 
 dim(k) <- c(2,3)
 as.vector(k)
@@ -100,6 +104,7 @@ k[6] <- 3
 k
 try(x[k])			## not allowed
 
+x[cbind(c(0, 1), c(-1, 0))]	## allowed
 
 x[c(TRUE, FALSE)]
 x[c(TRUE, FALSE),]
@@ -137,5 +142,22 @@ try(x[k])			## not allowed
 
 x[c(TRUE, FALSE)]
 x[c(TRUE, FALSE),]
+
+
+##
+m <- matrix(c(1, 1, 0, 2), nrow = 2)
+m
+s <- as.simple_triplet_matrix(m)
+identical(s[s > 0], m[m > 0])
+identical(s[s > 0], s$v)	## not guaranteed
+local({
+    s[s > 0] <- 3
+    m[m > 0] <- 3
+    identical(as.matrix(s), m)
+})
+
+try(s[s])
+a <- as.simple_sparse_array(s)
+try(s[a])
 
 ###

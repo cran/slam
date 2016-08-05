@@ -4,7 +4,7 @@
 #include <R_ext/Complex.h>
 #include <time.h>
 
-// ceeboo 2009/5,10,12 2010/1,5,6 2011/2 2012/4,5 2013/10
+// ceeboo 2009/5,10,12 2010/1,5,6 2011/2 2012/4,5 2013/10 2016/6
 //
 
 // remove attributes from payload vector (see src/main/coerce.c)
@@ -64,7 +64,7 @@ int _valid_v(SEXP x) {
 	    {
 		Rcomplex *v = COMPLEX(x);
 		while (i-- > 0)
-		    if (v[i].i == (double) 0 || 
+		    if (v[i].i == (double) 0 && 
 			v[i].r == (double) 0)
 			break;
 	    }
@@ -81,7 +81,7 @@ int _valid_v(SEXP x) {
 		    break;
 	    break;
 	default:
-	    error("type not implemented");
+	    error("type of 'x' not implemented");
 	
     }
     return i + 1;
@@ -167,8 +167,12 @@ SEXP _sums_stm(SEXP x, SEXP R_dim, SEXP R_na_rm) {
 	error("'x' not of class 'simple_triplet_matrix'");
     if (TYPEOF(R_dim) != INTSXP)
 	error("'dim' not of type integer");
+    if (!LENGTH(R_dim))
+	error("'dim' invalid length");
     if (TYPEOF(R_na_rm) != LGLSXP)
 	error("'na.rm' not of type logical");
+    if (!LENGTH(R_na_rm))
+	error("'na.rm' invalid length");
 
     int n, *i = NULL;
     
@@ -184,49 +188,79 @@ SEXP _sums_stm(SEXP x, SEXP R_dim, SEXP R_na_rm) {
     }
     n = INTEGER(VECTOR_ELT(x, n + 2))[0];
 
-    // for the type of the return argument see the behavior
-    // of rowSums and colSums for matrix.
-    SEXP r = PROTECT(allocVector(REALSXP, n));
-
-    memset(REAL(r), 0, sizeof(double) * n);
-    // offset one-based indexing
-    double *__r__ = REAL(r) - 1;
-
+    SEXP r = NULL;
     SEXP _x_ = VECTOR_ELT(x, 2);
 
     switch (TYPEOF(_x_)) {
 	case LGLSXP:
 	case INTSXP: {
-	    int v, *k, *__x__ = INTEGER(_x_);
+	    // for the type of the return argument see the behavior
+	    // of rowSums and colSums for matrix.
+	    r = PROTECT(allocVector(REALSXP, n));
+
+	    memset(REAL(r), 0, sizeof(double) * n);
+	    // offset one-based indexing
+	    double *__r__ = REAL(r) - 1;
+
+	    int *k, *__x__ = INTEGER(_x_);
 	    if (*LOGICAL(R_na_rm)) {
 		for (k = __x__ + LENGTH(_x_); __x__ < k; __x__++, i++)
-		    if ((v = *__x__) == NA_INTEGER)
+		    if (*__x__ == NA_INTEGER)
 			continue;
 		    else 
-			__r__[*i] += (double) v;
+			__r__[*i] += (double) *__x__;
 	    } else {
 		for (k = __x__ + LENGTH(_x_); __x__ < k; __x__++, i++)
-		    __r__[*i] +=
-		    // map NA
-			 ((v = *__x__) == NA_INTEGER) ? NA_REAL : v;
+		    if (*__x__ == NA_INTEGER)
+			__r__[*i]  = NA_REAL;	// map NA
+		    else
+			__r__[*i] += (double) *__x__;
 	    }
 	    break;
 	}
 	case REALSXP: {
-	    double v, *k, *__x__ = REAL(_x_);
+	    r = PROTECT(allocVector(REALSXP, n));
+
+	    memset(REAL(r), 0, sizeof(double) * n);
+	    double *__r__ = REAL(r) - 1;
+
+	    double *k, *__x__ = REAL(_x_);
 	    if (*LOGICAL(R_na_rm)) {
 		for (k = __x__ + LENGTH(_x_); __x__ < k; __x__++, i++)
-		    if (ISNAN((v = *__x__)))
+		    if (ISNAN(*__x__))
 			continue;
 		    else
-			__r__[*i] += v;
+			__r__[*i] += *__x__;
 	    } else
 		for (k = __x__ + LENGTH(_x_); __x__ < k; __x__++, i++)
 		    __r__[*i] += *__x__;
 	    break;
 	}
+	case CPLXSXP: {
+	    r = PROTECT(allocVector(CPLXSXP, n));
+
+	    memset(COMPLEX(r), 0, sizeof(Rcomplex) * n);
+	    Rcomplex *__r__ = COMPLEX(r) - 1;
+
+	    Rcomplex *k, *__x__ = COMPLEX(_x_);
+	    if (*LOGICAL(R_na_rm)) {
+		for (k = __x__ + LENGTH(_x_); __x__ < k; __x__++, i++)
+		    if (ISNAN(__x__->r) || ISNAN(__x__->i))
+			continue;
+		    else {
+			__r__[*i].r += __x__->r;
+			__r__[*i].i += __x__->i;
+		    }
+	    } else
+		for (k = __x__ + LENGTH(_x_); __x__ < k; __x__++, i++) {
+		    __r__[*i].r += __x__->r;
+		    __r__[*i].i += __x__->i;
+		}
+
+	    break;
+	}
 	default:
-	    error("type of 'x' not supported");
+	    error("type of 'x' invalid");
     }
 
     SEXP d = (LENGTH(x) > 5) ? VECTOR_ELT(x, 5) : R_NilValue;

@@ -1,8 +1,7 @@
 
-R version 2.14.2 Patched (2012-02-29 r58546)
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: i486-pc-linux-gnu (32-bit)
+R version 3.3.0 (2016-05-03) -- "Supposedly Educational"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: i686-pc-linux-gnu (32-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -62,6 +61,20 @@ A 20x5 simple triplet matrix.
 > identical(colMeans(x), col_means(xst))
 [1] TRUE
 > 
+> local({
++     x[] <- as.double(x)
++     xst <- as.simple_triplet_matrix(x)
++     identical(rowSums(x), row_sums(xst))
++ })
+[1] TRUE
+> 
+> local({
++     x[] <- as.complex(x)
++     xst <- as.simple_triplet_matrix(x)
++     identical(rowSums(x), row_sums(xst))
++ })
+[1] TRUE
+> 
 > ## NAs
 > 
 > xna <- x
@@ -114,6 +127,20 @@ A 20x5 simple triplet matrix.
 > identical(colMeans(xna), col_means(xnast))
 [1] TRUE
 > 
+> local({
++     xna[] <- as.double(xna)
++     xnast <- as.simple_triplet_matrix(xna)
++     identical(rowSums(xna), row_sums(xnast))
++ })
+[1] TRUE
+> 
+> local({
++     xna[] <- as.complex(xna)
++     xnast <- as.simple_triplet_matrix(xna)
++     identical(rowSums(xna), row_sums(xnast))
++ })
+[1] TRUE
+> 
 > identical(rowSums(xna, na.rm = TRUE), row_sums(xnast, na.rm = TRUE))
 [1] TRUE
 > identical(colSums(xna, na.rm = TRUE), col_sums(xnast, na.rm = TRUE))
@@ -121,6 +148,20 @@ A 20x5 simple triplet matrix.
 > identical(rowMeans(xna, na.rm = TRUE), row_means(xnast, na.rm = TRUE))
 [1] TRUE
 > identical(colMeans(xna, na.rm = TRUE), col_means(xnast, na.rm = TRUE))
+[1] TRUE
+> 
+> local({
++     xna[] <- as.double(xna)
++     xnast <- as.simple_triplet_matrix(xna)
++     identical(rowSums(xna, na.rm = TRUE), row_sums(xnast, na.rm = TRUE))
++ })
+[1] TRUE
+> 
+> local({
++     xna[] <- as.complex(xna)
++     xnast <- as.simple_triplet_matrix(xna)
++     identical(rowSums(xna, na.rm = TRUE), row_sums(xnast, na.rm = TRUE))
++ })
 [1] TRUE
 > 
 > ## cross-product
@@ -156,3 +197,6 @@ A 20x5 simple triplet matrix.
 > 
 > 
 > 
+> proc.time()
+   user  system elapsed 
+  0.180   0.032   0.207 

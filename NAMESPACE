@@ -53,7 +53,7 @@ useDynLib("slam",
           "_match_matrix",
           "_unattr",
           "_sums_stm",
-          "_row_tsums",   ## used by skmeans
+          "_row_tsums",
           "_tcrossprod_stm_stm"    = "tcrossprod_stm_stm",
           "_tcrossprod_stm_matrix" = "tcrossprod_stm_matrix",
           "_col_apply_stm",

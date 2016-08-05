@@ -29,6 +29,13 @@ s$v <- as.integer(s$v)
 
 identical(rollup(z, 2L, INDEX), 
 	  as.matrix(rollup(s, 2L, INDEX)))
+##
+local({
+    s$v <- as.complex(s$v)
+    z   <- as.matrix(s)
+    identical(rollup(z, 2L, INDEX), 
+	      as.matrix(rollup(s, 2L, INDEX)))
+})
 
 ## NA values
 is.na(s$v) <- 1:2
@@ -46,6 +53,13 @@ s$v <- as.double(s$v)
 identical(rollup(z, 2L, INDEX, na.rm = TRUE), 
 	  as.matrix(rollup(s, 2L, INDEX, na.rm = TRUE)))
 
+##
+local({
+    s$v <- as.complex(s$v)
+    z   <- as.matrix(s)
+    identical(rollup(z, 2L, INDEX, na.rm = TRUE), 
+	      as.matrix(rollup(s, 2L, INDEX, na.rm = TRUE)))
+})
 
 ##
 s <- as.simple_sparse_array(s)
@@ -63,4 +77,22 @@ identical(rollup(z, 2L, INDEX, na.rm = TRUE),
 s <- as.simple_triplet_matrix(s)
 identical(rollup(z, 2L, INDEX, na.rm = TRUE),
 	  as.array(rollup(s, 2L, INDEX, na.rm = TRUE)))
+
+## reduce
+is.na(s$v) <- s$i == 1L
+
+z <- rollup(as.simple_sparse_array(s), 2L, na.rm = TRUE)
+z <- reduce_simple_sparse_array(z, order = TRUE)
+z <- as.simple_triplet_matrix(z)
+identical(z,
+	  .Call(slam:::R_row_tsums, s, rep(factor(1L), ncol(s)), 
+		TRUE, TRUE, TRUE))
+
+s$v <- as.complex(s$v)
+
+z <- rollup(as.simple_sparse_array(s), 2L, na.rm = TRUE)
+z <- reduce_simple_sparse_array(z, order = TRUE)
+z <- as.simple_triplet_matrix(z)
+identical(z, 
+	  rollup(s, 2L, na.rm = TRUE, REDUCE = TRUE))
 ###
