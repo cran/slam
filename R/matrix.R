@@ -110,7 +110,7 @@ function(x, ...)
 {
     nr <- x$nrow
     nc <- x$ncol
-    y <- matrix(vector(typeof(x$v), nr * nc), nr, nc)
+    y <- matrix(vector(typeof(x$v), prod(nr, nc)), nr, nc)
     y[cbind(x$i, x$j)] <- x$v
     dimnames(y) <- x$dimnames
     y
@@ -457,7 +457,7 @@ function(x, value)
         stop("invalid dim replacement value")
     nr <- x$nrow
     nc <- x$ncol
-    if(prod(value) != nr * nc)
+    if(prod(value) != prod(nr, nc))
         stop("invalid dim replacement value")
 
     pos <- nr * (x$j - 1L) + x$i - 1L
@@ -515,6 +515,31 @@ function(x, value)
     x
 }
 
+## For reuse in other functions (we want to mess up, too).
+.stm_as_subscript <- 
+function(x, d, safe = FALSE, ...) 
+{
+    if (!is.simple_triplet_matrix(x))
+	return(x)
+    if (!is.logical(x$v) || !identical(dim(x), d))
+	stop("Not implemented.")
+    ## need column-major order
+    k <- order(x$j, x$i)
+    if (any(diff(k < 0))) {
+	x$v <- x$v[k]
+	x$i <- x$i[k]
+	x$j <- x$j[k]
+    }
+    ## offer a choice
+    if (safe ||
+	log2(prod(dim(x))) > .Machine$double.digits)
+	cbind(x$i[x$v], x$j[x$v])
+    else
+	## need to use a double in expression to 
+	## get a result of type double
+	((x$j - 1) * x$nrow + x$i)[x$v]
+}
+
 `[.simple_triplet_matrix` <-
 function(x, i, j, drop = FALSE)
 {
@@ -534,28 +559,24 @@ function(x, i, j, drop = FALSE)
     nr <- x$nrow
     nc <- x$ncol
 
-    pd <- nr * nc
+    pd <- prod(nr, nc)
 
-    .protect <- pd > 16777216L
-    .unsafe  <- pd > 4503599627370496
+    ## FIXME eventually, we should get rid of ill-conceived features 
+    ##       which need to expand to dense.
+    .disable <- pd > slam_options("max_dense")
 
     if(na == 2L) {
         ## Single index subscripting.
         ## Mimic subscripting matrices: no named argument handling in
         ## this case.
 
-	## FIXME use cases.
-	if (is.simple_triplet_matrix(i))
-	    if (is.logical(i$v) && 
-		nr == i$nrow && nc == i$ncol) 
-		i <- sort(((i$j - 1L) * nr + i$i)[i$v])
-	    else
-		stop("Not implemented.")
+	## FIXME mapping to numeric seems to be less inefficient.
+	i <- .stm_as_subscript(i, c(nr, nc))
         if(is.character(i))
             out <- vector(typeof(x$v))[rep.int(NA, length(i))]
         else if(!is.matrix(i)) {
             if(is.logical(i)) {
-		if(.protect)
+		if(.disable)
 		  stop("Logical vector subscripting disabled for this object.")
                 i <- which(rep_len(i, pd))
 	    }
@@ -564,7 +585,7 @@ function(x, i, j, drop = FALSE)
                               typeof(i)),
                      domain = NA)
 	    else
-		if(.unsafe)
+		if(log2(pd) > .Machine$double.digits)
 		  stop("Numeric vector subscripting disabled for this object.")
 	    ## Shortcut
 	    if(!length(i))
@@ -579,11 +600,11 @@ function(x, i, j, drop = FALSE)
 		if(length(out)) {
 		    is.na(i) <- i > pd
 		    is.na(out) <- is.na(i)
-		    i <- match(i, (x$j - 1L) * nr + x$i, 0L)
+		    i <- match(i, (x$j - 1) * nr + x$i, 0L)
 		    out[i > 0L] <- x$v[i]
 		}
             } else if(!any(is.na(i)) && all(i <= 0)) {
-		if(.protect)
+		if(.disable)
 		  stop("Negative vector subscripting disabled for this object.")
                 out <- vector(mode = typeof(x$v), pd)
                 out[(x$j - 1L) * nr + x$i] <- x$v
@@ -862,7 +883,7 @@ function(..., recursive = FALSE)
     args[ind] <-
         lapply(args[ind],
                function(x) {
-                   y <- vector(typeof(x$v), x$nrow * x$ncol)
+                   y <- vector(typeof(x$v), prod(x$nrow, x$ncol))
                    y[x$i + (x$j - 1L) * x$nrow] <- x$v
                    y
                })

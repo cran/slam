@@ -32,6 +32,12 @@ try(x[c(NA, 2, 3)] <- 1:2)	    ## not allowed
 ## works with R >= 3.x
 try(x[-c(.Machine$integer.max + 1, 1)] <- c(1, 2))
 
+as.vector(x[1,1,1])
+x[1L] <- NA
+as.vector(x[1,1,1])
+
+x[1L] <- 2
+as.vector(x[1,1,1])
 
 ## reference
 x <- matrix(1:6, nrow = 3)

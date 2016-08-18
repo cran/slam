@@ -160,4 +160,15 @@ try(s[s])
 a <- as.simple_sparse_array(s)
 try(s[a])
 
+is.na(m) <- 2
+m
+s <- as.simple_triplet_matrix(m)
+identical(s[s > 0], m[m > 0])
+
+local({
+    s[s > 0] <- 3
+    m[m > 0] <- 3
+    identical(as.matrix(s), m)
+})
+
 ###

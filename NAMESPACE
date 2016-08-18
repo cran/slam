@@ -168,3 +168,6 @@ export("read_stm_CLUTO",
 ## S3method("fold",   "simple_triplet_matrix")
 ## S3method("fold",   "simple_sparse_array")
 
+##
+export("slam_options")
+

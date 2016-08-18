@@ -1,5 +1,5 @@
 Package: slam
-Version: 0.1-37
+Version: 0.1-38
 Title: Sparse Lightweight Arrays and Matrices
 Authors@R: c(person("Kurt", "Hornik", role = c("aut", "cre"),
                      email = "Kurt.Hornik@R-project.org"),
@@ -7,15 +7,15 @@ Authors@R: c(person("Kurt", "Hornik", role = c("aut", "cre"),
              person("Christian", "Buchta", role = "aut"))
 Description: Data structures and algorithms for sparse arrays and matrices,
   based on index arrays and simple triplet representations, respectively.
-Depends: R (>= 2.8.0)
+Depends: R (>= 3.3.1)
 Imports: stats
 Enhances: Matrix, SparseM, spam
 License: GPL-2
 NeedsCompilation: yes
-Packaged: 2016-08-05 13:44:16 UTC; hornik
+Packaged: 2016-08-18 11:04:37 UTC; hornik
 Author: Kurt Hornik [aut, cre],
   David Meyer [aut],
   Christian Buchta [aut]
 Maintainer: Kurt Hornik <Kurt.Hornik@R-project.org>
 Repository: CRAN
-Date/Publication: 2016-08-05 16:12:04
+Date/Publication: 2016-08-18 15:39:43

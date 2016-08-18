@@ -1,7 +1,7 @@
 
-R Under development (unstable) (2016-08-04 r71028) -- "Unsuffered Consequences"
+R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
 Copyright (C) 2016 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+Platform: i686-pc-linux-gnu (32-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -56,7 +56,7 @@ integer(0)
 > 
 > try(x[as.logical(k)])		## wrong type
 Error in `[.simple_sparse_array`(x, as.logical(k)) : 
-  Logical subscripting currently not implemented.
+  Logical vector subscripting currently not implemented.
 > 				## wrong dimensions 
 > dim(k) <- c(2,3)
 > as.vector(k)
@@ -304,13 +304,29 @@ Error in x[k] : subscript out of bounds
 [1] TRUE
 > 
 > try(s[s])
-Error in `[.simple_triplet_matrix`(s, s) : Not implemented.
+Error in .stm_as_subscript(i, c(nr, nc)) : Not implemented.
 > a <- as.simple_sparse_array(s)
 > try(s[a])
 Error in `[.simple_triplet_matrix`(s, a) : Invalid subscript type: list.
+> 
+> is.na(m) <- 2
+> m
+     [,1] [,2]
+[1,]    1    0
+[2,]   NA    2
+> s <- as.simple_triplet_matrix(m)
+> identical(s[s > 0], m[m > 0])
+[1] TRUE
+> 
+> local({
++     s[s > 0] <- 3
++     m[m > 0] <- 3
++     identical(as.matrix(s), m)
++ })
+[1] TRUE
 > 
 > ###
 > 
 > proc.time()
    user  system elapsed 
-  0.104   0.016   0.115 
+  0.228   0.024   0.246 

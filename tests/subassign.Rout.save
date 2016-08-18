@@ -1,6 +1,6 @@
 
-R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
-Copyright (C) 2013 The R Foundation for Statistical Computing
+R version 3.3.1 (2016-06-21) -- "Bug in Your Hair"
+Copyright (C) 2016 The R Foundation for Statistical Computing
 Platform: i686-pc-linux-gnu (32-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -82,6 +82,15 @@ Warning message:
 In `[<-.simple_sparse_array`(`*tmp*`, -c(.Machine$integer.max +  :
   number of items to replace is not a multiple of replacement length
 > 
+> as.vector(x[1,1,1])
+[1] 0
+> x[1L] <- NA
+> as.vector(x[1,1,1])
+[1] NA
+> 
+> x[1L] <- 2
+> as.vector(x[1,1,1])
+[1] 2
 > 
 > ## reference
 > x <- matrix(1:6, nrow = 3)
@@ -242,4 +251,4 @@ In z[-c(.Machine$integer.max + 1, 1)] <- c(1, 2) :
 > 
 > proc.time()
    user  system elapsed 
-  0.356   0.036   0.385 
+  0.216   0.020   0.232 

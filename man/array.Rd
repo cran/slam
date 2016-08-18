@@ -66,12 +66,15 @@ drop_simple_sparse_array(x)
 
   \code{drop_simple_sparse_array} drops unused dimensions.
 
-  If \code{prod(dim(x)) > 2^24} empty and negative indexing are disabled
+  If \code{prod(dim(x)) > slam_options("max_dense")} empty and negative
+  indexing are disabled
   for \code{[} and \code{[<-}. Further, non-negative single (vector)
   indexing is limited to 52 bits of representation.
 }
 \seealso{
   \code{\link{simple_triplet_matrix}} for sparse matrices.
+
+  \code{\link{slam_options}} for options.
 }
 \examples{
 x <- array(c(1, 0, 0, 2, 0, 0, 0, 3), dim = c(2, 2, 2))

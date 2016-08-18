@@ -91,6 +91,12 @@ function(x, ...)
     x
 }
 
+Ops.simple_sparse_array <- 
+function(e1, e2) 
+{
+    stop("Not implemented.")
+}
+
 Summary.simple_sparse_array <-
 function(..., na.rm = FALSE)
 {
@@ -143,9 +149,8 @@ function(x, ...)
     nd <- length(x$dim)
     pd <- prod(x$dim)
 
-    ## Disable features that may exhaust resources.
-    .protect <-  pd > 16777216L
-    .unsafe  <-  pd > 4503599627370496	## 52-bit
+    ## See now matrix.R for comment.
+    .protect <-  pd > slam_options("max_dense")
 
     ## Note there is a limit to representing integer numbers as 
     ## doubles (see above).
@@ -167,15 +172,15 @@ function(x, ...)
         i <- ..1
         ## Single index subscripting.
         if(is.logical(i))
-            stop("Logical subscripting currently not implemented.")
+            stop("Logical vector subscripting currently not implemented.")
         else if(is.character(i))
-            stop("Character subscripting currently not implemented.")
+            stop("Character vector subscripting currently not implemented.")
         else if(!is.matrix(i)) {
 	    if (!is.numeric(unclass(i)))
                 stop(gettextf("Invalid subscript type: %s.",
                               typeof(i)),
                      domain = NA)
-	    if(.unsafe)
+	    if(log2(pd) > .Machine$double.digits)
 	      stop("Numeric vector subscripting disabled for this object.")
 	     ## Shortcut
 	     if(!length(i)) 
@@ -197,7 +202,7 @@ function(x, ...)
             } else if(!any(is.na(i)) && all(i <= 0)) {
 		if(.protect)
 		  stop("Negative vector subsripting disabled for this object.")
-                out <- vector(mode = typeof(x$v), prod(x$dim))
+                out <- vector(mode = typeof(x$v), pd)
                 out[spos(x$i)] <- x$v
 		## NOTE this fails if NAs are introduced by 
 		##	coercion to integer. 

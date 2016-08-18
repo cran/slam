@@ -12,12 +12,11 @@ function(x, ..., value) {
     nd <- length(x$dim)
     pd <- prod(x$dim)
 
-    .protect <- pd > 16777216L
-    .unsafe  <- pd > 4503599627370496
+    .disable <- pd > slam_options("max_dense")
 
     na <- nargs()
     if (na == 3L && missing(..1))
-	if (.protect)
+	if (.disable)
 	    stop("Empty subscripting disabled.")
 	else
 	    return(
@@ -27,13 +26,8 @@ function(x, ..., value) {
     ## Single index subscripting.
     if (na == 3L) {
 	I <- ..1
-	## see matrix.R
-	if (is.simple_triplet_matrix(I))
-	    if (is.logical(I$v) &&
-		identical(x$dim, c(I$nrow, I$ncol)))
-		I <- sort(((I$j - 1L) * I$nrow + I$i)[I$v])
-	    else
-		stop("Not implemented.")
+	## NOTE mapping to matrix is less inefficient (see below).
+	I <- .stm_as_subscript(I, x$dim, TRUE)
 	if (!is.numeric(unclass(I)))
 	    stop("Only numeric / matrix subscripting is implemented.")
 	if (!length(I))
@@ -48,7 +42,7 @@ function(x, ..., value) {
 	rm(k)
 	## Vector subscripting.
 	if (!is.matrix(I)) {
-	    if (.unsafe)
+	    if (log2(pd) > .Machine$double.digits)
 		stop("Vector subscripting disabled for this object.")
 	    ## Map.
 	    if (is.double(I))
@@ -61,7 +55,7 @@ function(x, ..., value) {
 		if (any(I > pd))
 		    stop("Extending is not implemented.")
 	    } else {
-		if (.protect)
+		if (.disable)
 		    stop("Negative subscripting disabled for this object.")
 		if (all(I <= 0L)) {
 		    ## NOTE this fails if NAs are introduced by 
@@ -105,7 +99,7 @@ function(x, ..., value) {
 	    if (!do.call(missing, list(n)))
 		args[[k]] <- eval(n)
 	    else
-		if (.protect)
+		if (.disable)
 		    stop("Missing dimensions disabled for this object.")
 		else
 		    args[[k]] <- seq_len(x$dim[k])
@@ -117,7 +111,7 @@ function(x, ..., value) {
 	    ## Map.
 	    if (is.double(args[[k]]))
 		args[[k]] <- trunc(args[[k]]) 
-	    if (.protect) {
+	    if (.disable) {
 		if (any(args[[k]] < 0L))
 		    stop("Negative subscripting disabled for this object.")
 	    } else
@@ -154,9 +148,9 @@ function(x, ..., value) {
     V <- c(x$v, V)[k]
 
     ## Remove ZERO entries.
-    k <- V == vector(typeof(V), 1L)
-    if (any(k)) {
-	k <- !k
+    k <- which(V == vector(typeof(V), 1L))
+    if (length(k)) {
+	k <- -k
 	I <- I[k,, drop = FALSE]
 	V <- V[k]
     }
