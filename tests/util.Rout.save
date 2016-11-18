@@ -1,5 +1,5 @@
 
-R version 3.3.0 (2016-05-03) -- "Supposedly Educational"
+R version 3.3.2 (2016-10-31) -- "Sincere Pumpkin Patch"
 Copyright (C) 2016 The R Foundation for Statistical Computing
 Platform: i686-pc-linux-gnu (32-bit)
 
@@ -244,6 +244,13 @@ expression(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 [[2]]
 [1] 1 1 2
 
+> .Call("_match_matrix", x, matrix(0L, 0, 2), 0L)
+[[1]]
+[1] 1 1 2 3 2
+
+[[2]]
+integer(0)
+
 > 
 > 
 > ##
@@ -265,4 +272,4 @@ expression(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 > 
 > proc.time()
    user  system elapsed 
-  0.180   0.028   0.203 
+  0.244   0.024   0.263 

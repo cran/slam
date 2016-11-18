@@ -36,6 +36,7 @@ x <- matrix(c(1L,1L,1L,1L,1L,2L,1L,3L,1L,2L),
 x
 .Call("_match_matrix", x, NULL, NULL)
 .Call("_match_matrix", x, x[1:3,], 0L)
+.Call("_match_matrix", x, matrix(0L, 0, 2), 0L)
 
 
 ##

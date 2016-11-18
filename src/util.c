@@ -390,7 +390,7 @@ SEXP _match_matrix(SEXP x, SEXP y, SEXP _nm) {
 	}
     }
 
-    if (ny) {
+    if (!isNull(y)) {
 	SEXP t;
 	SET_VECTOR_ELT(r, 1, (t = allocVector(INTSXP, ny)));
 	
