@@ -37,6 +37,7 @@ S3method("is.numeric", "simple_triplet_matrix")
 S3method("mean", "simple_triplet_matrix")
 S3method("print", "simple_triplet_matrix")
 S3method("rbind", "simple_triplet_matrix")
+S3method("split", "simple_triplet_matrix")
 S3method("t", "simple_triplet_matrix")
 S3method("unique", "simple_triplet_matrix")
 

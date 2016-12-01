@@ -12,7 +12,7 @@ function(i, j, v, nrow = max(i), ncol = max(j), dimnames = NULL)
                 dimnames = dimnames)
     class(stm) <- "simple_triplet_matrix"
     if(!.Call(R__valid_stm, stm))
-	stop("failed to create a valid 'simple_sparse_matrix' object")
+	stop("failed to create a valid 'simple_triplet_matrix' object")
     stm
 }
 
@@ -926,6 +926,43 @@ function(a, perm = NULL, ...)
 as.vector.simple_triplet_matrix <-
 function(x, mode = "any")
     as.vector(as.matrix(x), mode)
+
+split.simple_triplet_matrix <- 
+function(x, f, drop = FALSE, MARGIN = 1L, ...)
+{
+    if(!is.factor(f))
+        f <- as.factor(f)
+    else if(drop)
+        f <- factor(f)
+        
+    if (length(MARGIN) != 1L ||
+	is.na(match(MARGIN, 1:2)))
+	stop("'MARGIN' invalid")
+    if (length(f) != dim(x)[MARGIN])
+	stop("'f' invalid length")
+
+    fx <- f[x[[MARGIN]]]
+    mapply(function(i, j, v, k) {
+	    z <- x
+	    z$i <- i
+	    z$j <- j
+	    z$v <- v
+	    z[[MARGIN]] <- match(z[[MARGIN]], k)
+	    z[[MARGIN + 3L]] <- length(k)
+	    k <- z$dimnames[[MARGIN]][k]
+	    if (!is.null(k))
+		z$dimnames[[MARGIN]] <- k
+	    if (!.Call(R__valid_stm, z))
+		stop("oops, invalid 'simple_triplet_matrix' object")
+	    z
+	},
+	split(x$i, fx),
+	split(x$j, fx),
+	split(x$v, fx),
+	split(seq_along(f), f),
+	SIMPLIFY = FALSE
+    )
+}
 
 ## Utilities for creating special simple triplet matrices:
 
