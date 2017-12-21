@@ -33,7 +33,7 @@ x[k]
 
 z <- x[c(1,3),]
 data.frame(v = z$v, i = z$i,
-    k = .Call("_vector_index", z$dim, z$i))
+    k = .Call(slam:::R_vector_index, z$dim, z$i))
 
 
 ## drop not implemented
@@ -86,7 +86,7 @@ x[k]
 
 z <- x[c(1,3),]
 data.frame(v = z$v, i = z$i, j = z$j,
-    k = .Call("_vector_index", c(z$nrow, z$ncol), cbind(z$i, z$j)))
+    k = .Call(slam:::R_vector_index, c(z$nrow, z$ncol), cbind(z$i, z$j)))
 
 
 ## drop not implemented

@@ -20,6 +20,6 @@ identical(a, z)
 ##
 v <- c("logical", "integer", "double", "complex", "character", "list")
 stopifnot(any(sapply(v, function(v) 
-    !.Call("__valid_v", vector(typeof(v), 1L)))))
+    !.Call(slam:::R__valid_v, vector(typeof(v), 1L)))))
 
 ##

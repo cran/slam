@@ -137,7 +137,7 @@ function(x, higher = TRUE)
 	l <- dim(I)[1L]
 	if (k > 1L)
 	    I <- apply(I, 2L, rep, each = k)
-	I <- cbind(rep(seq.int(k), l), I)
+	I <- cbind(rep.int(seq.int(k), l), I)
     }
     if (!is.null(N)) {
 	if (!is.list(n))

@@ -43,7 +43,7 @@ In reduce_simple_sparse_array(a) : NAs introduced by reduction
 > ##
 > v <- c("logical", "integer", "double", "complex", "character", "list")
 > stopifnot(any(sapply(v, function(v) 
-+     !.Call("__valid_v", vector(typeof(v), 1L)))))
++     !.Call(slam:::R__valid_v, vector(typeof(v), 1L)))))
 > 
 > ##
 > 

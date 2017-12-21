@@ -68,7 +68,7 @@ function(x)
                           nr, x@Dim[2L], x@Dimnames)
 }
 
-## See Work/Matrix.R for S4 methods for coercing simple triplet matrices
+## See work/Matrix.R for S4 methods for coercing simple triplet matrices
 ## to Matrix objects.
 
 ## Sparse matrix classes in package 'SparseM'.
@@ -496,7 +496,7 @@ function(x, value)
             value <- NULL
         else {
             dnx <- vector("list", length(dim(x)))
-	    len <- sapply(value, length)
+	    len <- lengths(value)
 	    ind <- which(len > 0L)
 	    if (any(len[ind] != dim(x)[ind]))
 		stop("Invalid component length.")

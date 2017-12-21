@@ -42,24 +42,7 @@ S3method("t", "simple_triplet_matrix")
 S3method("unique", "simple_triplet_matrix")
 
 ## enhanced stuff
-useDynLib("slam",
-          "__valid_stm",
-          "__valid_ssa",
-          "__valid_v",
-          "_split_col",
-	  "_all_row",
-          "_part_index",
-          "_vector_index",
-          "_ini_array",
-          "_match_matrix",
-          "_unattr",
-          "_sums_stm",
-          "_row_tsums",
-          "_tcrossprod_stm_stm"    = "tcrossprod_stm_stm",
-          "_tcrossprod_stm_matrix" = "tcrossprod_stm_matrix",
-          "_col_apply_stm",
-          .fixes = "R"
-          )
+useDynLib("slam", .registration = TRUE)
 
 export("row_sums",
        "col_sums",

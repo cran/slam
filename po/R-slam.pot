@@ -1,0 +1,233 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: slam 0.1-41\n"
+"POT-Creation-Date: 2017-08-12 22:23\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
+msgid "'x' not of class 'simple_sparse_array'"
+msgstr ""
+
+msgid "'MARGIN' invalid"
+msgstr ""
+
+msgid "lengths of 'dim' do not conform"
+msgstr ""
+
+msgid "common parts of 'dim' do not conform"
+msgstr ""
+
+msgid "definitions of ZERO of 'v' do not conform"
+msgstr ""
+
+msgid "'x' not of class simple_striplet_matrix"
+msgstr ""
+
+msgid "'x' not of class simple_triplet_matrix"
+msgstr ""
+
+msgid "the numer of rows of 'x' and 'y' do not conform"
+msgstr ""
+
+msgid "'x, y' not of class simple_triplet_matrix"
+msgstr ""
+
+msgid "failed to create a valid 'simple_sparse_array' object"
+msgstr ""
+
+msgid "Generic '%s' not defined for \"%s\" objects."
+msgstr ""
+
+msgid "Not implemented."
+msgstr ""
+
+msgid "invalid dim replacement value"
+msgstr ""
+
+msgid "Logical vector subscripting currently not implemented."
+msgstr ""
+
+msgid "Character vector subscripting currently not implemented."
+msgstr ""
+
+msgid "Invalid subscript type: %s."
+msgstr ""
+
+msgid "Numeric vector subscripting disabled for this object."
+msgstr ""
+
+msgid "Negative vector subsripting disabled for this object."
+msgstr ""
+
+msgid "Cannot mix positive and negative subscripts."
+msgstr ""
+
+msgid "Invalid subscript."
+msgstr ""
+
+msgid "subscript out of bounds"
+msgstr ""
+
+msgid "Incorrect number of dimensions."
+msgstr ""
+
+msgid "Only numeric multi-index subscripting is implemented."
+msgstr ""
+
+msgid "NA indices currently not allowed"
+msgstr ""
+
+msgid "Repeated indices currently not allowed."
+msgstr ""
+
+msgid "A simple sparse array of dimension %s."
+msgstr ""
+
+msgid "Invalid permutation."
+msgstr ""
+
+msgid "'dim' must have positive length"
+msgstr ""
+
+msgid "'transpose' not implemented"
+msgstr ""
+
+msgid "invalid matrix format"
+msgstr ""
+
+msgid "failed to create a valid 'simple_triplet_matrix' object"
+msgstr ""
+
+msgid "Unsupported number of dimensions"
+msgstr ""
+
+msgid "Unary '%s' not defined for \"%s\" objects."
+msgstr ""
+
+msgid "NA/NaN handling not implemented."
+msgstr ""
+
+msgid "Incompatible dimensions."
+msgstr ""
+
+msgid "Invalid dimnames."
+msgstr ""
+
+msgid "Invalid component length."
+msgstr ""
+
+msgid "Logical vector subscripting disabled for this object."
+msgstr ""
+
+msgid "Negative vector subscripting disabled for this object."
+msgstr ""
+
+msgid "NA indices not allowed."
+msgstr ""
+
+msgid "Subscript out of bounds."
+msgstr ""
+
+msgid "Numbers of columns of matrices must match."
+msgstr ""
+
+msgid "Numbers of rows of matrices must match."
+msgstr ""
+
+msgid "Invalid margin."
+msgstr ""
+
+msgid "A %s simple triplet matrix."
+msgstr ""
+
+msgid "'f' invalid length"
+msgstr ""
+
+msgid "oops, invalid 'simple_triplet_matrix' object"
+msgstr ""
+
+msgid "multiple entries"
+msgstr ""
+
+msgid "NAs introduced by reduction"
+msgstr ""
+
+msgid "zero entries"
+msgstr ""
+
+msgid "'INDEX' invalid length"
+msgstr ""
+
+msgid "INDEX [%s] invalid length"
+msgstr ""
+
+msgid "component 'v' contains 'ZERO' value(s)"
+msgstr ""
+
+msgid "number of cells %d too large for hashing"
+msgstr ""
+
+msgid "processing %d cells ..."
+msgstr ""
+
+msgid "'DROP' not supported"
+msgstr ""
+
+msgid "dim(x) must have a positive length"
+msgstr ""
+
+msgid "Replacement disabled."
+msgstr ""
+
+msgid "replacement has length zero"
+msgstr ""
+
+msgid "Empty subscripting disabled."
+msgstr ""
+
+msgid "Only numeric / matrix subscripting is implemented."
+msgstr ""
+
+msgid "NAs are not allowed in subscripted assignments"
+msgstr ""
+
+msgid "Vector subscripting disabled for this object."
+msgstr ""
+
+msgid "Extending is not implemented."
+msgstr ""
+
+msgid "Negative subscripting disabled for this object."
+msgstr ""
+
+msgid "only 0's may be mixed with negative subscripts"
+msgstr ""
+
+msgid "negative values are not allowed in a matrix subscript"
+msgstr ""
+
+msgid "incorrect number of dimensions"
+msgstr ""
+
+msgid "Missing dimensions disabled for this object."
+msgstr ""
+
+msgid "Only numeric subscripting is implemented."
+msgstr ""
+
+msgid "number of items to replace is not a multiple of replacement length"
+msgstr ""
+
+msgid "'MARGINS' invalid"
+msgstr ""
+
+msgid "'MARGINS' and/or 'DIM' invalid"
+msgstr ""
+
+msgid "MARGINS [%s] invalid factorization"
+msgstr ""

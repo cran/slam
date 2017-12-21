@@ -11,7 +11,7 @@
 SEXP _unattr(SEXP x) {
     if (!isVector(x) || ATTRIB(x) == R_NilValue)
 	return x;
-    if (NAMED(x) > 1) {
+    if (MAYBE_SHARED(x)) {
 	SEXP s = x;
 	SEXP a = PROTECT(ATTRIB(x));
 	SET_ATTRIB(x, R_NilValue);
@@ -309,11 +309,11 @@ SEXP tcrossprod_stm_stm(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
 	    if (vx != VECTOR_ELT(x, 2))
 		UNPROTECT(1);
 	    r = eval(PROTECT(LCONS(install(".tcrossprod_bailout"),
-			      CONS(x,
+		     PROTECT( CONS(x,
 			      CONS(y, 
 			      CONS(ScalarLogical(FALSE), 
-				   R_NilValue))))), pkgEnv);
-	    UNPROTECT(1);
+				   R_NilValue)))))), pkgEnv);
+	    UNPROTECT(2);
 	    return r;
 	}
 
@@ -333,11 +333,11 @@ SEXP tcrossprod_stm_stm(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose) {
 		if (vx != VECTOR_ELT(x, 2))
 		    UNPROTECT(1);
 		r = eval(PROTECT(LCONS(install(".tcrossprod_bailout"),
-				  CONS(x,
+			 PROTECT( CONS(x,
 				  CONS(y, 
 				  CONS(ScalarLogical(FALSE), 
-				       R_NilValue))))), pkgEnv);
-		UNPROTECT(1);
+				       R_NilValue)))))), pkgEnv);
+		UNPROTECT(2);
 		return r;
 	    }
 
@@ -544,12 +544,12 @@ SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose,
 	    if (isNull(pkgEnv))
 		error("NA/NaN handling deactivated");
 	    r = eval(PROTECT(LCONS(install(".tcrossprod_bailout"),
-			      CONS(x,
+		     PROTECT( CONS(x,
 			      CONS(y, 
 			      CONS((R_transpose && *LOGICAL(R_transpose)) ?
 				    R_transpose : ScalarLogical(FALSE),
-				    R_NilValue))))), pkgEnv);
-	    UNPROTECT(1);
+				    R_NilValue)))))), pkgEnv);
+	    UNPROTECT(2);
 	    if (y != R_y)
 		UNPROTECT(1);
 	    return r;

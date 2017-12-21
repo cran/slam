@@ -16,7 +16,7 @@ function(file)
     l <- l[-1L]
 
     ## Compute i, j, and v slots for a simple_triplet_matrix.
-    rowLen <- sapply(l, length)
+    rowLen <- lengths(l)
     l <- unlist(l)
     i <- rep.int(seq_len(nRow), rowLen / 2)
     j <- l[seq.int(1, length(l), by = 2)]
@@ -128,7 +128,7 @@ function(file, scalingtype = NULL)
     ## see http://userweb.cs.utexas.edu/users/jfan/dm/README.html) we
     ## can also infer the row and col names.
     rnms <- if(file.exists(f <- sprintf("%s_words", file))) {
-        readLines(f)[seq(from = 2L, length.out = nr)]
+        readLines(f)[seq.int(from = 2L, length.out = nr)]
     } else NULL
     cnms <- if(file.exists(f <- sprintf("%s_docs", file))) {
         sub("^[^ ]*: ", "", readLines(f))

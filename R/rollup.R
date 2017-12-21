@@ -101,7 +101,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	    P <- array(1L, dim(I))
 	T <- vector("list", length(D))
 	for (k in seq_along(D)[-MARGIN])
-	    T[[k]] <- rep(1L, D[k])
+	    T[[k]] <- rep.int(1L, D[k])
     }
     N <- dimnames(x)
     if (is.null(N))

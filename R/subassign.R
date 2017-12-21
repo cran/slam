@@ -6,6 +6,12 @@
 `[<-.simple_sparse_array` <- 
 function(x, ..., value) {
 
+    if (inherits(value, c("simple_sparse_array", "simple_triplet_matrix"))) {
+	if (prod(dim(value)) > slam_options("max_dense"))
+	    stop("Replacement disabled.")
+	value <- as.vector(value)
+    }
+    
     if (!length(value))
 	stop("replacement has length zero")
 

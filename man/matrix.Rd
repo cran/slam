@@ -64,6 +64,12 @@ simple_triplet_matrix(c(1, 4), c(1, 2), c(1, 2))
 simple_triplet_zero_matrix(3)
 simple_triplet_diag_matrix(1:3)
 
-cbind(rbind(x, t(x)), rbind(x, x))
+cbind(rbind(s, t(s)), rbind(s, s))
+\dontrun{
+## map to default Matrix class
+stopifnot(require("Matrix"))
+sparseMatrix(i = s$i, j = s$j, x = s$v, dims = dim(s), 
+	     dimnames = dimnames(s))
+}
 }
 \keyword{math}

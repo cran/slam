@@ -15,7 +15,8 @@ SEXP _part_index(SEXP x) {
     k = LENGTH(getAttrib(x, R_LevelsSymbol));
 
     r = PROTECT(allocVector(INTSXP, LENGTH(x)));
-    setAttrib(r, install("table"), (t = allocVector(INTSXP, k)));
+    setAttrib(r, install("table"), PROTECT(t = allocVector(INTSXP, k)));
+    UNPROTECT(1);
 
     memset(INTEGER(t), 0, sizeof(int) * k);
 

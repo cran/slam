@@ -81,7 +81,7 @@ function(..., MARGIN = 1L)
 		    if (!is.null(y$dimnames[[m]]))
 			y$dimnames[[m]]
 		    else
-			rep("", y$dim[[m]])
+			rep.int("", y$dim[[m]])
 		)
 	    if (is.null(names(N)))
                 names(N) <- names(y$dimnames)
@@ -94,7 +94,7 @@ function(..., MARGIN = 1L)
 			names(N) <- names(y$dimnames)
 		N[[m]] <-
 		    c(
-			rep("", D[m]),
+			rep.int("", D[m]),
 			y$dimnames[[m]]
 		     )
 	    }

@@ -10,15 +10,15 @@ x[3, 1, 1] <- 2
 x[c(17, 17)] <- c(2, 3)		    ## duplicate subscripts
 x[c(5, NA, 6)] <- 4		    ## recycling
 data.frame(v = x$v, i = x$i,
-    k = .Call("_vector_index", x$dim, x$i))
+    k = .Call(slam:::R_vector_index, x$dim, x$i))
 
 ##
 x[, -1, 1] <- 0			    ## zero elements
 data.frame(v = x$v, i = x$i,
-    k = .Call("_vector_index", x$dim, x$i))
+    k = .Call(slam:::R_vector_index, x$dim, x$i))
 x[-c(2, 3)] <- 0
 data.frame(v = x$v, i = x$i,
-    k = .Call("_vector_index", x$dim, x$i))
+    k = .Call(slam:::R_vector_index, x$dim, x$i))
 
 x[] <- 0
 str(x)
@@ -38,6 +38,12 @@ as.vector(x[1,1,1])
 
 x[1L] <- 2
 as.vector(x[1,1,1])
+
+##
+z <- drop_simple_sparse_array(x[1,,])
+as.vector(z[1,])
+z[1,] <- -as.simple_triplet_matrix(z[1,])
+as.vector(z[1,])
 
 ## reference
 x <- matrix(1:6, nrow = 3)
