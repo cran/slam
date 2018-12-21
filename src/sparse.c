@@ -17,7 +17,7 @@ SEXP _unattr(SEXP x) {
 	SET_ATTRIB(x, R_NilValue);
 	x = duplicate(x);
 	SET_ATTRIB(s, a);
-	UNPROTECT_PTR(a);
+	UNPROTECT(1);		/* a */
     } else
 	SET_ATTRIB(x, R_NilValue);
     if (OBJECT(x))
@@ -622,7 +622,8 @@ SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, SEXP R_verbose,
 	_r = REAL(r);
 	for (int i = 0; i < n * m; i++)
 	    _r[i] = _y[i / n + (i % n) * m];
-	UNPROTECT_PTR(v);
+	UNPROTECT(2);		/* v, r */
+	PROTECT(r);
     } else {
 	// NOTE we rely on setAttrib to not check if the dimnames
 	//      are consistent with dim. 

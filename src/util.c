@@ -408,7 +408,6 @@ SEXP _match_matrix(SEXP x, SEXP y, SEXP _nm) {
     }
 
     // Unique.
-    UNPROTECT_PTR(ht);
 
     SEXP t;
     SET_VECTOR_ELT(r, 1, (t = allocVector(INTSXP, n)));
@@ -420,7 +419,7 @@ SEXP _match_matrix(SEXP x, SEXP y, SEXP _nm) {
 	    n++;
 	}
 
-    UNPROTECT(1);
+    UNPROTECT(2);
     return r;
 }
 

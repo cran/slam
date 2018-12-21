@@ -1,4 +1,4 @@
-249763183f4bddf9061c23e2651538d9 *DESCRIPTION
+06ab0fe9a707bc4646f84f4dd5f9f956 *DESCRIPTION
 daebbf4a476decad1729efdbb308054e *NAMESPACE
 f3f86fd18380544002202715c8d0d9f7 *R/abind.R
 b94f005638ee208bb4417ccb4893aa68 *R/apply.R
@@ -27,8 +27,8 @@ f75048a25feebac938f74e1ed79fe683 *man/sums.Rd
 dc088b0ac562f358ced61cdedbbf757d *src/apply.c
 eab1529358b656803537a7ccee91542c *src/dll.c
 a6e6e502309e5bb33b5ea822a133b6f8 *src/grouped.c
-cda2b1826e64d5a9a22f7ccfb6f67e4d *src/sparse.c
-6c8d13e3988d1063a16169f26587a670 *src/util.c
+827b875ce769451498721b3f1da27124 *src/sparse.c
+8e81ea3fe1a70d3a77407334e68189fe *src/util.c
 6e9231824027888adde90f5b525bed48 *tests/abind.R
 2a747ac2d11d058340e8f0c8bc01d71e *tests/abind.Rout.save
 1d6eac26b215d6fee5592782569e5232 *tests/apply.R
