@@ -30,12 +30,12 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	z <- INDEX[[as.character(k)]]
 	z <-
 	if (is.null(z))
-	    rep(factor(1L), d[k])
+	    rep.int(as.factor(1L), d[k])
 	else {
 	    if (length(z) != d[k])
 		stop(gettextf("INDEX [%s] invalid length", k),
                      domain = NA)
-	    factor(z)
+	    as.factor(z)
 	}
 	i[, k] <- z[i[, k]]
 	z <- levels(z)
@@ -120,12 +120,12 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 		D[k] <- -1L
 		next
 	    }
-	    z <- rep(factor(1L), D[k])
+	    z <- rep.int(as.factor(1L), D[k])
 	} else {
 	    if (length(z) != D[k])
 		stop(gettextf("INDEX [%s] invalid length", k),
                      domain = NA)
-	    z <- factor(z)
+	    z <- as.factor(z)
 	}
 	l <- levels(z)
 	D[k]   <- length(l)
@@ -268,12 +268,12 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., REDUCE = FALSE) {
 		z <- INDEX[[as.character(k)]]
 		z <- 
 		if (is.null(z))
-		    rep(factor(1L), dim(x)[k])
+		    rep.int(as.factor(1L), dim(x)[k])
 		else {
 		    if (length(z) != dim(x)[k])
 			stop(gettextf("INDEX [%s] invalid length", k),
                              domain = NA)
-		    factor(z)
+		    as.factor(z)
 		}
 		.Call(R_row_tsums, 
 		      x, z, 

@@ -778,7 +778,7 @@ function(..., deparse.level = 1L)
     }, args)
     ## Handle dimnames in one final step.
     rnms <- lapply(args, rownames)
-    rnms <- if(!all(sapply(rnms, is.null))) {
+    rnms <- if(!all(vapply(rnms, is.null, NA))) {
 	rnms <- mapply(function(rnm, n)
 	    if(is.null(rnm))
 		rep.int("", n)
@@ -815,7 +815,7 @@ function(..., deparse.level = 1L)
     }, args)
     ## Handle dimnames in one final step.
     cnms <- lapply(args, colnames)
-    cnms <- if(!all(sapply(cnms, is.null))) {
+    cnms <- if(!all(vapply(cnms, is.null, NA))) {
 	cnms <- mapply(function(cnm, n)
 	    if(is.null(cnm))
 		rep.int("", n)
@@ -859,7 +859,7 @@ function(x, incomparables = FALSE, MARGIN = 1L, fromLast = FALSE, ...)
     y <- split(paste(j[o], x$v[o], sep = "\r"), i[o])
     tmp <- character(len)
     names(tmp) <- seq_along(tmp)
-    tmp[names(y)] <- sapply(y, paste, collapse = "\r")
+    tmp[names(y)] <- vapply(y, paste, "", collapse = "\r")
     duplicated(tmp, fromLast = fromLast)
 }
 
@@ -879,7 +879,7 @@ c.simple_triplet_matrix <-
 function(..., recursive = FALSE)
 {
     args <- list(...)
-    ind <- which(sapply(args, inherits, "simple_triplet_matrix"))
+    ind <- which(vapply(args, inherits, NA, "simple_triplet_matrix"))
     args[ind] <-
         lapply(args[ind],
                function(x) {

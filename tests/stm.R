@@ -1,6 +1,10 @@
 
 library("slam")
 set.seed(20090626)
+## <FIXME>
+## Remove eventually.
+if(getRversion() >= "3.6.0") RNGkind(sample.kind = "Rounding")
+## </FIXME>
 
 ###
 

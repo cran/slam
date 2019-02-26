@@ -1,7 +1,7 @@
 
-R version 2.10.1 Patched (2010-01-01 r50884)
-Copyright (C) 2010 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
+R version 3.5.2 Patched (2019-02-21 r76160) -- "Eggshell Igloo"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -18,7 +18,10 @@ Type 'q()' to quit R.
 > 
 > library("slam")
 > set.seed(20091012)
-> 
+> ## <FIXME>
+> ## Remove eventually.
+> if(getRversion() >= "3.6.0") RNGkind(sample.kind = "Rounding")
+> ## </FIXME>
 > 
 > ###
 > as.simple_triplet_matrix_zeros <-
@@ -161,3 +164,6 @@ A 20x5 simple triplet matrix.
 > 
 > 
 > 
+> proc.time()
+   user  system elapsed 
+  0.127   0.010   0.126 

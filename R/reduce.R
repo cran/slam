@@ -35,7 +35,7 @@ function(x, strict = FALSE, order = FALSE)
 	    V <- sapply(V, function(x) 
 		if (length(x) > 1L) {
 		    x <- as.list(x)
-		    if (all(sapply(x[-1L], identical, x[[1L]])))
+		    if (all(vapply(x[-1L], identical, NA, x[[1L]])))
 			x[[1L]]
 		    else
 			NA
@@ -70,7 +70,7 @@ function(x, strict = FALSE, order = FALSE)
     N <-
     if (!length(N) ||
 	(is.null(names(N)) &&
-	  all(sapply(N, is.null))))
+	  all(vapply(N, is.null, NA))))
 	NULL
     else
 	lapply(N, as.vector)

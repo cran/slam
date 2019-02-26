@@ -43,7 +43,7 @@ function(..., MARGIN = 1L)
 	stop("'MARGIN' invalid")
     args <- list(...)
     if (length(args))
-	args <- args[!sapply(args, is.null)]
+	args <- args[!vapply(args, is.null, NA)]
     if (!length(args))
 	return(NULL)
     x <- as.simple_sparse_array(args[[1L]])

@@ -110,7 +110,7 @@ function(x, ..., value) {
 		else
 		    args[[k]] <- seq_len(x$dim[k])
 	}
-	if (!all(sapply(args, is.numeric)))
+	if (!all(vapply(args, is.numeric, NA)))
 	    stop("Only numeric subscripting is implemented.")
 	## Replace negative subscripts.
 	for (k in seq_along(args)) {
