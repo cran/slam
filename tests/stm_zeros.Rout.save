@@ -1,5 +1,5 @@
 
-R version 3.5.2 Patched (2019-02-21 r76160) -- "Eggshell Igloo"
+R Under development (unstable) (2019-03-01 r76185) -- "Unsuffered Consequences"
 Copyright (C) 2019 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
@@ -17,11 +17,11 @@ Type 'q()' to quit R.
 
 > 
 > library("slam")
-> set.seed(20091012)
 > ## <FIXME>
 > ## Remove eventually.
-> if(getRversion() >= "3.6.0") RNGkind(sample.kind = "Rounding")
+> suppressWarnings(RNGversion("3.5.0"))
 > ## </FIXME>
+> set.seed(20091012)
 > 
 > ###
 > as.simple_triplet_matrix_zeros <-
@@ -166,4 +166,4 @@ A 20x5 simple triplet matrix.
 > 
 > proc.time()
    user  system elapsed 
-  0.127   0.010   0.126 
+  0.130   0.036   0.159 

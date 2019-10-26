@@ -1,4 +1,4 @@
-af7a10b937dff302d52629691ff3b7a7 *DESCRIPTION
+93ea989aac08d0f9fdaad5f43ee655d9 *DESCRIPTION
 daebbf4a476decad1729efdbb308054e *NAMESPACE
 77c5ebf37055a0dd494b8d60eae9985b *R/abind.R
 b94f005638ee208bb4417ccb4893aa68 *R/apply.R
@@ -48,8 +48,8 @@ b86c28c833275f95a0640bda242e0cbb *tests/matrix.Rout.save
 13be5b14a4b4252d7b3025bef82eaac1 *tests/split.Rout.save
 396b0b82fa1bb5f567d6fc0f555df6b9 *tests/ssa_valid.R
 8b4b75f4b9c73bca36ebc106072eca8c *tests/ssa_valid.Rout.save
-a52335e4641f549691842b05302d8ad5 *tests/stm.R
-105ba965347e00ddf8b32b2eea5d8307 *tests/stm.Rout.save
+f48c756b0c0db0961b8959f478fedb71 *tests/stm.R
+d39141a68d98a2d3281f1242681af5ed *tests/stm.Rout.save
 c08e0dd2853dd24d35c71fb05b0c3998 *tests/stm_apply.R
 6d6c5b37fc83131692759b25f3b0dd75 *tests/stm_apply.Rout.save
 6ec22193d6ab30c20bdcf70bab31075a *tests/stm_rollup.R
@@ -60,8 +60,8 @@ b3f5ab7d9d4821c0ba990baf4f617749 *tests/stm_subassign.Rout.save
 935594f3f4913951dcc6e0c23301f3a1 *tests/stm_ttcrossprod.Rout.save
 1f6250d61d1f2829414b4584df18050f *tests/stm_valid.R
 1b56e8328e82d2b2766eae2061d8b460 *tests/stm_valid.Rout.save
-5b1fbacddfb817f314ef4f765af4c2da *tests/stm_zeros.R
-3b6326c6e49da5355483c6654d121399 *tests/stm_zeros.Rout.save
+728ff9bc3c371a363cab3a75a5a0b4e9 *tests/stm_zeros.R
+e14df64bda2beb93a385d13c72eae4e0 *tests/stm_zeros.Rout.save
 8726e6238106da5de2e0f16f239899e1 *tests/subassign.R
 816c7e268de781b428348b3f5e8154d0 *tests/subassign.Rout.save
 c859a6ac7318b301963a165f10f6a767 *tests/util.R

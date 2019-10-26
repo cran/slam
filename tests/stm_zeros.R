@@ -1,10 +1,10 @@
 
 library("slam")
-set.seed(20091012)
 ## <FIXME>
 ## Remove eventually.
-if(getRversion() >= "3.6.0") RNGkind(sample.kind = "Rounding")
+suppressWarnings(RNGversion("3.5.0"))
 ## </FIXME>
+set.seed(20091012)
 
 ###
 as.simple_triplet_matrix_zeros <-
