@@ -187,10 +187,12 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	names(V) <- NULL
 	V <- lapply(V, FUN, ...)
     } else {
+        verbose <- getOption("verbose")
 	.pt <- proc.time()
-	message(gettextf("processing %d cells ... ", dim(I)[1L]),
-		appendLF = FALSE,
-                domain = NA)
+        if(verbose)
+            message(gettextf("processing %d cells ... ", dim(I)[1L]),
+                    appendLF = FALSE,
+                    domain = NA)
 	i <- split.default(seq_along(i), i)
 	names(i) <- NULL
 	V <- mapply(function(i, z) {
@@ -213,9 +215,10 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	rm(i, T)
 	if (EXPAND > 2L)
 	    rm(P)
-	message(sprintf("[%.2fs]\n", (proc.time() - .pt)[3L]),
-		appendLF = FALSE,
-                domain = NA)
+        if(verbose)
+            message(sprintf("[%.2fs]\n", (proc.time() - .pt)[3L]),
+                    appendLF = FALSE,
+                    domain = NA)
     }
     if (all(unlist(lapply(V, length)) == 1L)) {
 	V <- unlist(V, recursive = FALSE, use.names = FALSE)

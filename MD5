@@ -1,4 +1,4 @@
-93ea989aac08d0f9fdaad5f43ee655d9 *DESCRIPTION
+c9fffcc82af26567069b59124919299b *DESCRIPTION
 daebbf4a476decad1729efdbb308054e *NAMESPACE
 77c5ebf37055a0dd494b8d60eae9985b *R/abind.R
 b94f005638ee208bb4417ccb4893aa68 *R/apply.R
@@ -8,7 +8,7 @@ b94f005638ee208bb4417ccb4893aa68 *R/apply.R
 cb1a1fcc1d21beff71959e0822ba6e80 *R/matrix.R
 52edd441e5d9c1465b43128009619fc8 *R/misc.R
 b015852faa6a8574b8cb97275c54bfb6 *R/reduce.R
-ee18034f459c1226e00c6797fe017cc3 *R/rollup.R
+98e10626d3597c86f1c233e77607d49c *R/rollup.R
 081170556760537396d1c76b108027f2 *R/stm.R
 450fb37f708990339d60f6fc58481a8f *R/subassign.R
 d5e4976e869418e73823e386751b5650 *inst/po/en@quot/LC_MESSAGES/R-slam.mo
@@ -43,7 +43,7 @@ b86c28c833275f95a0640bda242e0cbb *tests/matrix.Rout.save
 1aedaf99201b77a1074e9118bc5704d2 *tests/matrix_dimnames.R
 0a73c3fcb1cf31632db30941809f2b1d *tests/matrix_dimnames.Rout.save
 81f3ceea72c7debaeded0e0a38dee245 *tests/rollup.R
-4c4203fcac718fc625cf1be8614981a3 *tests/rollup.Rout.save
+e300757faaf2b02a6f1ef041c6abebef *tests/rollup.Rout.save
 4e140e3ed76ef390637d93f979263c6b *tests/split.R
 13be5b14a4b4252d7b3025bef82eaac1 *tests/split.Rout.save
 396b0b82fa1bb5f567d6fc0f555df6b9 *tests/ssa_valid.R
