@@ -26,7 +26,7 @@ write_stm_MC(x, file)
 }
 \details{
   Documentation for CLUTO including its sparse matrix format is
-  available from \url{http://www-users.cs.umn.edu/~karypis/cluto/}.
+  available from \url{https://www-users.cs.umn.edu/~karypis/cluto/}.
 
   \code{read_stm_CLUTO} reads CLUTO sparse matrices, returning a
   \link[slam:matrix]{simple triplet matrix}.
@@ -36,7 +36,7 @@ write_stm_MC(x, file)
   \code{\link[slam:matrix]{as.simple_triplet_matrix}}.
 
   MC is a toolkit for creating vector models from text documents (see 
-  \url{http://www.cs.utexas.edu/users/dml/software/mc/}).  It employs a
+  \url{https://www.cs.utexas.edu/users/dml/software/mc/}).  It employs a
   variant of Compressed Column Storage (CCS) sparse matrix format,
   writing data into several files with suitable names: e.g., a file with
   \file{_dim} appended to the base file name stores the matrix

@@ -1,4 +1,4 @@
-c9fffcc82af26567069b59124919299b *DESCRIPTION
+fd51f8703729c797191676bbbb5dca61 *DESCRIPTION
 daebbf4a476decad1729efdbb308054e *NAMESPACE
 77c5ebf37055a0dd494b8d60eae9985b *R/abind.R
 b94f005638ee208bb4417ccb4893aa68 *R/apply.R
@@ -16,7 +16,7 @@ d5e4976e869418e73823e386751b5650 *inst/po/en@quot/LC_MESSAGES/R-slam.mo
 b549d8099a6034335d09c825532c0fca *man/apply.Rd
 d8adcd366f2ceea79dde576c2a44c33c *man/array.Rd
 57ab89e1ab8f7af331b824054f9a22a0 *man/crossprod.Rd
-70074ed00c0a76ffec8f177b7c8264ca *man/foreign.Rd
+fb428275728319f466b5d197769ca83e *man/foreign.Rd
 b8502c7d26801a715ee3064cff0ec90d *man/matrix.Rd
 c654d2bd652ea6876766d95d6d8e8ca5 *man/norms.Rd
 da052c0de6ca37432ee52620c4ccbc33 *man/options.Rd
