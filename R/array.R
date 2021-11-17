@@ -216,7 +216,7 @@ function(x, ...)
 		return(vector(mode = typeof(x$v), length = 0L))
 	     ## Ignore dimensions. 
 	     if(ncol(i) != nd || !is.numeric(i)) 
-		return(do.call("[.simple_sparse_array", 
+		return(do.call(`[.simple_sparse_array`, 
 			       list(x = x, as.vector(i))))
 	    if(is.double(i))
 		i <- trunc(i)
@@ -290,7 +290,7 @@ function(x, ...)
             }
         }
         if(!is.null(dnx <- x$dimnames))
-            dnx[] <- Map("[", dnx, ind)
+            dnx[] <- Map(`[`, dnx, ind)
         out <- simple_sparse_array(x$i[pos, , drop = FALSE], x$v[pos],
                                    dx, dnx)
     }

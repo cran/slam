@@ -618,7 +618,7 @@ function(x, i, j, drop = FALSE)
 		return(vector(mode = typeof(x$v), length = 0L))
 	    ## Ignore dimensions
 	    if(ncol(i) != 2L || !is.numeric(i))
-		return(do.call("[.simple_triplet_matrix",
+		return(do.call(`[.simple_triplet_matrix`,
 			       list(x = x, as.vector(i))))
 
 	    if(is.double(i))
@@ -789,7 +789,7 @@ function(..., deparse.level = 1L)
 	    SIMPLIFY = FALSE
 	)
 	
-        do.call("c", rnms)
+        do.call(c, rnms)
     }
     else
         NULL
@@ -825,7 +825,7 @@ function(..., deparse.level = 1L)
 	    lapply(args, ncol),
 	    SIMPLIFY = FALSE
 	)
-        do.call("c", cnms)
+        do.call(c, cnms)
     }
     else
         NULL
@@ -887,7 +887,7 @@ function(..., recursive = FALSE)
                    y[x$i + (x$j - 1L) * x$nrow] <- x$v
                    y
                })
-    do.call("c", args)
+    do.call(c, args)
 }
 
 print.simple_triplet_matrix <-

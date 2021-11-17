@@ -57,7 +57,7 @@ function(x, strict = FALSE, order = FALSE)
 	rm(i)
 	## order entries
 	if (order) {
-	    i <- do.call("order", rev(.Call(R_split_col, I)))
+	    i <- do.call(base::order, rev(.Call(R_split_col, I)))
 	    if (!identical(i, seq_along(i))) {
 		V <- V[i]
 		I <- I[i,, drop = FALSE]

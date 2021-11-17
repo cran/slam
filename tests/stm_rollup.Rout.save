@@ -1,6 +1,6 @@
 
-R version 3.5.2 Patched (2019-02-21 r76160) -- "Eggshell Igloo"
-Copyright (C) 2019 The R Foundation for Statistical Computing
+R Under development (unstable) (2021-11-16 r81199) -- "Unsuffered Consequences"
+Copyright (C) 2021 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -30,11 +30,11 @@ Type 'q()' to quit R.
 > 
 > rollup(z, 2L, rep(1L, 20L), fivenum)
      1        
-[1,] Numeric,5
-[2,] Numeric,5
-[3,] Numeric,5
-[4,] Numeric,5
-[5,] Numeric,5
+[1,] numeric,5
+[2,] numeric,5
+[3,] numeric,5
+[4,] numeric,5
+[5,] numeric,5
 > 
 > identical(rollup(z, 2L, INDEX), 
 + 	  as.matrix(rollup(s, 2L, INDEX)))
@@ -142,4 +142,4 @@ _row_tsums: 0.000s [0.000s/0.000s]
 > 
 > proc.time()
    user  system elapsed 
-  0.120   0.008   0.117 
+  0.136   0.012   0.140 

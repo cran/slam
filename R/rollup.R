@@ -197,7 +197,7 @@ function(x, MARGIN, INDEX = NULL, FUN = sum, ..., DROP = FALSE,
 	names(i) <- NULL
 	V <- mapply(function(i, z) {
 		z <- I[z, ]
-		z <- mapply("[", T, z)
+		z <- mapply(`[`, T, z)
 		if (EXPAND > 2L) {
 		    ## NOTE this consumes less computation time
 		    ##	    and memory than
