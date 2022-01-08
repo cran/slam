@@ -1,8 +1,7 @@
 
-R version 2.14.2 Patched (2012-02-29 r58546)
-Copyright (C) 2012 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: i486-pc-linux-gnu (32-bit)
+R Under development (unstable) (2022-01-05 r81451) -- "Unsuffered Consequences"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -26,12 +25,13 @@ Type 'q()' to quit R.
 integer(0)
 > 
 > ## invalid
-> a <- simple_sparse_array(rep(1L, 2L), c(1L, -1L))
+> a <- simple_sparse_array(c(1L, 2L), c(1L, -1L))
+> a$i[2L] <- 1L
 > a <- reduce_simple_sparse_array(a)
 Warning message:
 In reduce_simple_sparse_array(a) : NAs introduced by reduction
 > as.array(a)
-[1] NA
+[1] NA  0
 > 
 > ## not minimal
 > x <- matrix(1:6, 3L, 2, dimnames = list(NULL, NULL))
@@ -47,3 +47,6 @@ In reduce_simple_sparse_array(a) : NAs introduced by reduction
 > 
 > ##
 > 
+> proc.time()
+   user  system elapsed 
+  0.134   0.016   0.143 

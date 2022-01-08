@@ -7,7 +7,8 @@ a <- as.simple_sparse_array(array(0L, 0L))
 drop_simple_sparse_array(a)
 
 ## invalid
-a <- simple_sparse_array(rep(1L, 2L), c(1L, -1L))
+a <- simple_sparse_array(c(1L, 2L), c(1L, -1L))
+a$i[2L] <- 1L
 a <- reduce_simple_sparse_array(a)
 as.array(a)
 

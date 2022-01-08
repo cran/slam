@@ -32,17 +32,26 @@ function(x, strict = FALSE, order = FALSE)
 	    V <- split(V, i)
 	    rm(i)
 	    names(V) <- NULL
+            nas <- FALSE
 	    V <- sapply(V, function(x) 
 		if (length(x) > 1L) {
-		    x <- as.list(x)
-		    if (all(vapply(x[-1L], identical, NA, x[[1L]])))
-			x[[1L]]
-		    else
-			NA
-		} else 
-		    x, 
+                    x <- unique(x)
+                    if(length(x) > 1L) {
+                        t <- typeof(x)
+                        if(t == "raw")
+                            stop("cannot reduce multiple entries (missing not defined")
+                        else {
+                            nas <<- TRUE
+                            as.vector(NA, t)
+                        }
+                    } else
+                        x
+                } else 
+                    x,
+              
 		USE.NAMES = FALSE)
-	    warning("NAs introduced by reduction")
+            if(nas)
+                warning("NAs introduced by reduction")
 	} else
 	    rm(i)
 	## remove 'zero' entries
