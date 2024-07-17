@@ -23,7 +23,8 @@ SEXP _unattr(SEXP x) {
     if (OBJECT(x))
 	SET_OBJECT(x, 0);
     if (IS_S4_OBJECT(x))
-	UNSET_S4_OBJECT(x);
+	warning("'x' UNSET_S4_OBJECT no longer supported");
+	// UNSET_S4_OBJECT(x);
     return x;
 }
 

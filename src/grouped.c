@@ -4,7 +4,7 @@
 
 extern int _valid_stm(SEXP x);
 
-// ceeboo 2010/8+10, 2016/6
+// ceeboo 2010/8+10, 2016/6, 2024/7
 //
 // sum (collapse) the rows of x into the column groups 
 // defined in index.
@@ -236,9 +236,9 @@ SEXP _row_tsums(SEXP x, SEXP R_index, SEXP R_na_rm, SEXP R_reduce,
 		n++;
 	    }
 	if (n < k) {
-	    SETLENGTH(__i, n);
-	    SETLENGTH( _j, n);
-	    SETLENGTH(__v, n);
+	    SET_VECTOR_ELT(r, 0, (__i = lengthgets(__i, n)));
+	    SET_VECTOR_ELT(r, 1, ( _j = lengthgets( _j, n)));
+	    SET_VECTOR_ELT(r, 2, (__v = lengthgets(__v, n)));
 	}
     }
 #ifdef _TIME_H
