@@ -18,6 +18,18 @@ function(i, j, v, nrow = max(i), ncol = max(j), dimnames = NULL)
     stm
 }
 
+.is_sparse_mat_coercible_to_stm <-
+function(x)
+    UseMethod(".is_sparse_mat_coercible_to_stm")
+
+.is_sparse_mat_coercible_to_stm.simple_triplet_matrix <-
+function(x)
+    TRUE
+
+.is_sparse_mat_coercible_to_stm.default <-
+function(x)
+    FALSE
+
 as.simple_triplet_matrix <-
 function(x)
     UseMethod("as.simple_triplet_matrix")
@@ -70,6 +82,12 @@ function(x)
                           nr, x@Dim[2L], x@Dimnames)
 }
 
+.is_sparse_mat_coercible_to_stm.dgTMatrix <-
+.is_sparse_mat_coercible_to_stm.dgCMatrix <-
+.is_sparse_mat_coercible_to_stm.dgRMatrix <-
+function(x)
+    TRUE
+
 ## See work/Matrix.R for S4 methods for coercing simple triplet matrices
 ## to Matrix objects.
 
@@ -96,6 +114,12 @@ function(x)
                           nr, x@dimension[2L])
 }
 
+.is_sparse_mat_coercible_to_stm.matrix.coo <-
+.is_sparse_mat_coercible_to_stm.matrix.csc <-
+.is_sparse_mat_coercible_to_stm.matrix.csr <-
+function(x)
+    TRUE
+    
 ## Sparse matrix class in package 'spam'.
 
 as.simple_triplet_matrix.spam <-
@@ -106,6 +130,10 @@ function(x)
                           x@colindices, x@entries,
                           nr, x@dimension[2L])
 }
+
+.is_sparse_mat_coercible_to_stm.spam <-
+function(x)
+    TRUE
 
 as.matrix.simple_triplet_matrix <-
 function(x, ...)
