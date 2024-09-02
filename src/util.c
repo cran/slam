@@ -432,3 +432,38 @@ SEXP _stripDimNamesNames(SEXP x) {
     return x;
 }
 
+SEXP _list_of_index_pairs(SEXP x, SEXP y) {
+    int i, n = LENGTH(x); 
+    SEXP e, z;
+    PROTECT(z = allocVector(VECSXP, n));
+    for(i = 0; i < n; i++) {
+	PROTECT(e = allocVector(INTSXP, 2));
+	INTEGER(e)[0] = INTEGER(x)[i];
+	INTEGER(e)[1] = INTEGER(y)[i];
+	UNPROTECT(1);
+	SET_VECTOR_ELT(z, i, e);
+    }
+    UNPROTECT(1);
+    return z;
+}
+
+SEXP _split_index_matrix_by_rows(SEXP x) {
+    SEXP d, e, y;
+    int i, j, k, nr, nc;
+    d = getAttrib(x, R_DimSymbol);
+    nr = INTEGER(d)[0];
+    nc = INTEGER(d)[1];
+    PROTECT(y = allocVector(VECSXP, nr));
+    for(i = 0; i < nr; i++) {
+	k = i;
+	PROTECT(e = allocVector(INTSXP, nc));
+	for(j = 0; j < nc; j++) {
+	    INTEGER(e)[j] = INTEGER(x)[k];
+	    k += nr;
+	}
+	UNPROTECT(1);
+	SET_VECTOR_ELT(y, i, e);
+    }
+    UNPROTECT(1);
+    return y;
+}

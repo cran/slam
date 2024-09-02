@@ -1,11 +1,11 @@
-36c48d611d945941eaa0fa10e459e2db *DESCRIPTION
+8b3b5430eb96b5a8e7695e366dbe1926 *DESCRIPTION
 2c0c220f2e56211f794f12902971180d *NAMESPACE
 77c5ebf37055a0dd494b8d60eae9985b *R/abind.R
 b94f005638ee208bb4417ccb4893aa68 *R/apply.R
-84b02e7be7e7ae4610432439312a6cc3 *R/array.R
+cfd1591b86d5151f765e1a783ac28f38 *R/array.R
 fcbdd0a1a079444120715c6abf3ddbae *R/crossprod.R
 23a43eb04ea4f250c0631fddffddce20 *R/foreign.R
-5047e790220e13b434ff63e760752dd8 *R/matrix.R
+0d84ab13f448bc1157328d20ad04d95a *R/matrix.R
 52edd441e5d9c1465b43128009619fc8 *R/misc.R
 70bff26550a9f0c7a514edc7a6c4466f *R/reduce.R
 9be3b4207e9ec3805d31dd6ea70cd5ff *R/rollup.R
@@ -16,7 +16,7 @@ d5e4976e869418e73823e386751b5650 *inst/po/en@quot/LC_MESSAGES/R-slam.mo
 b549d8099a6034335d09c825532c0fca *man/apply.Rd
 d8adcd366f2ceea79dde576c2a44c33c *man/array.Rd
 57ab89e1ab8f7af331b824054f9a22a0 *man/crossprod.Rd
-f39044389a5615464865f18cf2a5ba47 *man/foreign.Rd
+df5913aa675ec501522729ffcca2b913 *man/foreign.Rd
 b8502c7d26801a715ee3064cff0ec90d *man/matrix.Rd
 c654d2bd652ea6876766d95d6d8e8ca5 *man/norms.Rd
 da052c0de6ca37432ee52620c4ccbc33 *man/options.Rd
@@ -25,10 +25,10 @@ f75048a25feebac938f74e1ed79fe683 *man/sums.Rd
 1832b116a85280523d5399cd7ac2a5a6 *po/R-slam.pot
 2fa4c7011c2bc0f7449ae151d5cc44ae *src/Makevars
 dc088b0ac562f358ced61cdedbbf757d *src/apply.c
-eab1529358b656803537a7ccee91542c *src/dll.c
+92c3aa736bc9af757d4aed76a53c2187 *src/dll.c
 08727c340482a40d85787581b655e0fd *src/grouped.c
 1c8f6467c565da19fa7bfc3d439c03f5 *src/sparse.c
-8e81ea3fe1a70d3a77407334e68189fe *src/util.c
+4de52b7fed43eab249ec1e9e9afc8069 *src/util.c
 6e9231824027888adde90f5b525bed48 *tests/abind.R
 2a747ac2d11d058340e8f0c8bc01d71e *tests/abind.Rout.save
 1d6eac26b215d6fee5592782569e5232 *tests/apply.R

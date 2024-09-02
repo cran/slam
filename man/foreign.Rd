@@ -25,8 +25,8 @@ write_stm_MC(x, file)
   }
 }
 \details{
-  Documentation for CLUTO including its sparse matrix format is
-  available from \url{https://www-users.cse.umn.edu/~karypis/cluto/}.
+  Documentation for CLUTO including its sparse matrix format used to be 
+  available from \samp{https://www-users.cse.umn.edu/~karypis/cluto/}.
 
   \code{read_stm_CLUTO} reads CLUTO sparse matrices, returning a
   \link[slam:matrix]{simple triplet matrix}.

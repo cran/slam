@@ -10,7 +10,7 @@ function(i, j, v, nrow = max(i), ncol = max(j), dimnames = NULL)
     stm <- list(i = as.integer(i), j = as.integer(j), v = v,
                 nrow = as.integer(nrow), ncol = as.integer(ncol),
                 dimnames = dimnames)
-    if(anyDuplicated(cbind(stm$i, stm$j)) > 0)
+    if(anyDuplicated(.Call(R_list_of_index_pairs, stm$i, stm$j)) > 0)
         stop("Duplicate (i, j) pairs are not allowed.")
     class(stm) <- "simple_triplet_matrix"
     if(!.Call(R__valid_stm, stm))

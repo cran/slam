@@ -23,7 +23,7 @@ function(i, v, dim = NULL, dimnames = NULL)
     ## which are either NULL or character vectors as long as the
     ## corresponding dim.
     ## </FIXME>
-    if(anyDuplicated(i) > 0)
+    if(anyDuplicated(.Call(R_split_index_matrix_by_rows, i)) > 0)
         stop("Duplicate rows in i are not allowed.")
     ssa <- list(i = i, v = v, dim = as.integer(dim), dimnames = dimnames)
     class(ssa) <- "simple_sparse_array"

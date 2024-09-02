@@ -20,7 +20,8 @@ extern SEXP tcrossprod_stm_stm(SEXP x, SEXP y, SEXP pkgEnv, SEXP R_verbose);
 extern SEXP tcrossprod_stm_matrix(SEXP x, SEXP R_y, SEXP pkgEnv, 
 				  SEXP R_verbose, SEXP R_transpose);
 extern SEXP _col_apply_stm(SEXP a);
-
+extern SEXP _list_of_index_pairs(SEXP x, SEXP y);
+extern SEXP _split_index_matrix_by_rows(SEXP x);
 
 static const R_CallMethodDef CallEntries[] = {
     {"R__valid_stm",		(DL_FUNC) __valid_stm,		 1},
@@ -37,6 +38,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"R_row_tsums",		(DL_FUNC) _row_tsums,		 5},
     {"R_tcrossprod_stm_matrix", (DL_FUNC) tcrossprod_stm_matrix, 5},
     {"R_tcrossprod_stm_stm",	(DL_FUNC) tcrossprod_stm_stm,	 4},
+    {"R_list_of_index_pairs",   (DL_FUNC) _list_of_index_pairs,  2},
+    {"R_split_index_matrix_by_rows", 
+                                (DL_FUNC) _split_index_matrix_by_rows, 1},
     {NULL, NULL, 0}
 };
 
