@@ -1,5 +1,6 @@
 #include <R.h>
 #include <Rdefines.h>
+#include <Rversion.h>
 #include <R_ext/BLAS.h>
 #include <R_ext/Complex.h>
 #include <time.h>
@@ -9,6 +10,7 @@
 
 // remove attributes from payload vector (see src/main/coerce.c)
 SEXP _unattr(SEXP x) {
+#if R_VERSION < R_Version(4, 5, 0)
     if (!isVector(x) || ATTRIB(x) == R_NilValue)
 	return x;
     if (MAYBE_SHARED(x)) {
@@ -25,6 +27,13 @@ SEXP _unattr(SEXP x) {
     if (IS_S4_OBJECT(x))
 	warning("'x' UNSET_S4_OBJECT no longer supported");
 	// UNSET_S4_OBJECT(x);
+#else
+    if (!isVector(x) || !ANY_ATTRIB(x))
+	return x;
+    if (MAYBE_SHARED(x))
+	x = duplicate(x);
+    CLEAR_ATTRIB(x);
+#endif
     return x;
 }
 
