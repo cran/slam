@@ -29,11 +29,11 @@ write_stm_MC(x, file)
   available from \samp{https://www-users.cse.umn.edu/~karypis/cluto/}.
 
   \code{read_stm_CLUTO} reads CLUTO sparse matrices, returning a
-  \link[slam:matrix]{simple triplet matrix}.
+  \link{simple triplet matrix}.
 
   \code{write_stm_CLUTO} writes CLUTO sparse matrices.
   Argument \code{x} must be coercible to a simple triplet matrix via
-  \code{\link[slam:matrix]{as.simple_triplet_matrix}}.
+  \code{\link{as.simple_triplet_matrix}}.
 
   MC is a toolkit for creating vector models from text documents (see 
   \url{https://www.cs.utexas.edu/~dml/software/mc/}).  It employs a
@@ -48,10 +48,10 @@ write_stm_MC(x, file)
 
   \code{read_stm_MC} reads such sparse matrix information with argument
   \code{file} giving the path with the base file name, and returns a
-  \link[slam:matrix]{simple triplet matrix}.
+  \link[slam]{simple triplet matrix}.
 
   \code{write_stm_MC} writes matrices in MC CCS sparse matrix format.
   Argument \code{x} must be coercible to a simple triplet matrix via
-  \code{\link[slam:matrix]{as.simple_triplet_matrix}}.
+  \code{\link[slam]{as.simple_triplet_matrix}}.
 }
 \keyword{IO}

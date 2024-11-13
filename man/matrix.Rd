@@ -4,6 +4,7 @@
 \alias{simple_triplet_diag_matrix}
 \alias{as.simple_triplet_matrix}
 \alias{is.simple_triplet_matrix}
+\alias{simple triplet matrix}
 
 \title{Simple Triplet Matrix}
 \description{Data structures and operators for sparse matrices based on

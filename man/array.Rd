@@ -3,6 +3,7 @@
 \alias{simple_sparse_zero_array}
 \alias{as.simple_sparse_array}
 \alias{is.simple_sparse_array}
+\alias{simple sparse array}
 
 \alias{simplify_simple_sparse_array}
 \alias{reduce_simple_sparse_array}
